@@ -1,6 +1,6 @@
 -- 배너 이미지 리스트 관리 테이블 TODO (img_url 의 경우 서버에서 공백 포함 여부 체크하기)
-DROP TABLE IF EXISTS ref_bannerInfo;
-CREATE TABLE ref_bannerInfo (
+DROP TABLE IF EXISTS ref_banner_info;
+CREATE TABLE ref_banner_info (
     id          INT AUTO_INCREMENT PRIMARY KEY COMMENT '기본 키 컬럼',
     version     INT             NOT NULL COMMENT '배너 버전',
     banner_type TINYINT         NOT NULL COMMENT '배너 타입(1: 메인 포커스 배너, 2: 뉴스 배너 big, 3: 뉴스 배너 small)',
