@@ -6,7 +6,6 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 @SpringBootApplication
 public class WeaponMasterApplication {
-
 	public static void main(String[] args) {
 		// Load .env file
 		Dotenv dotenv = Dotenv.load();
@@ -18,5 +17,4 @@ public class WeaponMasterApplication {
 
 		SpringApplication.run(WeaponMasterApplication.class, args);
 	}
-
 }
