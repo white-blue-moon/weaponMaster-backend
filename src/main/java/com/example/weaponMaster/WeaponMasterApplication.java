@@ -6,11 +6,12 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 @SpringBootApplication
 public class WeaponMasterApplication {
+
 	public static void main(String[] args) {
 		// Load .env file
 		Dotenv dotenv = Dotenv.load();
 
-		// Set system properties (optional)
+		// .env 변수 값으로 각 DB 정보 할당
 		System.setProperty("DB_URL", dotenv.get("DB_URL"));
 		System.setProperty("DB_USERNAME", dotenv.get("DB_USERNAME"));
 		System.setProperty("DB_PASSWORD", dotenv.get("DB_PASSWORD"));

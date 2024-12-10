@@ -6,8 +6,8 @@ import jakarta.persistence.*;
 @Table(name = "ref_banner_info", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"version", "banner_type", "img_order"})
 })
-
 public class BannerInfo {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
