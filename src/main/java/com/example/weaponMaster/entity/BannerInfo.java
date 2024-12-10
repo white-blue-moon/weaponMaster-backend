@@ -3,7 +3,7 @@ package com.example.weaponMaster.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "ref_banner_info", uniqueConstraints = {
+@Table(name = "ref_focus_banner_info", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"version", "banner_type", "img_order"})
 })
 public class BannerInfo {

@@ -18,7 +18,7 @@ public class BannerController {
         this.bannerService = bannerService;
     }
 
-    @PostMapping("/banners")
+    @PostMapping("/focus-banners")
     public RespBannerDto getBannersByVersion(@RequestBody List<ReqBannerDto> requests) {
         return bannerService.getBanners(requests);
     }
