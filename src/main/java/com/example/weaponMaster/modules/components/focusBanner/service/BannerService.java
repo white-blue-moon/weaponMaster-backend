@@ -1,10 +1,10 @@
-package com.example.weaponMaster.service;
+package com.example.weaponMaster.modules.components.focusBanner.service;
 
-import com.example.weaponMaster.dto.BannerDto;
-import com.example.weaponMaster.dto.RespBannerDto;
-import com.example.weaponMaster.dto.ReqBannerDto;
-import com.example.weaponMaster.entity.BannerInfo;
-import com.example.weaponMaster.repository.BannerInfoRepository;
+import com.example.weaponMaster.modules.components.focusBanner.dto.BannerDto;
+import com.example.weaponMaster.modules.components.focusBanner.dto.RespBannerDto;
+import com.example.weaponMaster.modules.components.focusBanner.dto.ReqBannerDto;
+import com.example.weaponMaster.modules.components.focusBanner.entity.BannerInfo;
+import com.example.weaponMaster.modules.components.focusBanner.repository.BannerInfoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

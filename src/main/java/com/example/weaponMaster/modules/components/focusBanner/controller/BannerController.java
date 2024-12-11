@@ -1,8 +1,8 @@
-package com.example.weaponMaster.controller;
+package com.example.weaponMaster.modules.components.focusBanner.controller;
 
-import com.example.weaponMaster.dto.RespBannerDto;
-import com.example.weaponMaster.dto.ReqBannerDto;
-import com.example.weaponMaster.service.BannerService;
+import com.example.weaponMaster.modules.components.focusBanner.dto.RespBannerDto;
+import com.example.weaponMaster.modules.components.focusBanner.dto.ReqBannerDto;
+import com.example.weaponMaster.modules.components.focusBanner.service.BannerService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;

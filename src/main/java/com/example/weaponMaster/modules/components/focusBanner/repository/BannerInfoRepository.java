@@ -1,6 +1,6 @@
-package com.example.weaponMaster.repository;
+package com.example.weaponMaster.modules.components.focusBanner.repository;
 
-import com.example.weaponMaster.entity.BannerInfo;
+import com.example.weaponMaster.modules.components.focusBanner.entity.BannerInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

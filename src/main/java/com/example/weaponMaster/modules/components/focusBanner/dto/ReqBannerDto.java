@@ -1,4 +1,4 @@
-package com.example.weaponMaster.dto;
+package com.example.weaponMaster.modules.components.focusBanner.dto;
 
 public class ReqBannerDto {
 

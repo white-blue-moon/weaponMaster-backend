@@ -1,4 +1,4 @@
-package com.example.weaponMaster.dto;
+package com.example.weaponMaster.modules.components.focusBanner.dto;
 
 import java.util.List;
 import java.util.Map;

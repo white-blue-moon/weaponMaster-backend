@@ -1,4 +1,4 @@
-package com.example.weaponMaster.constant;
+package com.example.weaponMaster.modules.components.focusBanner.constant;
 
 // TODO 클라이언트 측에서 상황에 따라 요청하도록 수정, 클라로 코드 옮기면 서버는 삭제 필요
 public class BannerType {
