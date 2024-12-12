@@ -27,7 +27,7 @@ public class BannerService {
         // 배너 타입에 따른 리스트를 생성하고, 각 리스트를 설정
         for (ReqBannerDto request : requests) {
             List<BannerInfo> banners = bannerInfoRepository
-                    .findByVersionAndBannerTypeOrderByImgOrder(request.getVersion(), request.getBannerType());
+                    .findByVersionAndTypeSorted(request.getVersion(), request.getBannerType());
 
             // 각 배너 타입에 맞게 리스트를 설정
             List<BannerDto> bannerDtoList = banners.stream()

@@ -2,6 +2,7 @@ package com.example.weaponMaster.modules.components.focusBanner.entity;
 
 import jakarta.persistence.*;
 
+// TODO 이미 DB 상 제약조건이 걸려있으면 코드로는 추가하지 않아도 되는 것으로 보임 -> 다시 확인하기
 @Entity
 @Table(name = "ref_focus_banner_info", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"version", "banner_type", "img_order"})

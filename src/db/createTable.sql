@@ -10,3 +10,15 @@ CREATE TABLE ref_focus_banner_info (
     img_comment VARCHAR(255)    COMMENT '이미지 설명 (참고용)',  -- 기본값 없음 (NULL 허용)
     CONSTRAINT unique_ref_bannerInfo UNIQUE (version, banner_type, img_order)
 ) CHARSET=utf8 COMMENT='포커스 배너 이미지 리스트 관리 테이블';
+
+-- 홈페이지 설정 값 관리 테이블 TODO 설정을 별도로 지정할 수 있는 보조 툴 만들기
+DROP TABLE IF EXISTS site_setting;
+CREATE TABLE site_setting (
+    id                  INT AUTO_INCREMENT PRIMARY KEY COMMENT '기본 키 컬럼',
+    is_active           TINYINT         NOT NULL DEFAULT 0 COMMENT '설정값 리스트 활성화 여부 (0: 비활성화, 1: 활성화)',
+    settings            JSON            NOT NULL COMMENT '설정값 리스트',
+    settings_comment    VARCHAR(255)    COMMENT '설정값 리스트 설명 (참고용)'  -- 기본값 없음 (NULL 허용)
+) CHARSET=utf8 COMMENT='홈페이지 설정 값 관리 테이블';
+
+-- 홈페이지 설정 값 관리 테이블 인덱스 추가
+CREATE INDEX idx_site_settings_is_active ON site_setting(is_active);

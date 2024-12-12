@@ -23,3 +23,7 @@ DELETE FROM ref_focus_banner_info WHERE version = 1 AND banner_type = 3;
 INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 3, 'https://bbscdn.df.nexon.com/data6/commu/202411/9323fca1-bdf3-793d-2be0-3ad61ef8f07f.jpg', 1, '던페 쿠폰 보상');
 INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 3, 'https://bbscdn.df.nexon.com/data6/commu/202411/4297ef52-57ee-be59-2a83-e926ea732041.jpg', 2, '중천 발표 요약');
 INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 3, 'https://bbscdn.df.nexon.com/data6/commu/202411/693e417e-9076-d8e8-8c77-264cc97a7404.jpg', 3, '중천 쿠폰');
+
+-- 홈페이지 설정 값 리스트 테스트 정보 추가
+DELETE FROM site_setting WHERE id = 1;
+INSERT INTO site_setting (id, is_active, settings, settings_comment) VALUES(1, 0, '{"home_main_focus_ver": 1, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1}', '설정 테스트');
