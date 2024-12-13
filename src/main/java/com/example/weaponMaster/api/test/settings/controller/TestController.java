@@ -1,6 +1,6 @@
-package com.example.weaponMaster.api.test.controller;
+package com.example.weaponMaster.api.test.settings.controller;
 
-import com.example.weaponMaster.modules.siteSetting.dto.SiteSettingDto;
+import com.example.weaponMaster.modules.common.records.Settings;
 import com.example.weaponMaster.modules.siteSetting.service.SiteSettingService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,8 +14,8 @@ public class TestController {
         this.siteSettingService = siteSettingService;
     }
 
-    @PostMapping("/settings")
-    public SiteSettingDto getSiteSetting() {
+    @PostMapping("/test/settings")
+    public Settings getSiteSetting() {
         return siteSettingService.getSetting();
     }
 }

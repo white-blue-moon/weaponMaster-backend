@@ -19,7 +19,7 @@ public class BannerController {
     }
 
     @PostMapping("/focus-banners")
-    public RespBannerDto getBannersByVersion(@RequestBody List<ReqBannerDto> requests) {
-        return bannerService.getBanners(requests);
+    public RespBannerDto getBannersByVersion(@RequestBody List<ReqBannerDto> request) {
+        return bannerService.getBanners(request);
     }
 }
