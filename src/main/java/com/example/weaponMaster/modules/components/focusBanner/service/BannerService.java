@@ -26,7 +26,6 @@ public class BannerService {
     public RespBannerDto getBanners(List<ReqBannerDto> requests, Settings settings) {
         Map<Integer, List<BannerDto>> bannersMap = new HashMap<>();
 
-        // 배너 타입에 따른 리스트를 생성하고, 각 리스트를 설정
         for (ReqBannerDto request : requests) {
             // 배너 타입에 매치되는 버전 확인
             Integer version = getBannerVersion(request.getBannerType(), settings);
@@ -43,7 +42,6 @@ public class BannerService {
             bannersMap.put(request.getBannerType(), bannerDtoList);
         }
 
-        // 응답 객체 생성
         RespBannerDto responseDto = new RespBannerDto();
         responseDto.setBanners(bannersMap);
         return responseDto;

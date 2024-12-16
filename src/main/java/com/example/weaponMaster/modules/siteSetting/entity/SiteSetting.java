@@ -1,9 +1,7 @@
 package com.example.weaponMaster.modules.siteSetting.entity;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.hibernate.annotations.Type;
 
 import java.util.Map;

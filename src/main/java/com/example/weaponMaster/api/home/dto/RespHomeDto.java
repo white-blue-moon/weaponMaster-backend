@@ -1,4 +1,4 @@
-package com.example.weaponMaster.api.page.home.dto;
+package com.example.weaponMaster.api.home.dto;
 
 import com.example.weaponMaster.modules.components.focusBanner.dto.RespBannerDto;
 

@@ -25,5 +25,6 @@ INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img
 INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 3, 'https://bbscdn.df.nexon.com/data6/commu/202411/693e417e-9076-d8e8-8c77-264cc97a7404.jpg', 3, '중천 쿠폰');
 
 -- 홈페이지 설정 값 리스트 테스트 정보 추가
-DELETE FROM site_setting WHERE id = 1;
-INSERT INTO site_setting (id, is_active, settings, settings_comment) VALUES(1, 0, '{"home_main_focus_ver": 1, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1}', '설정 테스트');
+DELETE FROM site_setting WHERE id IN (1, 2);
+INSERT INTO site_setting (id, is_active, settings, settings_comment) VALUES(1, 1, '{"home_main_focus_ver": 1, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1}', '설정 테스트');
+INSERT INTO site_setting (id, is_active, settings, settings_comment) VALUES(2, 0, '{"home_main_focus_ver": 2, "home_news_focus_first_ver": 2, "home_news_focus_second_ver": 2}', '설정 테스트 ver.2');
