@@ -2,7 +2,7 @@ package com.example.weaponMaster.api.home.service;
 
 import com.example.weaponMaster.api.home.dto.ReqHomeDto;
 import com.example.weaponMaster.api.home.dto.RespHomeDto;
-import com.example.weaponMaster.modules.common.records.Settings;
+import com.example.weaponMaster.modules.siteSetting.record.Settings;
 import com.example.weaponMaster.modules.components.focusBanner.dto.RespBannerDto;
 import com.example.weaponMaster.modules.components.focusBanner.service.BannerService;
 import com.example.weaponMaster.modules.siteSetting.service.SiteSettingService;

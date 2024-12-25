@@ -1,6 +1,6 @@
 package com.example.weaponMaster.api.test.settings.controller;
 
-import com.example.weaponMaster.modules.common.records.Settings;
+import com.example.weaponMaster.modules.siteSetting.record.Settings;
 import com.example.weaponMaster.modules.siteSetting.service.SiteSettingService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;

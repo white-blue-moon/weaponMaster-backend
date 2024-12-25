@@ -1,12 +1,13 @@
 package com.example.weaponMaster.modules.components.focusBanner.service;
 
-import com.example.weaponMaster.modules.common.records.Settings;
+import com.example.weaponMaster.modules.siteSetting.record.Settings;
 import com.example.weaponMaster.modules.components.focusBanner.constant.BannerType;
 import com.example.weaponMaster.modules.components.focusBanner.dto.BannerDto;
 import com.example.weaponMaster.modules.components.focusBanner.dto.RespBannerDto;
 import com.example.weaponMaster.modules.components.focusBanner.dto.ReqBannerDto;
 import com.example.weaponMaster.modules.components.focusBanner.entity.BannerInfo;
 import com.example.weaponMaster.modules.components.focusBanner.repository.BannerInfoRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -15,13 +16,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BannerService {
 
     private final BannerInfoRepository bannerInfoRepository;
-
-    public BannerService(BannerInfoRepository bannerInfoRepository) {
-        this.bannerInfoRepository = bannerInfoRepository;
-    }
 
     public RespBannerDto getBanners(List<ReqBannerDto> requests, Settings settings) {
         Map<Integer, List<BannerDto>> bannersMap = new HashMap<>();
@@ -48,16 +46,12 @@ public class BannerService {
     }
 
     private Integer getBannerVersion(Integer bannerType, Settings settings) {
-        switch (bannerType) {
-            case BannerType.MAIN_FOCUS_BANNER:
-                return settings.homeMainFocusVer();
-            case BannerType.NEWS_BANNER_FIRST:
-                return settings.homeNewsFocusFirstVer();
-            case BannerType.NEWS_BANNER_SECOND:
-                return settings.homeNewsFocusSecondVer();
-            default:
-                throw new IllegalArgumentException("Invalid banner type: " + bannerType);
-        }
+        return switch (bannerType) {
+            case BannerType.MAIN_FOCUS_BANNER -> settings.homeMainFocusVer();
+            case BannerType.NEWS_BANNER_FIRST -> settings.homeNewsFocusFirstVer();
+            case BannerType.NEWS_BANNER_SECOND -> settings.homeNewsFocusSecondVer();
+            default -> throw new IllegalArgumentException("Invalid banner type: " + bannerType);
+        };
     }
 
 }

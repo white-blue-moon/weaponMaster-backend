@@ -1,18 +1,11 @@
 package com.example.weaponMaster.api.home.dto;
 
 import com.example.weaponMaster.modules.components.focusBanner.dto.ReqBannerDto;
-
+import lombok.Getter;
 import java.util.List;
 
+@Getter
 public class ReqHomeDto {
 
     private List<ReqBannerDto> reqBanner;
-
-    public List<ReqBannerDto> getReqBanner() {
-        return reqBanner;
-    }
-
-    public void setReqBanner(List<ReqBannerDto> reqBanner) {
-        this.reqBanner = reqBanner;
-    }
 }

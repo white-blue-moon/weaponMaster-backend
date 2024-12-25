@@ -1,4 +1,4 @@
-package com.example.weaponMaster.modules.common.records;
+package com.example.weaponMaster.modules.siteSetting.record;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

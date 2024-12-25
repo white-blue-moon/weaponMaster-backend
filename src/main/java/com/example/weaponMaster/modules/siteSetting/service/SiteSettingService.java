@@ -1,20 +1,17 @@
 package com.example.weaponMaster.modules.siteSetting.service;
 
-import com.example.weaponMaster.modules.common.records.Settings;
+import com.example.weaponMaster.modules.siteSetting.record.Settings;
 import com.example.weaponMaster.modules.siteSetting.entity.SiteSetting;
 import com.example.weaponMaster.modules.siteSetting.repository.SiteSettingRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class SiteSettingService {
     private final SiteSettingRepository siteSettingRepository;
     private final ObjectMapper objectMapper;
-
-    public SiteSettingService(SiteSettingRepository siteSettingRepository, ObjectMapper objectMapper) {
-        this.siteSettingRepository = siteSettingRepository;
-        this.objectMapper = objectMapper;
-    }
 
     public Settings getSetting() {
         SiteSetting settingInfo = siteSettingRepository.findLatestActiveSetting();
