@@ -2,7 +2,6 @@ package com.example.weaponMaster.modules.account.service;
 
 import com.example.weaponMaster.api.account.join.dto.ReqJoinDto;
 import com.example.weaponMaster.api.account.join.dto.RespJoinDto;
-import com.example.weaponMaster.modules.account.dto.UserInfoDto;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,22 +13,13 @@ public class UserInfoService {
     private final UserInfoRepository userInfoRepository;
 
     // TODO DB 에러 처리 필요
-    public UserInfoDto getUserInfo(String userId) {
+    public boolean isUserIdExist(String userId) {
         UserInfo userInfo = userInfoRepository.findByUserId(userId);
         if (userInfo == null) {
-            return new UserInfoDto();
+            return false;
         }
 
-        return new UserInfoDto(
-                true,
-                userInfo.getUserId(),
-                userInfo.getUserPw(),
-                userInfo.getUserType(),
-                userInfo.getDfServerId(),
-                userInfo.getDfCharacterName(),
-                userInfo.getLastLoginDate(),
-                userInfo.getJoinDate()
-        );
+        return true;
     }
 
     public RespJoinDto createUserInfo(ReqJoinDto request) {
