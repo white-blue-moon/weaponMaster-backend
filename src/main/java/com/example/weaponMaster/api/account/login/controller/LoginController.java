@@ -15,7 +15,7 @@ public class LoginController {
     // 일반모드 로그인
     @PostMapping("/account/login/normal")
     public RespLoginDto loginNormal(@RequestBody ReqLoginDto request) {
-        boolean isLoginOk = userInfoService.canLogin(request.getUserId(), request.getUserPw());
+        boolean isLoginOk = userInfoService.checkLogin(request.getUserId(), request.getUserPw());
         return new RespLoginDto(isLoginOk);
     }
 

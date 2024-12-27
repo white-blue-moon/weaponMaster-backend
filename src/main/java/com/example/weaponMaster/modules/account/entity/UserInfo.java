@@ -29,7 +29,7 @@ public class UserInfo {
     @Column(name = "df_character_name", nullable = true, columnDefinition = "VARCHAR(255) DEFAULT ''")
     private String dfCharacterName;
 
-    @Column(name = "last_login_date", insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "last_login_date", insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime lastLoginDate;
 
     @Column(name = "join_date", insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

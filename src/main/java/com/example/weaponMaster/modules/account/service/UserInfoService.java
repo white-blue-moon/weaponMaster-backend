@@ -1,7 +1,6 @@
 package com.example.weaponMaster.modules.account.service;
 
 import com.example.weaponMaster.api.account.join.dto.ReqJoinDto;
-import com.example.weaponMaster.api.account.join.dto.RespJoinDto;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,8 @@ import java.util.Objects;
 public class UserInfoService {
     private final UserInfoRepository userInfoRepository;
 
-    public boolean canLogin(String userId, String userPw) {
+    // TODO DB 에러 처리 필요
+    public boolean checkLogin(String userId, String userPw) {
         UserInfo userInfo = userInfoRepository.findByUserId(userId);
         if (userInfo == null) {
             return false;
@@ -22,6 +22,7 @@ public class UserInfoService {
 
         if (Objects.equals(userInfo.getUserId(), userId)) {
             if (Objects.equals(userInfo.getUserPw(), userPw)) {
+                userInfoRepository.updateLastLoginDate(userId);
                 return true;
             }
         }
