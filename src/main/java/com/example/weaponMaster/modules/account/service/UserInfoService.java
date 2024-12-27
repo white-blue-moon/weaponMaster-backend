@@ -7,10 +7,27 @@ import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class UserInfoService {
     private final UserInfoRepository userInfoRepository;
+
+    public boolean canLogin(String userId, String userPw) {
+        UserInfo userInfo = userInfoRepository.findByUserId(userId);
+        if (userInfo == null) {
+            return false;
+        }
+
+        if (Objects.equals(userInfo.getUserId(), userId)) {
+            if (Objects.equals(userInfo.getUserPw(), userPw)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     // TODO DB 에러 처리 필요
     public boolean isUserIdExist(String userId) {
@@ -22,14 +39,12 @@ public class UserInfoService {
         return true;
     }
 
-    public RespJoinDto createUserInfo(ReqJoinDto request) {
-        UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
-        if (userInfo != null) {
-            // TODO "userId is already exist"
-            return new RespJoinDto(false);
+    public boolean createUserInfo(ReqJoinDto request) {
+        if (isUserIdExist(request.getUserId())) {
+            return false;
         }
 
-        userInfo = new UserInfo(
+        UserInfo userInfo = new UserInfo(
                 request.getUserId(),
                 request.getUserPw(),
                 request.getDfServerId(),
@@ -39,10 +54,10 @@ public class UserInfoService {
         // TODO 간결한 에러 처리 방식 확인 중
         try {
             userInfoRepository.save(userInfo);
-            return new RespJoinDto(true);
+            return true;
         } catch (Exception e) {
             System.err.println("Error saving user info: " + e.getMessage());
-            return new RespJoinDto(false);
+            return false;
         }
     }
 

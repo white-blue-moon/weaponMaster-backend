@@ -16,6 +16,7 @@ public class JoinController {
 
     @PostMapping("/account/join")
     public RespJoinDto join(@RequestBody ReqJoinDto request) {
-        return userInfoService.createUserInfo(request);
+        boolean isSuccess = userInfoService.createUserInfo(request);
+        return new RespJoinDto(isSuccess);
     }
 }
