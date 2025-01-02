@@ -1,10 +1,13 @@
 package com.example.weaponMaster.modules.components.article.service;
 
-import com.example.weaponMaster.api.news.dto.ReqNewsDto;
+import com.example.weaponMaster.api.articles.dto.ReqArticlesDto;
+import com.example.weaponMaster.modules.components.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.components.article.entity.Article;
 import com.example.weaponMaster.modules.components.article.repository.ArticleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -12,7 +15,7 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
 
-    public boolean createArticle(ReqNewsDto request) {
+    public boolean createArticle(ReqArticlesDto request) {
         Article article = new Article(
                 request.getCategoryType(),
                 request.getArticleType(),
@@ -22,7 +25,6 @@ public class ArticleService {
                 request.getAuthor()
         );
 
-        // TODO 간결한 에러 처리 방식 확인 중
         try {
             articleRepository.save(article);
             return true;
@@ -31,4 +33,37 @@ public class ArticleService {
             return false;
         }
     }
+
+    public ArticleDto[] getArticleList(Integer categoryType, Integer articleType) {
+        Article[] articles;
+
+        try {
+            articles = articleRepository.findArticleList(categoryType, articleType);
+        } catch (Exception e) {
+            System.err.println("Error get article list: " + e.getMessage());
+            return null;
+        }
+
+        if (articles == null) {
+            return null;
+        }
+
+        return Arrays.stream(articles)
+                .map(article -> ArticleDto.builder()
+                        .id(article.getId())
+                        .categoryType(article.getCategoryType())
+                        .articleType(article.getArticleType())
+                        .articleDetailType(article.getArticleDetailType())
+                        .title(article.getTitle())
+                        .contents(article.getContents())
+                        .author(article.getAuthor())
+                        .createDate(article.getCreateDate())
+                        .updateDate(article.getUpdateDate())
+                        .viewCount(article.getViewCount())
+                        .isPinned(article.getIsPinned())
+                        .build()
+                )
+                .toArray(ArticleDto[]::new); // 스트림 결과를 ArticleDto[] 배열로 변환
+    }
+
 }

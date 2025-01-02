@@ -1,11 +1,11 @@
-package com.example.weaponMaster.api.news.dto;
+package com.example.weaponMaster.api.articles.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class ReqNewsDto {
+public class ReqArticlesDto {
 
     private final Integer categoryType;
     private final Integer articleType;
