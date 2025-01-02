@@ -34,3 +34,27 @@ CREATE TABLE user_info (
     last_login_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '가장 마지막 로그인 시간',
     join_date           TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '회원가입한 시간'
 ) CHARSET=utf8 COMMENT='홈페이지 회원 정보 관리 테이블';
+
+-- TODO 유저 로그 테이블 만들기
+
+-- 홈페이지 게시물 관리 테이블
+DROP TABLE IF EXISTS ref_article;
+CREATE TABLE ref_article (
+    id                      INT AUTO_INCREMENT PRIMARY KEY COMMENT '기본 키 컬럼(= 게시물 고유 번호)',
+    category_type           TINYINT         NOT NULL COMMENT '카테고리 타입(1: 새소식, 2: 커뮤니티, 3: 서비스센터)',
+    article_type            TINYINT         NOT NULL COMMENT '카테고리 별 게시물 타입(ex. 새소식 > 1: 공지사항, 2: 업데이트, 3: 이벤트, 4: 개발자노트)',
+    article_detail_type     TINYINT         NOT NULL DEFAULT 0 COMMENT '게시물 별 세부 타입(ex. 공지사항 > 1: 일반, 2: 점검), 세부 타입 사용하지 않을 경우 0',
+    title                   VARCHAR(255)    NOT NULL COMMENT '제목',
+    contents                TEXT            NOT NULL COMMENT '내용',
+    author                  VARCHAR(255)    NOT NULL COMMENT '작성자',
+    create_date             TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '게시물 최초 작성일자',
+    update_date             TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '게시물 최종 수정일자',
+    view_count              INT             NOT NULL DEFAULT 0 COMMENT '조회수',
+    is_pinned               TINYINT         NOT NULL DEFAULT 0 COMMENT '게시물 상단 고정 여부(0: 고정 안 함, 1: 고정함)'
+) CHARSET=utf8 COMMENT='홈페이지 게시물 관리 테이블';
+
+-- 홈페이지 설정 값 관리 테이블 인덱스 추가
+CREATE INDEX idx_ref_article_category_type  ON ref_article(category_type);
+CREATE INDEX idx_ref_article_article_type   ON ref_article(article_type);
+CREATE INDEX idx_ref_article_author         ON ref_article(author);
+CREATE INDEX idx_ref_article_is_pinned      ON ref_article(is_pinned);

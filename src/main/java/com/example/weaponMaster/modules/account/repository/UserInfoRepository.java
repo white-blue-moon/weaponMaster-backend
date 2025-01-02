@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface UserInfoRepository extends JpaRepository<UserInfo, Integer> {
+public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
 
     @Query(value = "SELECT * FROM user_info WHERE user_id = :user_id", nativeQuery = true)
     UserInfo findByUserId(
