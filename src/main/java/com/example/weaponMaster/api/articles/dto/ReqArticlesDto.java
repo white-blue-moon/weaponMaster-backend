@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReqArticlesDto {
 
+    private final Integer id;
     private final Integer categoryType;
     private final Integer articleType;
     private final Integer articleDetailType;

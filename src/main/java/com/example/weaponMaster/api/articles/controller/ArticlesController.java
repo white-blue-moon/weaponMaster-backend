@@ -16,16 +16,28 @@ public class ArticlesController {
     // 게시물 등록
     @PostMapping("/articles")
     public RespArticlesDto createArticle(@RequestBody ReqArticlesDto request) {
-        boolean isSuccess = articleService.createArticle(request);
+        boolean isSuccess = articleService.saveArticle(request);
+        return new RespArticlesDto(isSuccess);
+    }
+
+    // 게시물 수정
+    @PutMapping("/articles")
+    public RespArticlesDto updateArticle(@RequestBody ReqArticlesDto request) {
+        boolean isSuccess = articleService.saveArticle(request);
         return new RespArticlesDto(isSuccess);
     }
 
     // 게시물 리스트 조회
-    // TODO 파라미터 int -> Integer 수정 필요할지 확인 필요
     @GetMapping("/articles/list/{categoryType}/{articleType}")
     public RespArticlesDto getArticleList(@PathVariable("categoryType") Integer categoryType, @PathVariable("articleType") Integer articleType) {
         ArticleDto[] articles = articleService.getArticleList(categoryType, articleType);
         return new RespArticlesDto(true, articles);
     }
 
+    // 게시물 조회
+    @GetMapping("/articles/{id}")
+    public RespArticlesDto getArticle(@PathVariable("id") Integer id) {
+        ArticleDto[] article = articleService.getArticle(id);
+        return new RespArticlesDto(true, article);
+    }
 }
