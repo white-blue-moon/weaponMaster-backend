@@ -1,17 +1,18 @@
 package com.example.weaponMaster.api.articles.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReqArticlesDto {
 
-    private final Integer id;
-    private final Integer categoryType;
-    private final Integer articleType;
-    private final Integer articleDetailType;
-    private final String title;
-    private final String contents;
-    private final String author;
+    private Integer categoryType;
+    private Integer articleType;
+    private Integer articleDetailType;
+    private String title;
+    private String contents;
+    private String author;
 }

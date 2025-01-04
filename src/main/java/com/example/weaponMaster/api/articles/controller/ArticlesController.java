@@ -16,20 +16,27 @@ public class ArticlesController {
     // 게시물 등록
     @PostMapping("/articles")
     public RespArticlesDto createArticle(@RequestBody ReqArticlesDto request) {
-        boolean isSuccess = articleService.saveArticle(request);
+        boolean isSuccess = articleService.createArticle(request);
         return new RespArticlesDto(isSuccess);
     }
 
     // 게시물 수정
-    @PutMapping("/articles")
-    public RespArticlesDto updateArticle(@RequestBody ReqArticlesDto request) {
-        boolean isSuccess = articleService.saveArticle(request);
+    @PutMapping("/articles/{id}")
+    public RespArticlesDto updateArticle(@RequestBody ReqArticlesDto request, @PathVariable("id") Integer id) {
+        boolean isSuccess = articleService.updateArticle(request, id);
+        return new RespArticlesDto(isSuccess);
+    }
+
+    // 게시물 삭제
+    @DeleteMapping("/articles/{id}")
+    public RespArticlesDto deleteArticle(@RequestBody ReqArticlesDto request, @PathVariable("id") Integer id) {
+        boolean isSuccess = articleService.deleteArticle(request, id);
         return new RespArticlesDto(isSuccess);
     }
 
     // 게시물 리스트 조회
-    @GetMapping("/articles/list/{categoryType}/{articleType}")
-    public RespArticlesDto getArticleList(@PathVariable("categoryType") Integer categoryType, @PathVariable("articleType") Integer articleType) {
+    @GetMapping("/articles")
+    public RespArticlesDto getArticleList(@RequestParam("categoryType") Integer categoryType, @RequestParam("articleType") Integer articleType) {
         ArticleDto[] articles = articleService.getArticleList(categoryType, articleType);
         return new RespArticlesDto(true, articles);
     }

@@ -1,6 +1,10 @@
 package com.example.weaponMaster.modules.components.article.service;
 
 import com.example.weaponMaster.api.articles.dto.ReqArticlesDto;
+import com.example.weaponMaster.modules.account.constant.UserType;
+import com.example.weaponMaster.modules.account.entity.UserInfo;
+import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
+import com.example.weaponMaster.modules.components.article.constant.CategoryType;
 import com.example.weaponMaster.modules.components.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.components.article.entity.Article;
 import com.example.weaponMaster.modules.components.article.repository.ArticleRepository;
@@ -15,8 +19,11 @@ import java.util.Optional;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final UserInfoRepository userInfoRepository;
 
-    public boolean saveArticle(ReqArticlesDto request) {
+    public boolean createArticle(ReqArticlesDto request) {
+        // TODO 새소식인 경우 관리자 권한이 있는지 확인하기
+
         // TODO isPinned 와 같은 값도 반영되도록 수정 필요 (생성, 수정) 공통 사용 중
         Article article = new Article(
                 request.getCategoryType(),
@@ -27,15 +34,83 @@ public class ArticleService {
                 request.getAuthor()
         );
 
-        if (request.getId() > 0) {
-            article.setId(request.getId());
-        }
-
         try {
             articleRepository.save(article);
             return true;
         } catch (Exception e) {
             System.err.println("Error create article: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean updateArticle(ReqArticlesDto request, Integer id) {
+        // TODO 게시물 소유자가 맞는지 확인하기, 새소식인 경우 관리자 권한이 있는지 확인하기
+
+        // TODO isPinned 와 같은 값도 반영되도록 수정 필요 (생성, 수정) 공통 사용 중
+        Article article = new Article(
+                request.getCategoryType(),
+                request.getArticleType(),
+                request.getArticleDetailType(),
+                request.getTitle(),
+                request.getContents(),
+                request.getAuthor()
+        );
+        article.setId(id);
+
+        try {
+            articleRepository.save(article);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error update article: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean deleteArticle(ReqArticlesDto request, Integer id) {
+        Optional<Article> articleOptional;
+
+        try {
+            articleOptional = articleRepository.findById(id);
+        } catch (Exception e) {
+            System.err.println("Error get article by ID (delete article): " + e.getMessage());
+            return false;
+        }
+
+        if (articleOptional.isEmpty()) {
+            return false;
+        }
+
+        // Optional 에서 값을 가져옴
+        Article article = articleOptional.get();
+
+        // TODO 게시물 소유자가 맞는지 확인하기 (일반 게시물)
+        // 새소식 카테고리 글 삭제 시도 시 관리자 권한 있는지 확인
+        if (article.getCategoryType() == CategoryType.NEWS) {
+            UserInfo userInfo;
+
+            try {
+                userInfo = userInfoRepository.findByUserId(request.getAuthor());
+            } catch (Exception e) {
+                System.err.println("Error get user info (delete article): " + e.getMessage());
+                return false;
+            }
+
+            if (userInfo == null) {
+                System.err.println("Error can't find user info (delete article)");
+                return false;
+            }
+
+            if (userInfo.getUserType() == UserType.NORMAL) {
+                System.err.println("Error userType is not ADMIN (delete article)");
+                return false;
+            }
+        }
+
+        try {
+            articleRepository.deleteById(article.getId());
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error delete article: " + e.getMessage());
             return false;
         }
     }
