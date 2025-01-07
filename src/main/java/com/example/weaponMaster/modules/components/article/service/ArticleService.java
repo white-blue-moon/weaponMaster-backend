@@ -4,6 +4,7 @@ import com.example.weaponMaster.api.articles.dto.ReqArticlesDto;
 import com.example.weaponMaster.modules.account.constant.UserType;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
+import com.example.weaponMaster.modules.components.article.constant.ArticleType;
 import com.example.weaponMaster.modules.components.article.constant.CategoryType;
 import com.example.weaponMaster.modules.components.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.components.article.entity.Article;
@@ -119,7 +120,11 @@ public class ArticleService {
         Article[] articles;
 
         try {
-            articles = articleRepository.findArticleList(categoryType, articleType);
+            if (articleType == ArticleType.ALL) {
+                articles = articleRepository.findArticlesByCategory(categoryType);
+            } else {
+                articles = articleRepository.findArticleList(categoryType, articleType);
+            }
         } catch (Exception e) {
             System.err.println("Error get article list: " + e.getMessage());
             return null;

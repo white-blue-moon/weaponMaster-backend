@@ -15,4 +15,9 @@ public interface ArticleRepository extends JpaRepository<Article, Integer> {
             @Param("categoryType") Integer categoryType,
             @Param("articleType") Integer articleType
     );
+
+    @Query(value = "SELECT * FROM ref_article WHERE category_type = :categoryType ORDER BY id DESC", nativeQuery = true)
+    Article[] findArticlesByCategory(
+            @Param("categoryType") Integer categoryType
+    );
 }
