@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------
 ---------------------------[ 홈페이지 설정 값 ]----------------------------
 
--- 홈페이지 설정 값 관리 테이블 TODO 설정을 별도로 지정할 수 있는 보조 툴 만들기
+-- 홈페이지 설정 값 관리 테이블
 DROP TABLE IF EXISTS site_setting;
 CREATE TABLE site_setting (
     id                  INT AUTO_INCREMENT PRIMARY KEY COMMENT '기본 키 컬럼',
@@ -48,7 +48,7 @@ CREATE TABLE user_info (
 
 -- TODO 유저 로그 테이블 만들기
 
--- 유저 게시물 관리 테이블 TODO -> 테이블, 컬럼 이름 수정한 부분 -> 백엔드/프론트엔드 반영하기
+-- 유저 게시물 관리 테이블
 DROP TABLE IF EXISTS user_article;
 CREATE TABLE user_article (
     id                      INT AUTO_INCREMENT PRIMARY KEY COMMENT '기본 키 컬럼(= 게시물 고유 번호)',
@@ -67,7 +67,6 @@ CREATE TABLE user_article (
 CREATE INDEX idx_user_article_category_type  ON user_article(category_type);
 CREATE INDEX idx_user_article_article_type   ON user_article(article_type);
 CREATE INDEX idx_user_article_is_pinned      ON user_article(is_pinned);
--- CREATE INDEX idx_user_article_author         ON user_article(author); TODO 꼭 필요한지 한번 더 체크하기
 
 -- 유저 댓글 관리 테이블
 DROP TABLE IF EXISTS user_comments;
@@ -77,9 +76,8 @@ CREATE TABLE user_comments (
     article_id      INT             NOT NULL COMMENT '게시물 타겟 아이디',
     re_comment_id   INT             NOT NULL DEFAULT 0 COMMENT '대댓글 타겟 아이디 (대댓글이 아닌 일반 댓글이면 0)',
     contents        TEXT            NOT NULL COMMENT '내용',
-    like_count      INT             NOT NULL DEFAULT 0 COMMENT '좋아요 수',
     create_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '댓글 최초 작성일자',
-    update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '댓글 최종 수정일자',
+    update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '댓글 최종 수정일자'
 ) CHARSET=utf8 COMMENT='유저 댓글 관리 테이블';
 -- 유저 댓글 관리 테이블 인덱스 추가
 CREATE INDEX idx_user_comments_article_id   ON user_comments(article_id);

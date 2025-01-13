@@ -28,13 +28,16 @@ public class Comment {
     @Column(name = "contents", nullable = false, columnDefinition = "TEXT")
     private String contents;
 
-    @Column(name = "like_count", nullable = false, columnDefinition = "INT DEFAULT 0")
-    private Integer likeCount = 0;
-
-    @Column(name = "create_date", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "create_date", nullable = false, updatable = false, insertable = false,  columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createDate;
 
-    @Column(name = "update_date", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    @Column(name = "update_date", nullable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updateDate;
-}
 
+    public Comment(String userId, Integer articleId, Integer reCommentId, String contents) {
+        this.userId = userId;
+        this.articleId = articleId;
+        this.reCommentId = reCommentId;
+        this.contents = contents;
+    }
+}
