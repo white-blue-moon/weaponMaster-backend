@@ -1,4 +1,4 @@
-package com.example.weaponMaster.modules.components.article.constant;
+package com.example.weaponMaster.modules.article.constant;
 
 public class CategoryType {
 

@@ -1,6 +1,6 @@
 package com.example.weaponMaster.api.articles.dto;
 
-import com.example.weaponMaster.modules.components.article.dto.ArticleDto;
+import com.example.weaponMaster.modules.article.dto.ArticleDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

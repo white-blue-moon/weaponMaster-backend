@@ -2,8 +2,8 @@ package com.example.weaponMaster.api.articles.controller;
 
 import com.example.weaponMaster.api.articles.dto.ReqArticlesDto;
 import com.example.weaponMaster.api.articles.dto.RespArticlesDto;
-import com.example.weaponMaster.modules.components.article.dto.ArticleDto;
-import com.example.weaponMaster.modules.components.article.service.ArticleService;
+import com.example.weaponMaster.modules.article.dto.ArticleDto;
+import com.example.weaponMaster.modules.article.service.ArticleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

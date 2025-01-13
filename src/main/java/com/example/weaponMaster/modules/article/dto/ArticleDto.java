@@ -1,4 +1,4 @@
-package com.example.weaponMaster.modules.components.article.dto;
+package com.example.weaponMaster.modules.article.dto;
 
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +15,7 @@ public class ArticleDto {
     private Integer articleDetailType; // 게시물 세부 타입
     private String title;              // 게시물 제목
     private String contents;           // 게시물 내용
-    private String author;             // 작성자
+    private String userId;             // 작성자
     private LocalDateTime createDate;  // 작성 날짜
     private LocalDateTime updateDate;  // 수정 날짜
     private Integer viewCount;         // 조회수

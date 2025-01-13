@@ -1,14 +1,14 @@
-package com.example.weaponMaster.modules.components.article.service;
+package com.example.weaponMaster.modules.article.service;
 
 import com.example.weaponMaster.api.articles.dto.ReqArticlesDto;
 import com.example.weaponMaster.modules.account.constant.UserType;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
-import com.example.weaponMaster.modules.components.article.constant.ArticleType;
-import com.example.weaponMaster.modules.components.article.constant.CategoryType;
-import com.example.weaponMaster.modules.components.article.dto.ArticleDto;
-import com.example.weaponMaster.modules.components.article.entity.Article;
-import com.example.weaponMaster.modules.components.article.repository.ArticleRepository;
+import com.example.weaponMaster.modules.article.constant.ArticleType;
+import com.example.weaponMaster.modules.article.constant.CategoryType;
+import com.example.weaponMaster.modules.article.dto.ArticleDto;
+import com.example.weaponMaster.modules.article.entity.Article;
+import com.example.weaponMaster.modules.article.repository.ArticleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +32,7 @@ public class ArticleService {
                 request.getArticleDetailType(),
                 request.getTitle(),
                 request.getContents(),
-                request.getAuthor()
+                request.getUserId()
         );
 
         try {
@@ -47,6 +47,7 @@ public class ArticleService {
     public boolean updateArticle(ReqArticlesDto request, Integer id) {
         // TODO 게시물 소유자가 맞는지 확인하기, 새소식인 경우 관리자 권한이 있는지 확인하기
 
+        // TODO 게시물 DB 조회 후 변경된 값만 바꿔서 update 되는 방식으로 수정하기
         // TODO isPinned 와 같은 값도 반영되도록 수정 필요 (생성, 수정) 공통 사용 중
         Article article = new Article(
                 request.getCategoryType(),
@@ -54,7 +55,7 @@ public class ArticleService {
                 request.getArticleDetailType(),
                 request.getTitle(),
                 request.getContents(),
-                request.getAuthor()
+                request.getUserId()
         );
         article.setId(id);
 
@@ -90,16 +91,17 @@ public class ArticleService {
             UserInfo userInfo;
 
             try {
-                userInfo = userInfoRepository.findByUserId(request.getAuthor());
+                userInfo = userInfoRepository.findByUserId(request.getUserId());
             } catch (Exception e) {
                 System.err.println("Error get user info (delete article): " + e.getMessage());
                 return false;
             }
 
             if (userInfo == null) {
-                System.err.println("Error can't find user info (delete article)");
+                System.err.printf("Error can't find user info (delete article), userId: %s \n", request.getUserId());
                 return false;
             }
+
 
             if (userInfo.getUserType() == UserType.NORMAL) {
                 System.err.println("Error userType is not ADMIN (delete article)");
@@ -142,7 +144,7 @@ public class ArticleService {
                         .articleDetailType(article.getArticleDetailType())
                         .title(article.getTitle())
                         .contents(article.getContents())
-                        .author(article.getAuthor())
+                        .userId(article.getUserId())
                         .createDate(article.getCreateDate())
                         .updateDate(article.getUpdateDate())
                         .viewCount(article.getViewCount())
@@ -177,7 +179,7 @@ public class ArticleService {
                 .articleDetailType(article.getArticleDetailType())
                 .title(article.getTitle())
                 .contents(article.getContents())
-                .author(article.getAuthor())
+                .userId(article.getUserId())
                 .createDate(article.getCreateDate())
                 .updateDate(article.getUpdateDate())
                 .viewCount(article.getViewCount())
