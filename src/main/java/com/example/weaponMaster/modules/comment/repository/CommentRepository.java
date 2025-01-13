@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
     @Query(value = "SELECT * FROM user_comments WHERE article_id = :articleId ORDER BY id ASC", nativeQuery = true)
-    Comment[] findCommentList(
+    Comment[] findByArticleId(
             @Param("articleId") Integer articleId
     );
 

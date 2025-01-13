@@ -2,7 +2,6 @@ package com.example.weaponMaster.modules.article.dto;
 
 import lombok.Builder;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Data

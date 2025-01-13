@@ -1,5 +1,6 @@
 package com.example.weaponMaster.api.comments.dto;
 
+import com.example.weaponMaster.modules.comment.dto.CommentDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,8 +11,9 @@ import lombok.NoArgsConstructor;
 public class RespCommentsDto {
 
     private boolean isSuccess; // 클라에서 전달받을 때는 is 가 빠진 채로 받음
+    private CommentDto[] comments;
 
-    // public RespCommentsDto(boolean isSuccess) {
-    //     this.isSuccess = isSuccess;
-    // }
+    public RespCommentsDto(boolean isSuccess) {
+        this.isSuccess = isSuccess;
+    }
 }
