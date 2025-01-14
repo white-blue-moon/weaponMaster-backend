@@ -13,6 +13,20 @@ import java.util.Objects;
 public class UserInfoService {
     private final UserInfoRepository userInfoRepository;
 
+    // TODO 조회하는 중복 로직 묶기
+    public UserInfo getUserInfoEntity(String userId) {
+        UserInfo userInfo;
+
+        try {
+            userInfo = userInfoRepository.findByUserId(userId);
+        } catch (Exception e) {
+            System.err.println("Error get user info: " + e.getMessage());
+            return null;
+        }
+
+        return userInfo;
+    }
+
     // TODO DB 에러 처리 필요
     public boolean checkLogin(String userId, String userPw) {
         UserInfo userInfo = userInfoRepository.findByUserId(userId);

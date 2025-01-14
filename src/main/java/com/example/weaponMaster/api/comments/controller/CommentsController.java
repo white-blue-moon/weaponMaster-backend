@@ -26,4 +26,11 @@ public class CommentsController {
         CommentDto[] comments = commentService.getCommentList(articleId);
         return new RespCommentsDto(true, comments);
     }
+
+    // 댓글 삭제
+    @DeleteMapping("/comments/{id}")
+    public RespCommentsDto deleteComment(@RequestBody ReqCommentsDto request, @PathVariable("id") Integer id) {
+        boolean isSuccess = commentService.deleteComment(request, id);
+        return new RespCommentsDto(isSuccess);
+    }
 }

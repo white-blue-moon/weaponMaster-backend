@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReqCommentsDto {
+
     private String userId;
     private Integer articleId;
     private Integer reCommentId;
