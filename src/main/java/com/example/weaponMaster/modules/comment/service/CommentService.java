@@ -1,22 +1,19 @@
 package com.example.weaponMaster.modules.comment.service;
 
 import com.example.weaponMaster.api.comments.dto.ReqCommentsDto;
-import com.example.weaponMaster.modules.article.constant.ArticleType;
-import com.example.weaponMaster.modules.article.dto.ArticleDto;
-import com.example.weaponMaster.modules.article.entity.Article;
+import com.example.weaponMaster.modules.article.service.ArticleService;
 import com.example.weaponMaster.modules.comment.dto.CommentDto;
 import com.example.weaponMaster.modules.comment.entity.Comment;
 import com.example.weaponMaster.modules.comment.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.Arrays;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
 
+    private final ArticleService articleService;
     private final CommentRepository commentRepository;
 
     public boolean createComment(ReqCommentsDto request) {
@@ -29,11 +26,15 @@ public class CommentService {
 
         try {
             commentRepository.save(comment);
-            return true;
         } catch (Exception e) {
             System.err.println("Error create comment: " + e.getMessage());
             return false;
         }
+
+        // 댓글 개수 업데이트
+        CommentDto[] comments = getCommentList(request.getArticleId());
+        boolean isSuccess = articleService.updateCommentCount(request.getArticleId(), comments.length);
+        return isSuccess;
     }
 
     public CommentDto[] getCommentList(Integer articleId) {

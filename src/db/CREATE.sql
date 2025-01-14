@@ -60,6 +60,7 @@ CREATE TABLE user_article (
     contents                TEXT            NOT NULL COMMENT '내용',
     create_date             TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '게시물 최초 작성일자',
     update_date             TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '게시물 최종 수정일자',
+    comment_count           INT             NOT NULL DEFAULT 0 COMMENT '댓글 개수',
     view_count              INT             NOT NULL DEFAULT 0 COMMENT '조회수',
     is_pinned               TINYINT         NOT NULL DEFAULT 0 COMMENT '게시물 상단 고정 여부 (0: 고정 안 함, 1: 고정함)'
 ) CHARSET=utf8 COMMENT='게시물 관리 테이블';

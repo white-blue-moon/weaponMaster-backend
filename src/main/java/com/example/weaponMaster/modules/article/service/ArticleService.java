@@ -20,7 +20,7 @@ import java.util.Optional;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
-    private final UserInfoRepository userInfoRepository;
+    private final UserInfoRepository userInfoRepository; // TODO 서비스단 불러오기
 
     public boolean createArticle(ReqArticlesDto request) {
         // TODO 새소식인 경우 관리자 권한이 있는지 확인하기
@@ -68,6 +68,25 @@ public class ArticleService {
         }
     }
 
+    public boolean updateCommentCount(Integer articleId, Integer commentCount) {
+        Article article = getArticleEntity(articleId);
+        if (article == null) {
+            System.err.println("Error article doesn't exist: " + articleId);
+            return false;
+        }
+
+        article.setCommentCount(commentCount);
+
+        try {
+            articleRepository.save(article);
+        } catch (Exception e) {
+            System.err.println("Error update article commentCount: " + e.getMessage() + (" ("+ articleId + "/" + commentCount + ")"));
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean deleteArticle(ReqArticlesDto request, Integer id) {
         Optional<Article> articleOptional;
 
@@ -101,7 +120,6 @@ public class ArticleService {
                 System.err.printf("Error can't find user info (delete article), userId: %s \n", request.getUserId());
                 return false;
             }
-
 
             if (userInfo.getUserType() == UserType.NORMAL) {
                 System.err.println("Error userType is not ADMIN (delete article)");
@@ -137,42 +155,32 @@ public class ArticleService {
         }
 
         return Arrays.stream(articles)
-                .map(article -> ArticleDto.builder()
-                        .id(article.getId())
-                        .categoryType(article.getCategoryType())
-                        .articleType(article.getArticleType())
-                        .articleDetailType(article.getArticleDetailType())
-                        .title(article.getTitle())
-                        .contents(article.getContents())
-                        .userId(article.getUserId())
-                        .createDate(article.getCreateDate())
-                        .updateDate(article.getUpdateDate())
-                        .viewCount(article.getViewCount())
-                        .isPinned(article.getIsPinned())
-                        .build()
-                )
-                .toArray(ArticleDto[]::new); // 스트림 결과를 ArticleDto[] 배열로 변환
+                .map(this::convertToDto)  // 변환 함수 호출
+                .toArray(ArticleDto[]::new);
     }
 
-    public ArticleDto[] getArticle(Integer id) {
+    public Article getArticleEntity(Integer id) {
         Optional<Article> articleOptional;
 
         try {
             articleOptional = articleRepository.findById(id);
         } catch (Exception e) {
-            System.err.println("Error get article by ID: " + e.getMessage());
+            System.err.println("Error get article: " + e.getMessage());
             return null;
         }
 
-        if (articleOptional.isEmpty()) {
-            return null;
-        }
-
-        // Optional 에서 값을 가져옴
         Article article = articleOptional.get();
+        return article;
+    }
 
-        // Article 객체를 ArticleDto 배열로 변환
-        ArticleDto articleDto = ArticleDto.builder()
+    public ArticleDto getArticle(Integer id) {
+        Article article = getArticleEntity(id);  // 엔티티 가져오기
+        return convertToDto(article);  // 엔티티를 DTO로 변환
+    }
+
+    // Article 엔티티를 ArticleDto로 변환하는 메서드
+    private ArticleDto convertToDto(Article article) {
+        return ArticleDto.builder()
                 .id(article.getId())
                 .categoryType(article.getCategoryType())
                 .articleType(article.getArticleType())
@@ -182,12 +190,9 @@ public class ArticleService {
                 .userId(article.getUserId())
                 .createDate(article.getCreateDate())
                 .updateDate(article.getUpdateDate())
+                .commentCount(article.getCommentCount())
                 .viewCount(article.getViewCount())
                 .isPinned(article.getIsPinned())
                 .build();
-
-        // ArticleDto 를 배열로 반환
-        return new ArticleDto[]{articleDto};
     }
-
 }

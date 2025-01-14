@@ -44,7 +44,7 @@ public class ArticlesController {
     // 게시물 조회
     @GetMapping("/articles/{id}")
     public RespArticlesDto getArticle(@PathVariable("id") Integer id) {
-        ArticleDto[] article = articleService.getArticle(id);
-        return new RespArticlesDto(true, article);
+        ArticleDto article = articleService.getArticle(id);
+        return new RespArticlesDto(true, new ArticleDto[]{article});
     }
 }

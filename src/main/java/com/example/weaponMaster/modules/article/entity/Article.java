@@ -40,6 +40,9 @@ public class Article {
     @Column(name = "update_date", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updateDate;
 
+    @Column(name = "comment_count", columnDefinition = "INT DEFAULT 0")
+    private Integer commentCount = 0;
+
     @Column(name = "view_count", columnDefinition = "INT DEFAULT 0")
     private Integer viewCount = 0;
 

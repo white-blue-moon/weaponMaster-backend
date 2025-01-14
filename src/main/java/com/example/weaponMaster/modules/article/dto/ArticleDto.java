@@ -17,6 +17,7 @@ public class ArticleDto {
     private String userId;             // 작성자
     private LocalDateTime createDate;  // 작성 날짜
     private LocalDateTime updateDate;  // 수정 날짜
+    private Integer commentCount;      // 댓글 수
     private Integer viewCount;         // 조회수
     private Boolean isPinned;          // 상단 고정 여부
 }
