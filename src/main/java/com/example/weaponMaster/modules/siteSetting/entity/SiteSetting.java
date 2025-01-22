@@ -4,6 +4,8 @@ import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.Type;
+
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Data
@@ -16,8 +18,8 @@ public class SiteSetting {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive;
+    @Column(name = "active_state", nullable = false)
+    private boolean activeState;
 
     @Type(JsonType.class)
     @Column(name = "settings", nullable = false)
@@ -25,4 +27,7 @@ public class SiteSetting {
 
     @Column(name = "settings_comment", length = 255)
     private String settingsComment;
+
+    @Column(name = "create_date", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime createDate;
 }

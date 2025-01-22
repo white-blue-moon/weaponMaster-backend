@@ -5,9 +5,10 @@
 DROP TABLE IF EXISTS site_setting;
 CREATE TABLE site_setting (
     id                  INT AUTO_INCREMENT PRIMARY KEY COMMENT '기본 키 컬럼',
-    is_active           TINYINT         NOT NULL DEFAULT 0 COMMENT '설정값 리스트 활성화 여부 (0: 비활성화, 1: 활성화)',
+    active_state        TINYINT         NOT NULL DEFAULT 0 COMMENT '설정값 리스트 활성화 여부 (0: 비활성화, 1: 활성화, 2: 예약중)',
     settings            JSON            NOT NULL COMMENT '설정값 리스트',
-    settings_comment    VARCHAR(255)    COMMENT '설정값 리스트 설명 (참고용)'
+    settings_comment    VARCHAR(255)    COMMENT '설정값 리스트 설명 (참고용)',
+    create_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '설정값 최초 작성일자'
 ) CHARSET=utf8 COMMENT='홈페이지 설정 값 관리 테이블';
 
 -- 홈페이지 설정 값 관리 테이블 인덱스 추가

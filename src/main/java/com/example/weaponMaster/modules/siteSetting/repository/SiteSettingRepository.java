@@ -10,10 +10,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SiteSettingRepository extends JpaRepository<SiteSetting, Integer> {
 
-    @Query(value = "SELECT * FROM site_setting WHERE is_active = :active_state ORDER BY id DESC LIMIT 1", nativeQuery = true)
-    SiteSetting findLatestActiveSetting(
-            @Param("active_state") Integer active_state
-    );
+    @Query(value = "SELECT * FROM site_setting WHERE active_state = :activeState ORDER BY id DESC LIMIT 1", nativeQuery = true)
+    SiteSetting findLatestActiveSetting(Integer activeState);
 
     // 활성화된 최신 설정값 조회
     default SiteSetting findLatestActiveSetting() {
