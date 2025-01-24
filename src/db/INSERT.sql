@@ -44,5 +44,5 @@ INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img
 
 -- 홈페이지 설정 값 리스트 테스트 정보 추가
 DELETE FROM site_setting WHERE id IN (1, 2);
-INSERT INTO site_setting (id, is_active, settings, settings_comment) VALUES(1, 1, '{"home_main_focus_ver": 1, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1}', '설정 테스트');
-INSERT INTO site_setting (id, is_active, settings, settings_comment) VALUES(2, 0, '{"home_main_focus_ver": 2, "home_news_focus_first_ver": 2, "home_news_focus_second_ver": 2}', '설정 테스트 ver.2');
+INSERT INTO site_setting (is_active, settings, settings_comment) VALUES(1, '{"home_main_focus_ver": 1, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1}', '설정 테스트');
+INSERT INTO site_setting (is_active, settings, settings_comment) VALUES(0, '{"home_main_focus_ver": 2, "home_news_focus_first_ver": 2, "home_news_focus_second_ver": 2}', '설정 테스트 ver.2');
