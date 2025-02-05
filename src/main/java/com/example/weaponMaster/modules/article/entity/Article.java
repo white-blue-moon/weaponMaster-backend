@@ -1,5 +1,6 @@
 package com.example.weaponMaster.modules.article.entity;
 
+import com.example.weaponMaster.api.articles.dto.ReqArticlesDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -56,5 +57,13 @@ public class Article {
         this.title = title;
         this.contents = contents;
         this.userId = userId;
+    }
+
+    public void update(ReqArticlesDto request) {
+        this.categoryType = request.getCategoryType();
+        this.articleType = request.getArticleType();
+        this.articleDetailType = request.getArticleDetailType();
+        this.title = request.getTitle();
+        this.contents = request.getContents();
     }
 }

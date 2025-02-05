@@ -39,8 +39,8 @@ public class CommentService {
 
         // 댓글 개수 업데이트
         CommentDto[] comments = getCommentList(request.getArticleId());
-        boolean isSuccess = articleService.updateCommentCount(request.getArticleId(), comments.length);
-        return isSuccess;
+        articleService.updateCommentCount(request.getArticleId(), comments.length);
+        return true;
     }
 
     public CommentDto[] getCommentList(Integer articleId) {
@@ -120,8 +120,8 @@ public class CommentService {
         
         // 댓글 개수 업데이트
         CommentDto[] comments = getCommentList(request.getArticleId());
-        boolean isSuccess = articleService.updateCommentCount(request.getArticleId(), comments.length);
-        return isSuccess;
+        articleService.updateCommentCount(request.getArticleId(), comments.length);
+        return true;
     }
 
 }

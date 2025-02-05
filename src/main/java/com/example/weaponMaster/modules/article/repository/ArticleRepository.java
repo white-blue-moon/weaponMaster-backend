@@ -10,13 +10,8 @@ import org.springframework.stereotype.Repository;
 public interface ArticleRepository extends JpaRepository<Article, Integer> {
 
     @Query(value = "SELECT * FROM user_article WHERE category_type = :categoryType AND article_type = :articleType ORDER BY id DESC", nativeQuery = true)
-    Article[] findArticleList(
-            @Param("categoryType") Integer categoryType,
-            @Param("articleType") Integer articleType
-    );
+    Article[] findArticleList(Integer categoryType, Integer articleType);
 
     @Query(value = "SELECT * FROM user_article WHERE category_type = :categoryType ORDER BY id DESC", nativeQuery = true)
-    Article[] findArticlesByCategory(
-            @Param("categoryType") Integer categoryType
-    );
+    Article[] findArticlesByCategory(Integer categoryType);
 }

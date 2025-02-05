@@ -1,9 +1,9 @@
 package com.example.weaponMaster.api.articles.controller;
 
 import com.example.weaponMaster.api.articles.dto.ReqArticlesDto;
-import com.example.weaponMaster.api.articles.dto.RespArticlesDto;
 import com.example.weaponMaster.modules.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.article.service.ArticleService;
+import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,36 +15,31 @@ public class ArticlesController {
 
     // 게시물 등록
     @PostMapping("/articles")
-    public RespArticlesDto createArticle(@RequestBody ReqArticlesDto request) {
-        boolean isSuccess = articleService.createArticle(request);
-        return new RespArticlesDto(isSuccess);
+    public ApiResponse<Void> createArticle(@RequestBody ReqArticlesDto request) {
+        return articleService.createArticle(request);
     }
 
     // 게시물 수정
     @PutMapping("/articles/{id}")
-    public RespArticlesDto updateArticle(@RequestBody ReqArticlesDto request, @PathVariable("id") Integer id) {
-        boolean isSuccess = articleService.updateArticle(request, id);
-        return new RespArticlesDto(isSuccess);
+    public ApiResponse<Void> updateArticle(@RequestBody ReqArticlesDto request, @PathVariable("id") Integer id) {
+        return articleService.updateArticle(request, id);
     }
 
     // 게시물 삭제
     @DeleteMapping("/articles/{id}")
-    public RespArticlesDto deleteArticle(@RequestBody ReqArticlesDto request, @PathVariable("id") Integer id) {
-        boolean isSuccess = articleService.deleteArticle(request, id);
-        return new RespArticlesDto(isSuccess);
+    public ApiResponse<Void> deleteArticle(@RequestBody ReqArticlesDto request, @PathVariable("id") Integer id) {
+        return articleService.deleteArticle(request, id);
     }
 
     // 게시물 리스트 조회
     @GetMapping("/articles")
-    public RespArticlesDto getArticleList(@RequestParam("categoryType") Integer categoryType, @RequestParam("articleType") Integer articleType) {
-        ArticleDto[] articles = articleService.getArticleList(categoryType, articleType);
-        return new RespArticlesDto(true, articles);
+    public ApiResponse<ArticleDto[]> getArticleList(@RequestParam("categoryType") Integer categoryType, @RequestParam("articleType") Integer articleType) {
+         return articleService.getArticleList(categoryType, articleType);
     }
 
     // 게시물 조회
     @GetMapping("/articles/{id}")
-    public RespArticlesDto getArticle(@PathVariable("id") Integer id) {
-        ArticleDto article = articleService.getArticle(id);
-        return new RespArticlesDto(true, new ArticleDto[]{article});
+    public ApiResponse<ArticleDto> getArticle(@PathVariable("id") Integer id) {
+        return articleService.getArticle(id);
     }
 }

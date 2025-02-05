@@ -12,7 +12,7 @@ public class ReqArticlesDto {
     private Integer categoryType;
     private Integer articleType;
     private Integer articleDetailType;
-    private String title;
-    private String contents;
-    private String userId;
+    private String  title;
+    private String  contents;
+    private String  userId;
 }

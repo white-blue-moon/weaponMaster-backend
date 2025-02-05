@@ -37,16 +37,19 @@ CREATE TABLE ref_focus_banner_info (
 -------------------------------------------------------------------------
 ----------------------------[ 사용자 별 참조 값 ]----------------------------
 
+-- TODO id 컬럼 추가된 부분 백엔드 반영 필요
 -- 유저 회원 정보 관리 테이블
 DROP TABLE IF EXISTS user_info;
 CREATE TABLE user_info (
-    user_id             VARCHAR(255)    NOT NULL PRIMARY KEY COMMENT '유저 아이디',
+    id                  INT AUTO_INCREMENT PRIMARY KEY COMMENT '기본 키 컬럼',
+    user_id             VARCHAR(255)    NOT NULL COMMENT '유저 아이디',
     user_pw             VARCHAR(255)    NOT NULL COMMENT '유저 비밀번호',
     user_type           TINYINT         NOT NULL DEFAULT 0 COMMENT '권한 타입 (0: 일반 유저, 1: 관리자 권한 유저)',
     df_server_id        VARCHAR(255)    DEFAULT '' COMMENT '던파 캐릭터 서버 아이디 (ex. hilder)',
     df_character_name   VARCHAR(255)    DEFAULT '' COMMENT '던파 캐릭터 이름 (ex. 음악들으면서)',
     join_date           TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '회원가입한 시간',
-    last_login_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '가장 마지막 로그인 시간'
+    last_login_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '가장 마지막 로그인 시간',
+    UNIQUE (user_id) -- user_id 고유값으로 설정
 ) CHARSET=utf8 COMMENT='유저 회원 정보 관리 테이블';
 
 -- TODO 유저 로그 테이블 만들기
