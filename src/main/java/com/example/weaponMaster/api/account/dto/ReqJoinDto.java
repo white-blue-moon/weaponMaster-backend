@@ -1,4 +1,4 @@
-package com.example.weaponMaster.api.account.join.dto;
+package com.example.weaponMaster.api.account.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
