@@ -8,11 +8,12 @@ import com.example.weaponMaster.modules.article.service.ArticleService;
 import com.example.weaponMaster.modules.comment.dto.CommentDto;
 import com.example.weaponMaster.modules.comment.entity.Comment;
 import com.example.weaponMaster.modules.comment.repository.CommentRepository;
+import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +23,8 @@ public class CommentService {
     private final UserInfoService userInfoService;
     private final CommentRepository commentRepository;
 
-    public boolean createComment(ReqCommentsDto request) {
+    @Transactional
+    public ApiResponse<Void> createComment(ReqCommentsDto request) {
         Comment comment = new Comment(
                 request.getUserId(),
                 request.getArticleId(),
@@ -30,98 +32,64 @@ public class CommentService {
                 request.getContents()
         );
 
-        try {
-            commentRepository.save(comment);
-        } catch (Exception e) {
-            System.err.println("Error create comment: " + e.getMessage());
-            return false;
-        }
+        commentRepository.save(comment);
+        updateCommentCount(request.getArticleId());
 
-        // 댓글 개수 업데이트
-        CommentDto[] comments = getCommentList(request.getArticleId());
-        articleService.updateCommentCount(request.getArticleId(), comments.length);
-        return true;
+        return ApiResponse.success();
     }
 
-    public CommentDto[] getCommentList(Integer articleId) {
-        Comment[] comments;
-
-        try {
-            comments = commentRepository.findByArticleId(articleId);
-        } catch (Exception e) {
-            System.err.println("Error fetching comments: " + e.getMessage());
-            return null;
+    public ApiResponse<CommentDto[]> getCommentList(Integer articleId) {
+        Comment[] comments = commentRepository.findByArticleId(articleId);
+        if (comments == null || comments.length == 0) {
+            return ApiResponse.success(new CommentDto[0]);
         }
 
-        if (comments == null) {
-            return null;
-        }
-
-        // Comment 엔티티를 CommentDto 로 매핑
-        return Arrays.stream(comments)
-                .map(comment -> CommentDto.builder()
-                        .id(comment.getId())
-                        .userId(comment.getUserId())
-                        .articleId(comment.getArticleId())
-                        .reCommentId(comment.getReCommentId())
-                        .contents(comment.getContents())
-                        .createDate(comment.getCreateDate())
-                        .updateDate(comment.getUpdateDate())
-                        .build())
+        CommentDto[] commentDtoList = Arrays.stream(comments)
+                .map(this::convertToDto)
                 .toArray(CommentDto[]::new);
+
+        return ApiResponse.success(commentDtoList);
     }
 
-    public boolean deleteComment(ReqCommentsDto request, Integer id) {
-        Optional<Comment> commentOptional;
+    @Transactional
+    public ApiResponse<Void> deleteComment(ReqCommentsDto request, Integer id) {
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found, id: " + id));
 
-        try {
-            commentOptional = commentRepository.findById(id);
-        } catch (Exception e) {
-            System.err.println("Error get comment (delete comment): " + e.getMessage());
-            return false;
-        }
-
-        if (commentOptional.isEmpty()) {
-            return false;
-        }
-
-        // Optional 에서 값을 가져옴
-        Comment comment = commentOptional.get();
-
-        // 1. 댓글 소유자가 맞는지 확인하기
-        // 2. 소유자가 다를 경우 관리자 권한 있는지 확인
-        if (!Objects.equals(comment.getUserId(), request.getUserId())) {
-            UserInfo userInfo;
-
-            try {
-                userInfo = userInfoService.getUserInfoEntity(request.getUserId());
-            } catch (Exception e) {
-                System.err.println("Error get user info (delete comment): " + e.getMessage());
-                return false;
-            }
-
+        // 1. 댓글 소유자가 맞는지 확인
+        if (!comment.getUserId().equals(request.getUserId())) {
+            UserInfo userInfo = userInfoService.getUserInfoEntity(request.getUserId());
             if (userInfo == null) {
-                System.err.printf("Error can't find user info (delete comment), userId: %s \n", request.getUserId());
-                return false;
+                throw new IllegalArgumentException("User not found, userId: " + request.getUserId());
             }
 
+            // 2. 소유자가 다를 경우 관리자 권한 있는지 확인
             if (userInfo.getUserType() != UserType.ADMIN) {
-                System.err.println("Error userType is not ADMIN (delete comment)");
-                return false;
+                throw new IllegalArgumentException("User does not have admin privileges: " + request.getUserId());
             }
         }
 
-        try {
-            commentRepository.deleteById(id);
-        } catch (Exception e) {
-            System.err.println("Error delete comment: " + e.getMessage());
-            return false;
-        }
-        
-        // 댓글 개수 업데이트
-        CommentDto[] comments = getCommentList(request.getArticleId());
-        articleService.updateCommentCount(request.getArticleId(), comments.length);
-        return true;
+        commentRepository.deleteById(id);
+        updateCommentCount(request.getArticleId());
+
+        return ApiResponse.success();
     }
 
+    @Transactional
+    private void updateCommentCount(Integer articleId) {
+        int commentCount = commentRepository.countByArticleId(articleId);
+        articleService.updateCommentCount(articleId, commentCount);
+    }
+
+    private CommentDto convertToDto(Comment comment) {
+        return CommentDto.builder()
+                .id(comment.getId())
+                .userId(comment.getUserId())
+                .articleId(comment.getArticleId())
+                .reCommentId(comment.getReCommentId())
+                .contents(comment.getContents())
+                .createDate(comment.getCreateDate())
+                .updateDate(comment.getUpdateDate())
+                .build();
+    }
 }

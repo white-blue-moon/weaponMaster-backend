@@ -1,9 +1,9 @@
 package com.example.weaponMaster.api.comments.controller;
 
 import com.example.weaponMaster.api.comments.dto.ReqCommentsDto;
-import com.example.weaponMaster.api.comments.dto.RespCommentsDto;
 import com.example.weaponMaster.modules.comment.dto.CommentDto;
 import com.example.weaponMaster.modules.comment.service.CommentService;
+import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,22 +15,19 @@ public class CommentsController {
 
     // 댓글 등록
     @PostMapping("/comments")
-    public RespCommentsDto createComment(@RequestBody ReqCommentsDto request) {
-        boolean isSuccess = commentService.createComment(request);
-        return new RespCommentsDto(isSuccess);
+    public ApiResponse<Void> createComment(@RequestBody ReqCommentsDto request) {
+        return commentService.createComment(request);
     }
 
     // 댓글 리스트 조회
     @GetMapping("/comments/{id}")
-    public RespCommentsDto getCommentList(@PathVariable("id") Integer articleId) {
-        CommentDto[] comments = commentService.getCommentList(articleId);
-        return new RespCommentsDto(true, comments);
+    public ApiResponse<CommentDto[]> getCommentList(@PathVariable("id") Integer articleId) {
+        return commentService.getCommentList(articleId);
     }
 
     // 댓글 삭제
     @DeleteMapping("/comments/{id}")
-    public RespCommentsDto deleteComment(@RequestBody ReqCommentsDto request, @PathVariable("id") Integer id) {
-        boolean isSuccess = commentService.deleteComment(request, id);
-        return new RespCommentsDto(isSuccess);
+    public ApiResponse<Void> deleteComment(@RequestBody ReqCommentsDto request, @PathVariable("id") Integer id) {
+        return commentService.deleteComment(request, id);
     }
 }
