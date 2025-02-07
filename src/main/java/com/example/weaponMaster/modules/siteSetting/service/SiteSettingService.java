@@ -11,15 +11,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SiteSettingService {
     private final SiteSettingRepository siteSettingRepository;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper; // TODO
 
     public Settings getSetting() {
-        SiteSetting settingInfo = siteSettingRepository.findLatestActiveSetting();
-
-        try {
-            return objectMapper.convertValue(settingInfo.getSettings(), Settings.class); // JSON 객체 변환
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse settings JSON", e);
-        }
+        SiteSetting settingInfo = siteSettingRepository.findActiveSetting();
+        return objectMapper.convertValue(settingInfo.getSettings(), Settings.class); // JSON 객체 변환
     }
 }

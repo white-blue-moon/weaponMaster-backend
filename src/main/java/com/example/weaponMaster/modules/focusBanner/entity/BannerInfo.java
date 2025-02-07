@@ -1,4 +1,4 @@
-package com.example.weaponMaster.modules.components.focusBanner.entity;
+package com.example.weaponMaster.modules.focusBanner.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

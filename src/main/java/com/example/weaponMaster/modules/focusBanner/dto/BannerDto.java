@@ -1,4 +1,4 @@
-package com.example.weaponMaster.modules.components.focusBanner.dto;
+package com.example.weaponMaster.modules.focusBanner.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

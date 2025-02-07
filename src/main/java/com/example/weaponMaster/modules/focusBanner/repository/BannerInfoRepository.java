@@ -1,19 +1,13 @@
-package com.example.weaponMaster.modules.components.focusBanner.repository;
+package com.example.weaponMaster.modules.focusBanner.repository;
 
-import com.example.weaponMaster.modules.components.focusBanner.entity.BannerInfo;
+import com.example.weaponMaster.modules.focusBanner.entity.BannerInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface BannerInfoRepository extends JpaRepository<BannerInfo, Integer> {
 
     @Query(value = "SELECT * FROM ref_focus_banner_info WHERE version = :version AND banner_type = :bannerType ORDER BY img_order", nativeQuery = true)
-    List<BannerInfo> findByVersionAndTypeSorted(
-            @Param("version") Integer version,
-            @Param("bannerType") Integer bannerType
-    );
+    BannerInfo[] findByVersionAndType(Integer version, Integer bannerType);
 }
