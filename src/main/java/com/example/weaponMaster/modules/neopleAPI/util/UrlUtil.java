@@ -17,14 +17,15 @@ public class UrlUtil {
         this.apiKey = apiKey;
     }
 
+    // TODO 인코딩을 하지 않고 바로 넘겨야 결과 값을 받아와서 함수 사용 임시 보류
     private static String encodeURIComponent(String component)   {
         String result = null;
 
         try {
             result = URLEncoder.encode(component, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-                result = component;
-            }
+            result = component;
+        }
 
         return result;
     }
@@ -42,7 +43,7 @@ public class UrlUtil {
 
         return String.format(
                 NeopleApi.AUCTION_SEARCH_URL,
-                encodeURIComponent(itemName),
+                itemName,
                 defaultWordType,
                 defaultSort,
                 defaultLimit,
