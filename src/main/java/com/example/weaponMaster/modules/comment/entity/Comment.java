@@ -35,9 +35,9 @@ public class Comment {
     private LocalDateTime updateDate;
 
     public Comment(String userId, Integer articleId, Integer reCommentId, String contents) {
-        this.userId = userId;
-        this.articleId = articleId;
+        this.userId      = userId;
+        this.articleId   = articleId;
         this.reCommentId = reCommentId;
-        this.contents = contents;
+        this.contents    = contents;
     }
 }
