@@ -95,8 +95,9 @@ CREATE TABLE user_auction_notice (
     id              INT AUTO_INCREMENT PRIMARY KEY COMMENT '경매 알림 고유 ID',
     user_id         VARCHAR(255)    NOT NULL COMMENT '유저 ID',
     auction_no      VARCHAR(255)    NOT NULL COMMENT '경매 등록 고유 번호',
-    item_info       JSON            NOT NULL COMMENT '경매 아이템 정보',
     auction_state   TINYINT         NOT NULL DEFAULT 0 COMMENT '경매 상태 (0: 판매 중, 1: 판매 완료, 2: 판매 기간 만료)',
+    item_img        VARCHAR(255)    NOT NULL COMMENT '경매 아이템 이미지 URL',
+    item_info       JSON            NOT NULL COMMENT '경매 아이템 정보',
     create_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '알림 생성 날짜',
     update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '알림 수정 날짜',
     CONSTRAINT unique_user_auction_notice UNIQUE (user_id, auction_no)
