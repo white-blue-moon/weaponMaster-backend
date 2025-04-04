@@ -24,4 +24,10 @@ public class NeopleController {
     public ApiResponse<Void> registerAuctionNotice(@RequestBody ReqAuctionDto request) {
         return neopleApiService.registerAuctionNotice(request);
     }
+
+    // 경매장 아이템 판매 알림 해제
+    @DeleteMapping("/neople/auction/notice")
+    public ApiResponse<Void> removeAuctionNotice(@RequestBody ReqAuctionDto request) {
+        return neopleApiService.removeAuctionNotice(request);
+    }
 }
