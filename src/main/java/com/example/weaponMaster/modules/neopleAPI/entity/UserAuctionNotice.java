@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_auction_notice")
-@Data
 @DynamicUpdate // 변경된 필드만 업데이트
+@Data
 @NoArgsConstructor
 public class UserAuctionNotice {
 
@@ -34,10 +34,10 @@ public class UserAuctionNotice {
     @Column(name = "item_info", nullable = false, columnDefinition = "json")
     private JsonNode itemInfo;
 
-    @Column(name = "create_date", insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "create_date", nullable = false, insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createDate;
 
-    @Column(name = "update_date", insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    @Column(name = "update_date", nullable = false, insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updateDate;
 
     public UserAuctionNotice(String userId, String itemImg, JsonNode itemInfo) {

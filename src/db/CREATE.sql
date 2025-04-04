@@ -102,3 +102,33 @@ CREATE TABLE user_auction_notice (
     update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '알림 수정 날짜',
     CONSTRAINT unique_user_auction_notice UNIQUE (user_id, auction_no)
 ) CHARSET=utf8mb4 COMMENT='유저 경매 판매 알림 등록 관리 테이블';
+
+-- 유저 개인 슬랙 알림 정보 관리 테이블
+DROP TABLE IF EXISTS user_slack_notice;
+CREATE TABLE user_slack_notice (
+    id                  INT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 row ID',
+    user_id             VARCHAR(255)    NOT NULL COMMENT '유저 ID',
+    notice_type         TINYINT         NOT NULL COMMENT '알림 종류 (ex. 1: 경매 판매 알림)',
+    slack_bot_token     VARCHAR(255)    NOT NULL COMMENT '개인 슬랙 봇 토큰',
+    slack_channel_id    VARCHAR(255)    NOT NULL COMMENT '개인 슬랙 채널 아이디',
+    create_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '정보 생성 날짜',
+    update_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '정보 수정 날짜',
+    CONSTRAINT unique_user_slack_notice UNIQUE (user_id, notice_type)
+) CHARSET=utf8mb4 COMMENT='유저 개인 슬랙 알림 정보 관리 테이블';
+
+
+-------------------------------------------------------------------------
+----------------------------[ 관리용 참조 값 ]------------------------------
+
+-- 공통 관리자 슬랙 알림 정보 관리 테이블
+DROP TABLE IF EXISTS admin_slack_notice;
+CREATE TABLE admin_slack_notice (
+    id                  INT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 row ID',
+    notice_type         TINYINT         NOT NULL   COMMENT '알림 종류 (ex. 1: 1대1 문의 등록 알림)',
+    notice_comment      VARCHAR(255)    DEFAULT '' COMMENT '알림 종류 설명 (참고용 서술)',
+    slack_bot_token     VARCHAR(255)    NOT NULL   COMMENT '개인 슬랙 봇 토큰',
+    slack_channel_id    VARCHAR(255)    NOT NULL   COMMENT '개인 슬랙 채널 아이디',
+    create_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '정보 생성 날짜',
+    update_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '정보 수정 날짜',
+    CONSTRAINT unique_admin_slack_notice UNIQUE (notice_type)
+) CHARSET=utf8mb4 COMMENT='공통 관리자 슬랙 알림 정보 관리 테이블';

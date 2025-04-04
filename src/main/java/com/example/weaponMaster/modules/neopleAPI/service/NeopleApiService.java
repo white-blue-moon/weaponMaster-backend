@@ -8,6 +8,8 @@ import com.example.weaponMaster.modules.neopleAPI.entity.UserAuctionNotice;
 import com.example.weaponMaster.modules.neopleAPI.repository.UserAuctionNoticeRepository;
 import com.example.weaponMaster.modules.neopleAPI.util.UrlUtil;
 import com.example.weaponMaster.api.neople.dto.RespAuctionDto;
+import com.example.weaponMaster.modules.slack.constant.UserSlackType;
+import com.example.weaponMaster.modules.slack.service.UserSlackNotifier;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ public class NeopleApiService {
     private final UserAuctionNoticeRepository                    userAuctionNoticeRepo;
     private final TaskScheduler                                  taskScheduler;
     private final ConcurrentHashMap<Integer, ScheduledFuture<?>> auctionMonitorMap = new ConcurrentHashMap<>(); // 추적 중인 경매 판매 알림을 관리하는 맵
+    private final UserSlackNotifier                              userSlackNotifier;
 
     public ApiResponse<RespAuctionDto[]> searchAuction(String itemName) throws Exception {
         ResponseEntity<String> response = restClient.get()
@@ -138,15 +141,18 @@ public class NeopleApiService {
                     JsonNode rootNode  = objectMapper.readTree(errorBody);
                     String   errorCode = rootNode.path("error").path("code").asText();
 
+                    // TODO 슬랙 알림 외에 웨펀마스터 쪽지 함에도 알림 가도록 하는 방식도 고려해 보기 (쪽지함 만들지 고려 중)
                     if ("DNF004".equals(errorCode)) {
                         userNotice.setAuctionState(AuctionState.SOLD_OUT);
                         userAuctionNoticeRepo.save(userNotice);
 
                         String priceStr       = userNotice.getItemInfo().path("currentPrice").asText();
                         String formattedPrice = priceStr.replaceAll("(\\d)(?=(\\d{3})+$)", "$1,");
-                        System.err.println("[판매 완료 알림] (" + now + ")");
-                        System.err.println(userNotice.getItemInfo().path("itemName").asText() + " 이 " + formattedPrice + " G 에 판매 완료되었습니다.");
-                        System.err.println();
+                        String message = "[판매 완료 알림] (" + now + ") \n";
+                        message += userNotice.getItemInfo().path("itemName").asText() + " 이 " + formattedPrice + " G 에 판매 완료되었습니다. \n";
+
+                        System.err.println(message + "\n");
+                        userSlackNotifier.sendMessage(userNotice.getUserId(), UserSlackType.AUCTION_NOTICE, message);
                         return;
                     }
                 }
