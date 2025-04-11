@@ -34,7 +34,7 @@ public class UrlUtil {
     public String getAuctionSearchUrl(String itemName) {
         String  defaultWordType = "front"; // 동일 단어(match), 앞 단어 검색(front), 전문 검색(full)
         String  defaultSort     = "desc";  // 가장 최근 등록된 순으로 조회
-        Integer defaultLimit    = 5;       // 5개 항목만 조회
+        Integer defaultLimit    = 10;      // 10개 항목만 조회
 
         return String.format(
                 NeopleApi.AUCTION_SEARCH_URL,

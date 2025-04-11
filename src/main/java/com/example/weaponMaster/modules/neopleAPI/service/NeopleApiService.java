@@ -132,6 +132,8 @@ public class NeopleApiService {
                         userNotice.setAuctionState(AuctionState.SOLD_OUT);
                         userAuctionNoticeRepo.save(userNotice);
 
+                        // TODO regCount 로 계산해서 정보 알리도록 수정 필요
+                        // TODO 10,000 골드 보증금 합산 및 수수료 제외한 가격으로도 알리기
                         String priceStr       = userNotice.getItemInfo().path("currentPrice").asText();
                         String formattedPrice = priceStr.replaceAll("(\\d)(?=(\\d{3})+$)", "$1,");
                         String message        = "[판매 완료 알림] (" + now + ") \n";

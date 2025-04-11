@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserAuctionNoticeRepository extends JpaRepository<UserAuctionNotice, Integer> {
 
-    @Query(value = "SELECT * FROM user_auction_notice WHERE user_id = :userId ORDER BY id ASC", nativeQuery = true)
+    @Query(value = "SELECT * FROM user_auction_notice WHERE user_id = :userId ORDER BY id DESC", nativeQuery = true)
     UserAuctionNotice[] findByUserId(String userId);
 
     @Query(value = "SELECT * FROM user_auction_notice WHERE user_id = :userId AND auction_no = :auctionNo", nativeQuery = true)
