@@ -71,8 +71,8 @@ public class NeopleApiService {
         userAuctionNoticeRepo.save(notice);
 
         // 2. 판매 상태 1분 마다 확인하는 스케줄 등록
-        UserAuctionNotice userNotice = userAuctionNoticeRepo.findByUserIdAndNo(notice.getUserId(), notice.getAuctionNo());
-        ScheduledFuture<?> future = taskScheduler.schedule(
+        UserAuctionNotice  userNotice = userAuctionNoticeRepo.findByUserIdAndNo(notice.getUserId(), notice.getAuctionNo());
+        ScheduledFuture<?> future     = taskScheduler.schedule(
                 () -> monitorAuction(userNotice),
                 new PeriodicTrigger(Duration.ofMinutes(1))
         );
@@ -88,24 +88,11 @@ public class NeopleApiService {
         return ApiResponse.success();
     }
 
-    // 경매 판매 알림 해제
-    public ApiResponse<Void> removeAuctionNotice(ReqAuctionDto request) {
-        String            auctionNo  = request.getItemInfo().path("auctionNo").asText();
-        UserAuctionNotice userNotice = userAuctionNoticeRepo.findByUserIdAndNo(request.getUserId(), auctionNo);
-
-        // 1. 맵에 등록된 알림 정보 삭제
-        auctionMonitorMap.remove(userNotice.getId());
-
-        // 2. DB 에 등록된 알림 정보 삭제
-        userAuctionNoticeRepo.deleteById(userNotice.getId());
-
-        return ApiResponse.success();
-    }
-
     // TODO 서버 통신이 끊겼다가 다시 연결될 때 DB 에서 SELLING 상태의 알림은 다시 1분 마다 추적하도록 세팅 필요
     private void monitorAuction(UserAuctionNotice userNotice) {
         try {
             if (userNotice.getAuctionState() != AuctionState.SELLING) {
+                stopMonitoring(userNotice.getId());
                 return;
             }
 
@@ -114,18 +101,16 @@ public class NeopleApiService {
             LocalDateTime     expireTime    = LocalDateTime.parse(expireDateStr, formatter);
             LocalDateTime     now           = LocalDateTime.now();
 
-            System.out.println("[판매 알림 추적 중] (" + now + ")");
-            System.out.println(userNotice.getItemInfo().path("itemName").asText() + "의 판매 상태를 확인합니다. " + "[#" + userNotice.getId() + "]");
-            System.out.println();
-
             if (now.isEqual(expireTime) || now.isAfter(expireTime)) {
                 userNotice.setAuctionState(AuctionState.EXPIRED);
                 userAuctionNoticeRepo.save(userNotice);
 
-                System.out.println("[판매 기간 만료 알림] (" + now + ")");
-                System.out.println(userNotice.getItemInfo().path("itemName").asText() + " 의 판매 기간이 만료되었습니다.");
-                System.out.println("판매 만료 시각 : " + userNotice.getItemInfo().path("expireDate").asText());
-                System.out.println();
+                String message = "[판매 기간 만료 알림] (" + now + ") \n";
+                message += userNotice.getItemInfo().path("itemName").asText() + " 의 판매 기간이 만료되었습니다. \n";
+                message += "판매 만료 시각 : " + userNotice.getItemInfo().path("expireDate").asText();
+                userSlackNotifier.sendMessage(userNotice.getUserId(), UserSlackType.AUCTION_NOTICE, message);
+
+                stopMonitoring(userNotice.getId());
                 return;
             }
 
@@ -148,11 +133,11 @@ public class NeopleApiService {
 
                         String priceStr       = userNotice.getItemInfo().path("currentPrice").asText();
                         String formattedPrice = priceStr.replaceAll("(\\d)(?=(\\d{3})+$)", "$1,");
-                        String message = "[판매 완료 알림] (" + now + ") \n";
+                        String message        = "[판매 완료 알림] (" + now + ") \n";
                         message += userNotice.getItemInfo().path("itemName").asText() + " 이 " + formattedPrice + " G 에 판매 완료되었습니다. \n";
-
-                        System.err.println(message + "\n");
                         userSlackNotifier.sendMessage(userNotice.getUserId(), UserSlackType.AUCTION_NOTICE, message);
+
+                        stopMonitoring(userNotice.getId());
                         return;
                     }
                 }
@@ -161,8 +146,30 @@ public class NeopleApiService {
 
         } catch (Exception e) {
             System.err.println("Auction monitoring error: " + e.getMessage());
+            stopMonitoring(userNotice.getId()); // 에러 발생 시에도 추적 종료
             return;
         }
+    }
+
+    private void stopMonitoring(Integer id) {
+        ScheduledFuture<?> future = auctionMonitorMap.remove(id); // 맵에서 제거
+        if (future != null) {
+            future.cancel(true); // 실행 중인 작업이 있으면 강제 중단
+        }
+    }
+
+    // 경매 판매 알림 해제
+    public ApiResponse<Void> removeAuctionNotice(ReqAuctionDto request) {
+        String            auctionNo  = request.getItemInfo().path("auctionNo").asText();
+        UserAuctionNotice userNotice = userAuctionNoticeRepo.findByUserIdAndNo(request.getUserId(), auctionNo);
+
+        // 1. DB 에 등록된 알림 정보 삭제
+        userAuctionNoticeRepo.deleteById(userNotice.getId());
+
+        // 2. 맵에 등록된 알림 정보 삭제
+        stopMonitoring(userNotice.getId());
+
+        return ApiResponse.success();
     }
 
 }
