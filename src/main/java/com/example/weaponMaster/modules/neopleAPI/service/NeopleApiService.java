@@ -24,6 +24,7 @@ import org.springframework.web.client.RestClient;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
@@ -144,6 +145,8 @@ public class NeopleApiService {
                 throw e;
             }
 
+            // TODO 최신 경매 정보로 DB 알림 update 필요 (몇 개 남았는지 등)
+
         } catch (Exception e) {
             System.err.println("Auction monitoring error: " + e.getMessage());
             stopMonitoring(userNotice.getId()); // 에러 발생 시에도 추적 종료
@@ -156,6 +159,19 @@ public class NeopleApiService {
         if (future != null) {
             future.cancel(true); // 실행 중인 작업이 있으면 강제 중단
         }
+    }
+
+    public ApiResponse<RespAuctionDto[]> getAuctionNotice(String userId) {
+        UserAuctionNotice[] userNoticeList = userAuctionNoticeRepo.findByUserId(userId);
+        RespAuctionDto[]    respDtoList    = Arrays.stream(userNoticeList)
+                .map(userNotice -> new RespAuctionDto(
+                        userNotice.getItemImg(),
+                        userNotice.getItemInfo(),
+                        userNotice.getAuctionState()
+                ))
+                .toArray(RespAuctionDto[]::new);
+
+        return ApiResponse.success(respDtoList);
     }
 
     // 경매 판매 알림 해제

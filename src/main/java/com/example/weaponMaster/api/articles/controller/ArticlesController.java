@@ -13,10 +13,22 @@ public class ArticlesController {
 
     private final ArticleService articleService;
 
+    // 게시물 리스트 조회
+    @GetMapping("/articles")
+    public ApiResponse<ArticleDto[]> getArticleList(@RequestParam("categoryType") Integer categoryType, @RequestParam("articleType") Integer articleType) {
+        return articleService.getArticleList(categoryType, articleType);
+    }
+
     // 게시물 등록
     @PostMapping("/articles")
     public ApiResponse<Void> createArticle(@RequestBody ReqArticlesDto request) {
         return articleService.createArticle(request);
+    }
+
+    // 게시물 단일 조회
+    @GetMapping("/articles/{id}")
+    public ApiResponse<ArticleDto> getArticle(@PathVariable("id") Integer id) {
+        return articleService.getArticle(id);
     }
 
     // 게시물 수정
@@ -29,17 +41,5 @@ public class ArticlesController {
     @DeleteMapping("/articles/{id}")
     public ApiResponse<Void> deleteArticle(@RequestBody ReqArticlesDto request, @PathVariable("id") Integer id) {
         return articleService.deleteArticle(request, id);
-    }
-
-    // 게시물 리스트 조회
-    @GetMapping("/articles")
-    public ApiResponse<ArticleDto[]> getArticleList(@RequestParam("categoryType") Integer categoryType, @RequestParam("articleType") Integer articleType) {
-         return articleService.getArticleList(categoryType, articleType);
-    }
-
-    // 게시물 조회
-    @GetMapping("/articles/{id}")
-    public ApiResponse<ArticleDto> getArticle(@PathVariable("id") Integer id) {
-        return articleService.getArticle(id);
     }
 }

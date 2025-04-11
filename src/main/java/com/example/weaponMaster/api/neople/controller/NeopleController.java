@@ -25,6 +25,12 @@ public class NeopleController {
         return neopleApiService.registerAuctionNotice(request);
     }
 
+    // 경매장 아이템 판매 알림 조회
+    @GetMapping("/neople/auction/notice")
+    public ApiResponse<RespAuctionDto[]> getAuctionNotice(@RequestParam("userId") String userId) {
+        return neopleApiService.getAuctionNotice(userId);
+    }
+
     // 경매장 아이템 판매 알림 해제
     @DeleteMapping("/neople/auction/notice")
     public ApiResponse<Void> removeAuctionNotice(@RequestBody ReqAuctionDto request) {
