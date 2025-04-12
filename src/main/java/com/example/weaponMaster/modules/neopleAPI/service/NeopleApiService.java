@@ -1,7 +1,9 @@
 package com.example.weaponMaster.modules.neopleAPI.service;
 
 import com.example.weaponMaster.api.neople.dto.ReqAuctionDto;
+import com.example.weaponMaster.api.neople.dto.RespUserAuctionDto;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
+import com.example.weaponMaster.modules.neopleAPI.constant.AuctionNotice;
 import com.example.weaponMaster.modules.neopleAPI.constant.AuctionState;
 import com.example.weaponMaster.modules.neopleAPI.constant.NeopleApi;
 import com.example.weaponMaster.modules.neopleAPI.entity.UserAuctionNotice;
@@ -64,28 +66,28 @@ public class NeopleApiService {
         return ApiResponse.success(auctionArray);
     }
 
-    // TODO 경매장 알림은 인당 최대 5개까지만 등록 가능하도록 제한하기
     // 경매 판매 알림 등록
     public ApiResponse<Void> registerAuctionNotice(ReqAuctionDto request) {
-        // 1. DB 에 경매 판매 알림 정보 저장
+        // 1. 현재 SELLING 추적 중인 알람 개수 확인
+        UserAuctionNotice[] userNotices = userAuctionNoticeRepo.findByUserIdAndState(request.getUserId(), AuctionState.SELLING);
+        if (userNotices.length >= AuctionNotice.MAX_NOTICE_COUNT) {
+            String errMsg = String.format("[알람 최대 등록 가능 개수 초과] userId: %s, maxNoticeCount: %d, userSellingCount: %d", request.getUserId(), AuctionNotice.MAX_NOTICE_COUNT, userNotices.length);
+            throw new IllegalArgumentException(errMsg);
+        }
+
+        // 2. DB 에 경매 판매 알림 정보 저장
         UserAuctionNotice notice = new UserAuctionNotice(request.getUserId(), request.getItemImg(), request.getItemInfo());
         userAuctionNoticeRepo.save(notice);
 
-        // 2. 판매 상태 1분 마다 확인하는 스케줄 등록
+        // 3. 판매 상태 1분 마다 확인하는 스케줄 등록
         UserAuctionNotice  userNotice = userAuctionNoticeRepo.findByUserIdAndNo(notice.getUserId(), notice.getAuctionNo());
-        ScheduledFuture<?> future     = taskScheduler.schedule(
-                () -> monitorAuction(userNotice),
-                new PeriodicTrigger(Duration.ofMinutes(1))
-        );
+        ScheduledFuture<?> future     = taskScheduler.schedule(() -> monitorAuction(userNotice), new PeriodicTrigger(Duration.ofMinutes(1)));
+        if (future == null) {
+            throw new RuntimeException(String.format("[경매 알람 추적 스케줄 등록 실패] userId: %s", notice.getUserId()));
+        }
 
-        // TODO 에러 처리 중앙에서만 하도록 할 수는 없는지 확인해 보기
-        // if (future == null) {
-        //     throw new Exception("경매 판매 상태 추적 알림 등록 실패");
-        // }
-
-        // 3. 등록한 스케줄을 맵에 저장하여 관리
+        // 4. 등록한 스케줄을 맵에 저장하여 관리
         auctionMonitorMap.put(userNotice.getId(), future);
-
         return ApiResponse.success();
     }
 
@@ -106,7 +108,7 @@ public class NeopleApiService {
                 userNotice.setAuctionState(AuctionState.EXPIRED);
                 userAuctionNoticeRepo.save(userNotice);
 
-                String message = "[판매 기간 만료 알림] (" + now + ") \n";
+                String message = "[판매 기간 만료 알림] \n";
                 message += userNotice.getItemInfo().path("itemName").asText() + " 의 판매 기간이 만료되었습니다. \n";
                 message += "판매 만료 시각 : " + userNotice.getItemInfo().path("expireDate").asText();
                 userSlackNotifier.sendMessage(userNotice.getUserId(), UserSlackType.AUCTION_NOTICE, message);
@@ -136,8 +138,8 @@ public class NeopleApiService {
                         // TODO 10,000 골드 보증금 합산 및 수수료 제외한 가격으로도 알리기
                         String priceStr       = userNotice.getItemInfo().path("currentPrice").asText();
                         String formattedPrice = priceStr.replaceAll("(\\d)(?=(\\d{3})+$)", "$1,");
-                        String message        = "[판매 완료 알림] (" + now + ") \n";
-                        message += userNotice.getItemInfo().path("itemName").asText() + " 이 " + formattedPrice + " G 에 판매 완료되었습니다. \n";
+                        String message        = "[판매 완료 알림] \n";
+                        message += userNotice.getItemInfo().path("itemName").asText() + " (이)가 " + formattedPrice + " G 에 판매 완료되었습니다. \n";
                         userSlackNotifier.sendMessage(userNotice.getUserId(), UserSlackType.AUCTION_NOTICE, message);
 
                         stopMonitoring(userNotice.getId());
@@ -163,9 +165,9 @@ public class NeopleApiService {
         }
     }
 
-    public ApiResponse<RespAuctionDto[]> getAuctionNotice(String userId) {
+    public ApiResponse<RespUserAuctionDto> getAuctionNotice(String userId) {
         UserAuctionNotice[] userNoticeList = userAuctionNoticeRepo.findByUserId(userId);
-        RespAuctionDto[]    respDtoList    = Arrays.stream(userNoticeList)
+        RespAuctionDto[]    noticeList     = Arrays.stream(userNoticeList)
                 .map(userNotice -> new RespAuctionDto(
                         userNotice.getItemImg(),
                         userNotice.getItemInfo(),
@@ -173,7 +175,8 @@ public class NeopleApiService {
                 ))
                 .toArray(RespAuctionDto[]::new);
 
-        return ApiResponse.success(respDtoList);
+        RespUserAuctionDto respDto = new RespUserAuctionDto(AuctionNotice.MAX_NOTICE_COUNT, noticeList);
+        return ApiResponse.success(respDto);
     }
 
     // 경매 판매 알림 해제
@@ -186,7 +189,6 @@ public class NeopleApiService {
 
         // 2. 맵에 등록된 알림 정보 삭제
         stopMonitoring(userNotice.getId());
-
         return ApiResponse.success();
     }
 

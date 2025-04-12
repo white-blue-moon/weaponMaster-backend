@@ -13,4 +13,7 @@ public interface UserAuctionNoticeRepository extends JpaRepository<UserAuctionNo
 
     @Query(value = "SELECT * FROM user_auction_notice WHERE user_id = :userId AND auction_no = :auctionNo", nativeQuery = true)
     UserAuctionNotice findByUserIdAndNo(String userId, String auctionNo);
+
+    @Query(value = "SELECT * FROM user_auction_notice WHERE user_id = :userId AND auction_state = :auctionState", nativeQuery = true)
+    UserAuctionNotice[] findByUserIdAndState(String userId, Integer auctionState);
 }
