@@ -10,6 +10,8 @@ import com.example.weaponMaster.modules.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.article.entity.Article;
 import com.example.weaponMaster.modules.article.repository.ArticleRepository;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
+import com.example.weaponMaster.modules.slack.constant.AdminSlackType;
+import com.example.weaponMaster.modules.slack.service.SlackNotifier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +20,10 @@ import java.util.Arrays;
 @Service
 @RequiredArgsConstructor
 public class ArticleService {
-    private final ArticleRepository articleRepository;
+
+    private final ArticleRepository  articleRepository;
     private final UserInfoRepository userInfoRepository;
+    private final SlackNotifier      slackNotifier;
 
     @Transactional
     public ApiResponse<Void> createArticle(ReqArticlesDto request) {
@@ -31,8 +35,30 @@ public class ArticleService {
                 request.getContents(),
                 request.getUserId()
         );
-        articleRepository.save(article);
+
+        Article userArticle = articleRepository.save(article);
+        if(userArticle.getCategoryType() == CategoryType.SERVICE_CENTER) {
+            if (userArticle.getArticleType() == ArticleType.SERVICE_CENTER.PRIVATE_CONTACT) {
+                slackNotifier.sendMessageAdmin(AdminSlackType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(userArticle));
+            }
+        }
+
         return ApiResponse.success();
+    }
+
+    private static String getNoticeMessage(Article userArticle) {
+        String link = String.format("http://localhost:8080/service/%d", userArticle.getId());
+        String message = String.format(
+                "`[1대1 문의 등록 알림]` - <%s|링크 바로가기>\n" +
+                        "```" +
+                        "제목: %s\n" +
+                        "작성자: %s" +
+                        "```",
+                link,
+                userArticle.getTitle(),
+                userArticle.getUserId()
+        );
+        return message;
     }
 
     @Transactional

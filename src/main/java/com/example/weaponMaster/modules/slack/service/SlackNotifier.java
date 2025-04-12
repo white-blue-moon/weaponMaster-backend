@@ -23,6 +23,7 @@ public class SlackNotifier {
     public void sendMessage(String userId, int noticeType, String message) {
         UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(userId, noticeType);
         if (userSlack == null) {
+            // TODO 슬랙 정보를 등록하지 않은 유저도 기능 사용은 가능하도록 에러 처리 개선 필요
             throw new IllegalArgumentException(String.format("[Slack 에러] 토큰이 없습니다. 메시지를 보낼 수 없습니다. userId: %s, noticeType: %d", userId, noticeType));
         }
 
