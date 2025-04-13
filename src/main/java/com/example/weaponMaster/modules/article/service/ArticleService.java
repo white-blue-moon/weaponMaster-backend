@@ -118,7 +118,9 @@ public class ArticleService {
         Article article = articleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Article not found: " + id));
 
-        return ApiResponse.success(convertToDto(article));
+        article.setViewCount(article.getViewCount() + 1);
+        Article updatedArticle = articleRepository.save(article);
+        return ApiResponse.success(convertToDto(updatedArticle));
     }
 
     private ArticleDto convertToDto(Article article) {
