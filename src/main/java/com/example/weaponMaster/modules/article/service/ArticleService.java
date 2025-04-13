@@ -71,6 +71,14 @@ public class ArticleService {
         return ApiResponse.success();
     }
 
+    // TODO 업데이트 방식 하나로 통일 가능할지 고려해 보기
+    @Transactional
+    public ArticleDto updateArticleDto(ArticleDto articleDto) {
+        Article article        = convertToEntity(articleDto);
+        Article updatedArticle = articleRepository.save(article);
+        return convertToDto(updatedArticle);
+    }
+
     @Transactional
     public ApiResponse<Void> updateCommentCount(Integer articleId, Integer commentCount) {
         Article article = articleRepository.findById(articleId)
@@ -128,5 +136,16 @@ public class ArticleService {
                 .viewCount(article.getViewCount())
                 .isPinned(article.getIsPinned())
                 .build();
+    }
+
+    private Article convertToEntity(ArticleDto dto) {
+        return new Article(
+                dto.getCategoryType(),
+                dto.getArticleType(),
+                dto.getArticleDetailType(),
+                dto.getTitle(),
+                dto.getContents(),
+                dto.getUserId()
+        );
     }
 }

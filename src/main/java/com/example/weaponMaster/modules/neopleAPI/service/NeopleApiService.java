@@ -138,8 +138,16 @@ public class NeopleApiService {
                         // TODO 10,000 골드 보증금 합산 및 수수료 제외한 가격으로도 알리기
                         String priceStr       = userNotice.getItemInfo().path("currentPrice").asText();
                         String formattedPrice = priceStr.replaceAll("(\\d)(?=(\\d{3})+$)", "$1,");
-                        String message        = "[판매 완료 알림] \n";
-                        message += userNotice.getItemInfo().path("itemName").asText() + " (이)가 " + formattedPrice + " G 에 판매 완료되었습니다. \n";
+                        String itemName       = userNotice.getItemInfo().path("itemName").asText();
+                        String message = String.format(
+                                "`[판매 완료 알림]`\n" +
+                                        "```\n" +
+                                        "아이템명: %s\n" +
+                                        "판매가격: %s G\n" +
+                                        "```",
+                                itemName,
+                                formattedPrice
+                        );
                         slackNotifier.sendMessage(userNotice.getUserId(), UserSlackType.AUCTION_NOTICE, message);
 
                         stopMonitoring(userNotice.getId());

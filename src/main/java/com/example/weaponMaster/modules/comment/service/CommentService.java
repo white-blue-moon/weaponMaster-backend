@@ -4,6 +4,10 @@ import com.example.weaponMaster.api.comments.dto.ReqCommentsDto;
 import com.example.weaponMaster.modules.account.constant.UserType;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.service.UserInfoService;
+import com.example.weaponMaster.modules.article.constant.ArticleDetailType;
+import com.example.weaponMaster.modules.article.constant.ArticleType;
+import com.example.weaponMaster.modules.article.constant.CategoryType;
+import com.example.weaponMaster.modules.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.article.service.ArticleService;
 import com.example.weaponMaster.modules.comment.dto.CommentDto;
 import com.example.weaponMaster.modules.comment.entity.Comment;
@@ -14,17 +18,88 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
 
-    private final ArticleService articleService;
-    private final UserInfoService userInfoService;
+    private final ArticleService    articleService;
+    private final UserInfoService   userInfoService;
     private final CommentRepository commentRepository;
 
+    // TODO 리펙토링 필요
     @Transactional
     public ApiResponse<Void> createComment(ReqCommentsDto request) {
+        ArticleDto article = articleService.getArticle(request.getArticleId()).getData();
+
+        // 공지사항/업데이트 게시글에는 댓글 기재 불가
+        if (isNewsAndNotCommentable(article)) {
+            throw new IllegalArgumentException(String.format("[댓글 등록 에러] 공지사항/업데이트 게시글에 댓글 등록 시도 userId: %s", request.getUserId()));
+        }
+
+        // 1:1 문의 게시글인 경우
+        if (isPrivateContact(article)) {
+            if (isAdminUser(request)) {
+                saveComment(request);
+                updateArticleIfFirstReply(article);
+                return ApiResponse.success();
+            }
+
+            if (isArticleOwner(request, article)) {
+                saveComment(request);
+                return ApiResponse.success();
+            }
+
+            // 관리자도 아니고 소유자도 아닌 경우
+            throw new IllegalArgumentException(String.format("[1:1문의 댓글 등록 에러] 관리자/소유자가 아니지만 댓글 등록 시도 userId: %s", request.getUserId()));
+        }
+
+        // 일반 게시글의 경우
+        saveComment(request);
+        return ApiResponse.success();
+    }
+
+    private boolean isNewsAndNotCommentable(ArticleDto article) {
+        if (article.getCategoryType() == CategoryType.NEWS) {
+            if (article.getArticleType() == ArticleType.NEWS.NOTICE || article.getArticleType() == ArticleType.NEWS.UPDATE) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isPrivateContact(ArticleDto article) {
+        if (article.getCategoryType() == CategoryType.SERVICE_CENTER) {
+            if (article.getArticleType() == ArticleType.SERVICE_CENTER.PRIVATE_CONTACT) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isAdminUser(ReqCommentsDto request) {
+        if (!request.isAdmin()) return false;
+
+        UserInfo userInfo = userInfoService.getUserInfoEntity(request.getUserId());
+        if (userInfo.getUserType() == UserType.ADMIN) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isArticleOwner(ReqCommentsDto request, ArticleDto article) {
+        if (Objects.equals(request.getUserId(), article.getUserId())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void saveComment(ReqCommentsDto request) {
         Comment comment = new Comment(
                 request.getUserId(),
                 request.getArticleId(),
@@ -34,8 +109,13 @@ public class CommentService {
 
         commentRepository.save(comment);
         updateCommentCount(request.getArticleId());
+    }
 
-        return ApiResponse.success();
+    private void updateArticleIfFirstReply(ArticleDto article) {
+        if (article.getArticleDetailType() == ArticleDetailType.SERVICE_CENTER.PRIVATE_CONTACT.WAITING) {
+            article.setArticleDetailType(ArticleDetailType.SERVICE_CENTER.PRIVATE_CONTACT.ANSWERED);
+            articleService.updateArticleDto(article);
+        }
     }
 
     public ApiResponse<CommentDto[]> getCommentList(Integer articleId) {

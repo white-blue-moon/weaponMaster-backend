@@ -51,19 +51,20 @@ public class Article {
     private Boolean isPinned = false;
 
     public Article(Integer categoryType, Integer articleType, Integer articleDetailType, String title, String contents, String userId) {
-        this.categoryType = categoryType;
-        this.articleType = articleType;
+        this.categoryType      = categoryType;
+        this.articleType       = articleType;
         this.articleDetailType = articleDetailType;
-        this.title = title;
-        this.contents = contents;
-        this.userId = userId;
+        this.title             = title;
+        this.contents          = contents;
+        this.userId            = userId;
     }
 
+    // TODO 아래 함수 방식으로 유지해야할지 고려해 보기
     public void update(ReqArticlesDto request) {
-        this.categoryType = request.getCategoryType();
-        this.articleType = request.getArticleType();
+        this.categoryType      = request.getCategoryType();
+        this.articleType       = request.getArticleType();
         this.articleDetailType = request.getArticleDetailType();
-        this.title = request.getTitle();
-        this.contents = request.getContents();
+        this.title             = request.getTitle();
+        this.contents          = request.getContents();
     }
 }
