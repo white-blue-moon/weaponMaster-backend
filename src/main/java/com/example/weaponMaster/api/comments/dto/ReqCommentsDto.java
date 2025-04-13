@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class ReqCommentsDto {
 
     private String  userId;
-    private boolean isAdmin;
+    private Boolean isAdmin;
     private Integer articleId;
     private Integer reCommentId;
     private String  contents;

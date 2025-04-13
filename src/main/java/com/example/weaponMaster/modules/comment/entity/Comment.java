@@ -3,10 +3,13 @@ package com.example.weaponMaster.modules.comment.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_comments")
+@DynamicUpdate // 변경된 필드만 업데이트
 @Data
 @NoArgsConstructor
 public class Comment {

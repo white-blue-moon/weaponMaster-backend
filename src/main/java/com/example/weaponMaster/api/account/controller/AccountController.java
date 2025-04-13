@@ -29,8 +29,12 @@ public class AccountController {
     // 일반모드 로그인
     @PostMapping("/account/login/normal")
     public ApiResponse<Void> loginNormal(@RequestBody ReqLoginDto request) {
-        return userInfoService.checkLogin(request.getUserId(), request.getUserPw());
+        return userInfoService.loginNormal(request);
     }
 
-    // TODO 관리자모드 로그인 API
+    // 관리자모드 로그인
+    @PostMapping("/account/login/admin")
+    public ApiResponse<Void> loginAdmin(@RequestBody ReqLoginDto request) {
+        return userInfoService.loginAdmin(request);
+    }
 }

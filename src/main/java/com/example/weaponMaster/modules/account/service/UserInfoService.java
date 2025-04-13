@@ -1,6 +1,8 @@
 package com.example.weaponMaster.modules.account.service;
 
 import com.example.weaponMaster.api.account.dto.ReqJoinDto;
+import com.example.weaponMaster.api.account.dto.ReqLoginDto;
+import com.example.weaponMaster.modules.account.constant.UserType;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
@@ -16,17 +18,36 @@ public class UserInfoService {
     private final UserInfoRepository userInfoRepository;
 
     @Transactional
-    public ApiResponse<Void> checkLogin(String userId, String userPw) {
-        UserInfo userInfo = userInfoRepository.findByUserId(userId);
+    public ApiResponse<Void> loginNormal(ReqLoginDto request) {
+        UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
         if (userInfo == null) {
-            throw new IllegalArgumentException("userId doesn't exist: " + userId);
+            throw new IllegalArgumentException("userId doesn't exist: " + request.getUserId());
         }
 
-        if (!Objects.equals(userInfo.getUserPw(), userPw)) {
-            throw new IllegalArgumentException("wrong password: " + userId);
+        if (!Objects.equals(userInfo.getUserPw(), request.getUserPw())) {
+            throw new IllegalArgumentException("wrong password: " + request.getUserId());
         }
 
-        userInfoRepository.updateLastLoginDate(userId);
+        userInfoRepository.updateLastLoginDate(request.getUserId());
+        return ApiResponse.success();
+    }
+
+    @Transactional
+    public ApiResponse<Void> loginAdmin(ReqLoginDto request) {
+        UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
+        if (userInfo == null) {
+            throw new IllegalArgumentException(String.format("[관리자모드 로그인 실패] 유저 정보 조회 불가 userId: %s", request.getUserId()));
+        }
+
+        if (!Objects.equals(userInfo.getUserPw(), request.getUserPw())) {
+            throw new IllegalArgumentException(String.format("[관리자모드 로그인 실패] 비밀번호 불일치 userId: %s", request.getUserId()));
+        }
+
+        if (userInfo.getUserType() != UserType.ADMIN) {
+            throw new IllegalArgumentException(String.format("[관리자모드 로그인 실패] 관리자 권한이 없으나 관리자모드 로그인 시도 userId: %s", request.getUserId()));
+        }
+
+        userInfoRepository.updateLastLoginDate(request.getUserId());
         return ApiResponse.success();
     }
 

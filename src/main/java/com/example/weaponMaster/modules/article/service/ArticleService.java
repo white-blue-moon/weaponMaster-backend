@@ -139,7 +139,7 @@ public class ArticleService {
     }
 
     private Article convertToEntity(ArticleDto dto) {
-        return new Article(
+        Article article = new Article(
                 dto.getCategoryType(),
                 dto.getArticleType(),
                 dto.getArticleDetailType(),
@@ -147,5 +147,12 @@ public class ArticleService {
                 dto.getContents(),
                 dto.getUserId()
         );
+
+        article.setId(dto.getId());
+        article.setCommentCount(dto.getCommentCount());
+        article.setViewCount(dto.getViewCount());
+        article.setIsPinned(dto.getIsPinned());
+        return article;
     }
+
 }

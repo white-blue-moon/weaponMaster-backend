@@ -27,8 +27,7 @@ public class CommentService {
     private final ArticleService    articleService;
     private final UserInfoService   userInfoService;
     private final CommentRepository commentRepository;
-
-    // TODO 리펙토링 필요
+    
     @Transactional
     public ApiResponse<Void> createComment(ReqCommentsDto request) {
         ArticleDto article = articleService.getArticle(request.getArticleId()).getData();
@@ -42,7 +41,7 @@ public class CommentService {
         if (isPrivateContact(article)) {
             if (isAdminUser(request)) {
                 saveComment(request);
-                updateArticleIfFirstReply(article);
+                updateArticleIfFirstReply(request);
                 return ApiResponse.success();
             }
 
@@ -81,7 +80,7 @@ public class CommentService {
     }
 
     private boolean isAdminUser(ReqCommentsDto request) {
-        if (!request.isAdmin()) return false;
+        if (!request.getIsAdmin()) return false;
 
         UserInfo userInfo = userInfoService.getUserInfoEntity(request.getUserId());
         if (userInfo.getUserType() == UserType.ADMIN) {
@@ -108,10 +107,13 @@ public class CommentService {
         );
 
         commentRepository.save(comment);
-        updateCommentCount(request.getArticleId());
+        updateArticleCommentCount(request.getArticleId());
     }
 
-    private void updateArticleIfFirstReply(ArticleDto article) {
+    private void updateArticleIfFirstReply(ReqCommentsDto request) {
+        // saveComment() 이후 최신 정보로 다시 조회
+        ArticleDto article = articleService.getArticle(request.getArticleId()).getData();
+
         if (article.getArticleDetailType() == ArticleDetailType.SERVICE_CENTER.PRIVATE_CONTACT.WAITING) {
             article.setArticleDetailType(ArticleDetailType.SERVICE_CENTER.PRIVATE_CONTACT.ANSWERED);
             articleService.updateArticleDto(article);
@@ -150,13 +152,12 @@ public class CommentService {
         }
 
         commentRepository.deleteById(id);
-        updateCommentCount(request.getArticleId());
+        updateArticleCommentCount(request.getArticleId());
 
         return ApiResponse.success();
     }
 
-    @Transactional
-    private void updateCommentCount(Integer articleId) {
+    private void updateArticleCommentCount(Integer articleId) {
         int commentCount = commentRepository.countByArticleId(articleId);
         articleService.updateCommentCount(articleId, commentCount);
     }
