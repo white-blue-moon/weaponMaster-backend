@@ -12,6 +12,6 @@ import java.util.Map;
 public class RespHomeDto {
 
     private Map<Integer, BannerDto[]> focusBanners; // Map<키: 배너 타입 번호, 값: 배너 리스트>
-    private ArticleDto[] newsArticles;
-    private ArticleDto[] bestViewArticles;
+    private ArticleDto[]              newsArticles;
+    private ArticleDto[]              bestViewArticles;
 }

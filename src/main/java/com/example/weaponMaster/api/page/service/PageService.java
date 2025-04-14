@@ -20,9 +20,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PageService {
 
-    private final SiteSettingService siteSettingService;
-    private final BannerService      bannerService;
-    private final ArticleService     articleService;
+    private final SiteSettingService   siteSettingService;
+    private final BannerService        bannerService;
+    private final ArticleService       articleService;
 
     public ApiResponse<RespHomeDto> getPageHome(ReqHomeDto request) {
         // 홈페이지 설정 조회

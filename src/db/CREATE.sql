@@ -8,13 +8,11 @@ CREATE TABLE site_setting (
     active_state        TINYINT         NOT NULL DEFAULT 0 COMMENT '설정값 리스트 활성화 여부 (0: 비활성화, 1: 활성화, 2: 예약중)',
     settings            JSON            NOT NULL COMMENT '설정값 리스트',
     settings_comment    VARCHAR(255)    COMMENT '설정값 리스트 설명 (참고용)',
-    create_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '설정값 최초 작성일자'
+    create_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '설정값 최초 작성일자',
     update_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '설정값 최종 수정 시간'
-    -- TODO 이력 확인을 위해 update_date 추가 예정 -> 반영 필요
 ) CHARSET=utf8 COMMENT='홈페이지 설정 값 관리 테이블';
-
 -- 홈페이지 설정 값 관리 테이블 인덱스 추가
-CREATE INDEX idx_site_settings_is_active ON site_setting(is_active);
+CREATE INDEX idx_site_settings_is_active ON site_setting(active_state);
 
 
 ------------------------------------------------------------------------
@@ -32,6 +30,16 @@ CREATE TABLE ref_focus_banner_info (
     img_comment VARCHAR(255)    COMMENT '이미지 설명 (참고용)',
     CONSTRAINT unique_ref_bannerInfo UNIQUE (version, banner_type, img_order)
 ) CHARSET=utf8 COMMENT='포커스 배너 이미지 리스트 관리 테이블';
+
+-- 퍼블리셔 로고 관리 테이블
+DROP TABLE IF EXISTS ref_publisher_logo;
+CREATE TABLE ref_publisher_logo (
+    id      INT AUTO_INCREMENT PRIMARY KEY COMMENT '기본 키 컬럼',
+    version INT             NOT NULL COMMENT '배너 버전',
+    img_url VARCHAR(255)    NOT NULL COMMENT '로고 이미지 소스 링크',
+    alt     VARCHAR(255)    NOT NULL COMMENT '로고 이미지 설명 (alt 기입용)',
+    CONSTRAINT unique_ref_bannerInfo UNIQUE (version)
+) CHARSET=utf8 COMMENT='퍼블리셔 로고 관리 테이블';
 
 
 -------------------------------------------------------------------------

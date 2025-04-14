@@ -42,7 +42,14 @@ INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img
 INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 3, 'https://bbscdn.df.nexon.com/data6/commu/202411/4297ef52-57ee-be59-2a83-e926ea732041.jpg', 2, '중천 발표 요약');
 INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 3, 'https://bbscdn.df.nexon.com/data6/commu/202411/693e417e-9076-d8e8-8c77-264cc97a7404.jpg', 3, '중천 쿠폰');
 
+-- 퍼블리셔 로고 1 ~ 5 버전 정보 추가
+DELETE FROM ref_publisher_logo WHERE version >= 1 AND version <= 5;
+INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(1, 'https://rs.nxfs.nexon.com/gnb/images/logo_nexon.png', 'NEXON');
+INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(2, 'https://rs.nxfs.nexon.com/bannerusr/24/3/fvfQ21143034203.gif', 'Logo');
+INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(3, 'https://rs.nxfs.nexon.com/bannerusr/24/12/cb8Q30153846079.png', '추모');
+INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(4, 'https://rs.nxfs.nexon.com/bannerusr/24/12/LoDB30160754039.png', '1230 애도');
+INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(5, 'https://rs.nxfs.nexon.com/bannerusr/24/2/5k9s02153134458.png', '설날(2025)');
+
 -- 홈페이지 설정 값 리스트 테스트 정보 추가
-DELETE FROM site_setting WHERE id IN (1, 2);
-INSERT INTO site_setting (is_active, settings, settings_comment) VALUES(1, '{"home_main_focus_ver": 1, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1}', '설정 테스트');
-INSERT INTO site_setting (is_active, settings, settings_comment) VALUES(0, '{"home_main_focus_ver": 2, "home_news_focus_first_ver": 2, "home_news_focus_second_ver": 2}', '설정 테스트 ver.2');
+DELETE FROM site_setting WHERE id = 1;
+INSERT INTO site_setting (active_state, settings, settings_comment) VALUES(1, '{"publisher_logo_ver": 1, "home_main_focus_ver": 2, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1}', '설정 테스트');
