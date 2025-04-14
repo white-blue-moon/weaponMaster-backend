@@ -113,6 +113,11 @@ public class ArticleService {
         return articleDtoList;
     }
 
+    public ArticleDto getLatestDevNote() {
+        Article article = articleRepository.findLatestDevNote(CategoryType.NEWS, ArticleType.NEWS.DEV_NOTE);
+        return convertToDto(article);
+    }
+
     public ApiResponse<ArticleDto[]> getArticleList(Integer categoryType, Integer articleType) {
         Article[] articles = (articleType == ArticleType.ALL)
                 ? articleRepository.findArticlesByCategory(categoryType)

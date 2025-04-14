@@ -2,6 +2,7 @@ package com.example.weaponMaster.api.page.service;
 
 import com.example.weaponMaster.api.page.dto.ReqHomeDto;
 import com.example.weaponMaster.api.page.dto.RespHomeDto;
+import com.example.weaponMaster.api.page.dto.RespInspectionDto;
 import com.example.weaponMaster.modules.article.constant.ArticleType;
 import com.example.weaponMaster.modules.article.constant.CategoryType;
 import com.example.weaponMaster.modules.article.dto.ArticleDto;
@@ -41,6 +42,22 @@ public class PageService {
         final int    ARTICLE_COUNT    = 9; // TODO 조회하는 게시물 개수 (임시 지정)
         ArticleDto[] bestViewArticles = articleService.getBestViewArticles(ARTICLE_COUNT);
         resp.setBestViewArticles(bestViewArticles);
+
+        return ApiResponse.success(resp);
+    }
+
+    public ApiResponse<RespInspectionDto> getPageInspection(int bannerType) {
+        // 홈페이지 설정 조회
+        Settings settings = siteSettingService.getSetting();
+
+        // 홈페이지 설정과 request 값을 조합하여 배너 정보 조회
+        Map<Integer, BannerDto[]> bannersMap = bannerService.getBannersMap(new int[bannerType], settings);
+        RespInspectionDto resp = new RespInspectionDto();
+        resp.setFocusBanners(bannersMap);
+
+        // 최신 개발자 노트 조회
+        ArticleDto devNote = articleService.getLatestDevNote();
+        resp.setDevNote(devNote);
 
         return ApiResponse.success(resp);
     }
