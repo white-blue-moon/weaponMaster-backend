@@ -146,14 +146,16 @@ public class CommentService {
             }
 
             // 2. 소유자가 다를 경우 관리자 권한 있는지 확인
+            if (!request.getIsAdmin()) {
+                throw new IllegalArgumentException(String.format("[댓글 삭제 에러] 관리자모드가 아닌 상태에서 삭제 시도 userId: %s", request.getUserId()));
+            }
             if (userInfo.getUserType() != UserType.ADMIN) {
                 throw new IllegalArgumentException("User does not have admin privileges: " + request.getUserId());
             }
         }
 
-        commentRepository.deleteById(id);
-        updateArticleCommentCount(request.getArticleId());
-
+        comment.setIsDeleted(true);
+        commentRepository.save(comment);
         return ApiResponse.success();
     }
 
@@ -169,6 +171,7 @@ public class CommentService {
                 .articleId(comment.getArticleId())
                 .reCommentId(comment.getReCommentId())
                 .contents(comment.getContents())
+                .isDeleted(comment.getIsDeleted())
                 .createDate(comment.getCreateDate())
                 .updateDate(comment.getUpdateDate())
                 .build();

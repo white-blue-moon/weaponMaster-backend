@@ -8,11 +8,12 @@ import java.time.LocalDateTime;
 @Builder
 public class CommentDto {
 
-    private Integer id;
-    private String userId;
-    private Integer articleId;
-    private Integer reCommentId;
-    private String contents;
+    private Integer       id;
+    private String        userId;
+    private Integer       articleId;
+    private Integer       reCommentId;
+    private String        contents;
+    private Boolean       isDeleted;
     private LocalDateTime createDate;
     private LocalDateTime updateDate;
 }

@@ -31,6 +31,9 @@ public class Comment {
     @Column(name = "contents", nullable = false, columnDefinition = "TEXT")
     private String contents;
 
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    private Boolean isDeleted = false;
+
     @Column(name = "create_date", nullable = false, updatable = false, insertable = false,  columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createDate;
 

@@ -83,6 +83,7 @@ CREATE TABLE user_comments (
     article_id      INT             NOT NULL COMMENT '게시물 타겟 아이디',
     re_comment_id   INT             NOT NULL DEFAULT 0 COMMENT '대댓글 타겟 아이디 (대댓글이 아닌 일반 댓글이면 0)',
     contents        TEXT            NOT NULL COMMENT '내용',
+    is_deleted      TINYINT         NOT NULL DEFAULT 0 COMMENT '댓글 삭제 여부 (0: 삭제 안 함, 1: 삭제됨)',
     create_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '댓글 최초 작성일자',
     update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '댓글 최종 수정일자'
 ) CHARSET=utf8 COMMENT='유저 댓글 관리 테이블';
