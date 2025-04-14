@@ -19,10 +19,4 @@ public class PageController {
     public ApiResponse<RespHomeDto> getPageHome(@RequestBody ReqHomeDto request) {
         return pageService.getPageHome(request);
     }
-
-//    TODO
-//    @PostMapping("/page/inspection")
-//    public RespHomeDto getPageInspection(@RequestBody ReqHomeDto request) {
-//        return pageService.getPageHome(request);
-//    }
 }

@@ -104,6 +104,15 @@ public class ArticleService {
         return ApiResponse.success();
     }
 
+    public ArticleDto[] getBestViewArticles(Integer articleCount) {
+        Article[]    articles       = articleRepository.findBestViewArticles(articleCount);
+        ArticleDto[] articleDtoList = Arrays.stream(articles)
+                                        .map(this::convertToDto)
+                                        .toArray(ArticleDto[]::new);
+
+        return articleDtoList;
+    }
+
     public ApiResponse<ArticleDto[]> getArticleList(Integer categoryType, Integer articleType) {
         Article[] articles = (articleType == ArticleType.ALL)
                 ? articleRepository.findArticlesByCategory(categoryType)

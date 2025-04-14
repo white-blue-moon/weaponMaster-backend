@@ -74,6 +74,7 @@ CREATE TABLE user_article (
 CREATE INDEX idx_user_article_category_type  ON user_article(category_type);
 CREATE INDEX idx_user_article_article_type   ON user_article(article_type);
 CREATE INDEX idx_user_article_is_pinned      ON user_article(is_pinned);
+CREATE INDEX idx_user_article_view_count     ON user_article(view_count);
 
 -- 유저 댓글 관리 테이블
 DROP TABLE IF EXISTS user_comments;
