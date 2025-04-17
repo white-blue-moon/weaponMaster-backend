@@ -46,12 +46,12 @@ public class PageService {
         return ApiResponse.success(resp);
     }
 
-    public ApiResponse<RespInspectionDto> getPageInspection(int bannerType) {
+    public ApiResponse<RespInspectionDto> getPageInspection(Integer bannerType) {
         // 홈페이지 설정 조회
         Settings settings = siteSettingService.getSetting();
 
         // 홈페이지 설정과 request 값을 조합하여 배너 정보 조회
-        Map<Integer, BannerDto[]> bannersMap = bannerService.getBannersMap(new int[bannerType], settings);
+        Map<Integer, BannerDto[]> bannersMap = bannerService.getBannersMap(new int[]{bannerType}, settings);
         RespInspectionDto resp = new RespInspectionDto();
         resp.setFocusBanners(bannersMap);
 

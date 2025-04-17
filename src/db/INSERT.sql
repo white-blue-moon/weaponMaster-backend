@@ -50,6 +50,15 @@ INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(3, 'https://rs.nxf
 INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(4, 'https://rs.nxfs.nexon.com/bannerusr/24/12/LoDB30160754039.png', '1230 애도');
 INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(5, 'https://rs.nxfs.nexon.com/bannerusr/24/2/5k9s02153134458.png', '설날(2025)');
 
+-- 점검페이지 메인 포커스 배너 1 버전 정보 추가
+DELETE FROM ref_focus_banner_info WHERE version = 1 AND banner_type = 1001;
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/3e0a78be-a19f-d2d3-5dbf-540aa173cab5.jpg', 1, ' ');
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/eb467836-7628-ea9b-f49c-db53254e8bf4.jpg', 2, ' ');
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/9641f064-a335-a7cd-df77-db9abc6ee8d1.png', 3, ' ');
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/a3390e26-c053-759e-e460-486467f9f3e5.jpg', 4, ' ');
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/0a3b7ce4-cb9c-1144-461d-634afa4f27c7.jpg', 5, ' ');
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/9a10acd4-d732-4002-2bec-c0a09bbfff45.jpg', 6, ' ');
+
 -- 홈페이지 설정 값 리스트 테스트 정보 추가
-DELETE FROM site_setting WHERE id = 1;
-INSERT INTO site_setting (active_state, settings, settings_comment) VALUES(1, '{"publisher_logo_ver": 1, "home_main_focus_ver": 2, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1}', '설정 테스트');
+DELETE FROM site_setting WHERE settings_comment = "설정 테스트";
+INSERT INTO site_setting (active_state, settings, settings_comment) VALUES(1, '{"publisher_logo_ver": 1, "home_main_focus_ver": 2, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1, "inspection_main_focus_ver": 1}', '설정 테스트');

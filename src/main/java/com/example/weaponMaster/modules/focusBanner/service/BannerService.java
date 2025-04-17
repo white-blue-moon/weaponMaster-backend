@@ -45,7 +45,8 @@ public class BannerService {
             case BannerType.MAIN_FOCUS_BANNER  -> settings.homeMainFocusVer();
             case BannerType.NEWS_BANNER_FIRST  -> settings.homeNewsFocusFirstVer();
             case BannerType.NEWS_BANNER_SECOND -> settings.homeNewsFocusSecondVer();
-            default -> throw new IllegalArgumentException("Invalid banner type: " + bannerType);
+            case BannerType.INSPECTION_MAIN    -> settings.inspectionMainFocusVer();
+            default -> throw new IllegalArgumentException("Invalid focus banner type: " + bannerType);
         };
     }
 }

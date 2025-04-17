@@ -20,7 +20,7 @@ public class BannerInfo {
     private Integer version;
 
     @Column(nullable = false)
-    private Byte bannerType;
+    private Short bannerType;
 
     @Column(nullable = false, length = 255)
     private String imgUrl;
