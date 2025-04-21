@@ -22,10 +22,10 @@ public class UserSlackNotice {
     private String userId;
 
     @Column(name = "notice_type", nullable = false)
-    private Byte noticeType; // TINYINT 타입 매핑
+    private Byte noticeType;
 
-    @Column(name = "slack_bot_token", nullable = false, length = 255)
-    private String slackBotToken;
+    @Column(name = "slack_bot_type", nullable = false)
+    private Byte slackBotType;
 
     @Column(name = "slack_channel_id", nullable = false, length = 255)
     private String slackChannelId;

@@ -53,11 +53,11 @@ CREATE TABLE user_info (
     user_id             VARCHAR(255)    NOT NULL COMMENT '유저 아이디',
     user_pw             VARCHAR(255)    NOT NULL COMMENT '유저 비밀번호',
     user_type           TINYINT         NOT NULL DEFAULT 0 COMMENT '권한 타입 (0: 일반 유저, 1: 관리자 권한 유저)',
-    df_server_id        VARCHAR(255)    DEFAULT '' COMMENT '던파 캐릭터 서버 아이디 (ex. hilder)',
-    df_character_name   VARCHAR(255)    DEFAULT '' COMMENT '던파 캐릭터 이름 (ex. 음악들으면서)',
+    -- df_server_id        VARCHAR(255)    DEFAULT '' COMMENT '던파 캐릭터 서버 아이디 (ex. hilder)',
+    -- df_character_name   VARCHAR(255)    DEFAULT '' COMMENT '던파 캐릭터 이름 (ex. 음악들으면서)',
     join_date           TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '회원가입한 시간',
     last_login_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '가장 마지막 로그인 시간',
-    UNIQUE (user_id) -- user_id 고유값으로 설정
+    UNIQUE (user_id)
 ) CHARSET=utf8 COMMENT='유저 회원 정보 관리 테이블';
 
 -- TODO 유저 로그 테이블 만들기
@@ -119,7 +119,7 @@ CREATE TABLE user_slack_notice (
     id                  INT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 row ID',
     user_id             VARCHAR(255)    NOT NULL COMMENT '유저 ID',
     notice_type         TINYINT         NOT NULL COMMENT '알림 종류 (ex. 1: 경매 판매 알림)',
-    slack_bot_token     VARCHAR(255)    NOT NULL COMMENT '개인 슬랙 봇 토큰',
+    slack_bot_type      TINYINT         NOT NULL COMMENT '슬랙봇 종류 (ex. 1: 일반 슬랙봇)',
     slack_channel_id    VARCHAR(255)    NOT NULL COMMENT '개인 슬랙 채널 아이디',
     create_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '정보 생성 날짜',
     update_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '정보 수정 날짜',
@@ -130,15 +130,27 @@ CREATE TABLE user_slack_notice (
 -------------------------------------------------------------------------
 ----------------------------[ 관리용 참조 값 ]------------------------------
 
--- 공통 관리자 슬랙 알림 정보 관리 테이블
+-- 관리자 공통 슬랙 알림 정보 관리 테이블
 DROP TABLE IF EXISTS admin_slack_notice;
 CREATE TABLE admin_slack_notice (
     id                  INT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 row ID',
-    notice_type         TINYINT         NOT NULL   COMMENT '알림 종류 (ex. 1: 1대1 문의 등록 알림)',
     notice_comment      VARCHAR(255)    DEFAULT '' COMMENT '알림 종류 설명 (참고용 서술)',
-    slack_bot_token     VARCHAR(255)    NOT NULL   COMMENT '개인 슬랙 봇 토큰',
-    slack_channel_id    VARCHAR(255)    NOT NULL   COMMENT '개인 슬랙 채널 아이디',
+    notice_type         TINYINT         NOT NULL   COMMENT '알림 종류 (ex. 1: 1대1 문의 등록 알림)',
+    slack_bot_type      TINYINT         NOT NULL   COMMENT '슬랙봇 종류 (ex. 1: 일반 슬랙봇)',
+    slack_channel_id    VARCHAR(255)    NOT NULL   COMMENT '슬랙 채널 아이디',
     create_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '정보 생성 날짜',
     update_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '정보 수정 날짜',
     CONSTRAINT unique_admin_slack_notice UNIQUE (notice_type)
-) CHARSET=utf8mb4 COMMENT='공통 관리자 슬랙 알림 정보 관리 테이블';
+) CHARSET=utf8mb4 COMMENT='관리자 공통 슬랙 알림 정보 관리 테이블';
+
+-- 슬랙봇 토큰 관리 테이블
+DROP TABLE IF EXISTS slack_bot_token;
+CREATE TABLE slack_bot_token (
+    id                  INT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 row ID',
+    type_comment        VARCHAR(255)    DEFAULT '' COMMENT '슬랙봇 타입 설명 (참고용 서술)',
+    type                TINYINT         NOT NULL   COMMENT '슬랙봇 타입 (ex. 1: 일반 슬랙봇)',
+    token               VARCHAR(255)    NOT NULL   COMMENT '토큰 값',
+    create_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '정보 생성 날짜',
+    update_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '정보 수정 날짜',
+    CONSTRAINT unique_slack_bot_token UNIQUE (type)
+) CHARSET=utf8mb4 COMMENT='슬랙봇 토큰 관리 테이블';
