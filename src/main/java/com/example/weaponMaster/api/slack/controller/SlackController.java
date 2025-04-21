@@ -1,6 +1,7 @@
 package com.example.weaponMaster.api.slack.controller;
 
 import com.example.weaponMaster.api.slack.dto.ReqSlackDto;
+import com.example.weaponMaster.api.slack.dto.RespSlackDto;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.slack.service.SlackService;
 import lombok.RequiredArgsConstructor;
@@ -12,11 +13,14 @@ public class SlackController {
 
     private final SlackService slackService;
 
-    // // 슬랙 채널 정보 조회
-    // @GetMapping("/slack/channel/{userId}/{noticeType}")
-    // public ApiResponse<RespAuctionDto[]> searchAuction(@PathVariable("itemName") String itemName) throws Exception {
-    //     return neopleApiService.searchAuction(itemName);
-    // }
+    // 슬랙 채널 정보 조회
+    @GetMapping("/slack/channel")
+    public ApiResponse<RespSlackDto> getSlackChannel(
+            @RequestParam("userId")     String  userId,
+            @RequestParam("noticeType") Integer noticeType) {
+
+        return slackService.getSlackChannel(userId, noticeType);
+    }
 
     // 슬랙 채널 정보 등록
     @PostMapping("/slack/channel")

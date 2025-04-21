@@ -31,10 +31,10 @@ public class UserSlackNotice {
     @Column(name = "slack_channel_id", nullable = false, length = 255)
     private String slackChannelId;
 
-    @Column(name = "create_date", nullable = false, updatable = false)
+    @Column(name = "create_date", nullable = false, insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createDate;
 
-    @Column(name = "update_date", nullable = false)
+    @Column(name = "update_date", nullable = false, insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updateDate;
 
     public UserSlackNotice(String userId, Byte noticeType, Byte slackBotType, String slackChannelId) {

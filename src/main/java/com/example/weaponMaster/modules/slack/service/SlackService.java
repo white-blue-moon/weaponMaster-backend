@@ -99,7 +99,21 @@ public class SlackService {
         return ApiResponse.success();
     }
 
+    public ApiResponse<RespSlackDto> getSlackChannel(String userId, Integer noticeType) {
+        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(userId, noticeType);
+
+        UserSlackDto    userDto   = convertToDto(userSlack);
+        RespSlackDto    resp      = new RespSlackDto();
+        resp.setUserSlackInfo(userDto);
+
+        return ApiResponse.success(resp);
+    }
+
     private UserSlackDto convertToDto(UserSlackNotice userSlack) {
+        if (userSlack == null) {
+            return null;
+        }
+
         return UserSlackDto.builder()
                 .id(userSlack.getId())
                 .userId(userSlack.getUserId())
