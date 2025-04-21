@@ -1,6 +1,14 @@
 package com.example.weaponMaster.modules.slack.service;
 
+import com.example.weaponMaster.api.slack.dto.ReqSlackDto;
+import com.example.weaponMaster.api.slack.dto.RespSlackDto;
+import com.example.weaponMaster.modules.article.dto.ArticleDto;
+import com.example.weaponMaster.modules.article.entity.Article;
+import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.slack.constant.SlackApi;
+import com.example.weaponMaster.modules.slack.constant.SlackBotType;
+import com.example.weaponMaster.modules.slack.constant.UserSlackType;
+import com.example.weaponMaster.modules.slack.dto.UserSlackDto;
 import com.example.weaponMaster.modules.slack.entity.AdminSlackNotice;
 import com.example.weaponMaster.modules.slack.entity.SlackBotToken;
 import com.example.weaponMaster.modules.slack.entity.UserSlackNotice;
@@ -16,7 +24,7 @@ import org.springframework.web.client.RestClient;
 
 @Service
 @RequiredArgsConstructor
-public class SlackNotifier {
+public class SlackService {
 
     private final UserSlackNoticeRepository  userSlackNoticeRepo;
     private final AdminSlackNoticeRepository adminSlackNoticeRepo;
@@ -74,4 +82,41 @@ public class SlackNotifier {
         }
     }
 
+    public ApiResponse<Void> registerSlackChannel(ReqSlackDto request) {
+        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(request.getUserId(), Integer.valueOf(request.getNoticeType()));
+        if (userSlack != null) {
+            throw new IllegalArgumentException(String.format("[Slack 채널 등록 에러] 이미 등록된 정보가 존재합니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
+        }
+
+        UserSlackNotice newUserSlack = new UserSlackNotice(
+                request.getUserId(),
+                request.getNoticeType(),
+                SlackBotType.NORMAL_BOT,
+                request.getChannelId()
+        );
+
+        userSlackNoticeRepo.save(newUserSlack);
+        return ApiResponse.success();
+    }
+
+    private UserSlackDto convertToDto(UserSlackNotice userSlack) {
+        return UserSlackDto.builder()
+                .id(userSlack.getId())
+                .userId(userSlack.getUserId())
+                .noticeType(userSlack.getNoticeType())
+                .slackChannelId(userSlack.getSlackChannelId())
+                .build();
+    }
+
+    private UserSlackNotice convertToEntity(UserSlackDto dto) {
+        UserSlackNotice userSlack = new UserSlackNotice(
+                dto.getUserId(),
+                dto.getNoticeType(),
+                dto.getSlackBotType(),
+                dto.getSlackChannelId()
+        );
+
+        userSlack.setId(dto.getId());
+        return userSlack;
+    }
 }

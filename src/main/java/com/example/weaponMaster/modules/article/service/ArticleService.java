@@ -11,7 +11,7 @@ import com.example.weaponMaster.modules.article.entity.Article;
 import com.example.weaponMaster.modules.article.repository.ArticleRepository;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.slack.constant.AdminSlackType;
-import com.example.weaponMaster.modules.slack.service.SlackNotifier;
+import com.example.weaponMaster.modules.slack.service.SlackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +23,7 @@ public class ArticleService {
 
     private final ArticleRepository  articleRepository;
     private final UserInfoRepository userInfoRepository;
-    private final SlackNotifier      slackNotifier;
+    private final SlackService slackService;
 
     @Transactional
     public ApiResponse<Void> createArticle(ReqArticlesDto request) {
@@ -39,7 +39,7 @@ public class ArticleService {
         Article userArticle = articleRepository.save(article);
         if(userArticle.getCategoryType() == CategoryType.SERVICE_CENTER) {
             if (userArticle.getArticleType() == ArticleType.SERVICE_CENTER.PRIVATE_CONTACT) {
-                slackNotifier.sendMessageAdmin(AdminSlackType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(userArticle));
+                slackService.sendMessageAdmin(AdminSlackType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(userArticle));
             }
         }
 

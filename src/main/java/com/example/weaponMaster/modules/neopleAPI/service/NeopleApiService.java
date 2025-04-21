@@ -11,7 +11,7 @@ import com.example.weaponMaster.modules.neopleAPI.repository.UserAuctionNoticeRe
 import com.example.weaponMaster.modules.neopleAPI.util.UrlUtil;
 import com.example.weaponMaster.api.neople.dto.RespAuctionDto;
 import com.example.weaponMaster.modules.slack.constant.UserSlackType;
-import com.example.weaponMaster.modules.slack.service.SlackNotifier;
+import com.example.weaponMaster.modules.slack.service.SlackService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class NeopleApiService {
     private final UserAuctionNoticeRepository                    userAuctionNoticeRepo;
     private final TaskScheduler                                  taskScheduler;
     private final ConcurrentHashMap<Integer, ScheduledFuture<?>> auctionMonitorMap = new ConcurrentHashMap<>(); // 추적 중인 경매 판매 알림을 관리하는 맵
-    private final SlackNotifier slackNotifier;
+    private final SlackService slackService;
 
     public ApiResponse<RespAuctionDto[]> searchAuction(String itemName) throws Exception {
         ResponseEntity<String> response = restClient.get()
@@ -111,7 +111,7 @@ public class NeopleApiService {
                 String message = "[판매 기간 만료 알림] \n";
                 message += userNotice.getItemInfo().path("itemName").asText() + " 의 판매 기간이 만료되었습니다. \n";
                 message += "판매 만료 시각 : " + userNotice.getItemInfo().path("expireDate").asText();
-                slackNotifier.sendMessage(userNotice.getUserId(), UserSlackType.AUCTION_NOTICE, message);
+                slackService.sendMessage(userNotice.getUserId(), UserSlackType.AUCTION_NOTICE, message);
 
                 stopMonitoring(userNotice.getId());
                 return;
@@ -148,7 +148,7 @@ public class NeopleApiService {
                                 itemName,
                                 formattedPrice
                         );
-                        slackNotifier.sendMessage(userNotice.getUserId(), UserSlackType.AUCTION_NOTICE, message);
+                        slackService.sendMessage(userNotice.getUserId(), UserSlackType.AUCTION_NOTICE, message);
 
                         stopMonitoring(userNotice.getId());
                         return;
