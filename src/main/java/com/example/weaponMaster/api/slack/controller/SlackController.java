@@ -22,6 +22,12 @@ public class SlackController {
         return slackService.getSlackChannel(userId, noticeType);
     }
 
+    // 슬랙 채널 통신 테스트
+    @PostMapping("/slack/channel/test")
+    public ApiResponse<Void> testSlackChannel(@RequestBody ReqSlackDto request) {
+        return slackService.testSlackChannel(request);
+    }
+
     // 슬랙 채널 정보 등록
     @PostMapping("/slack/channel")
     public ApiResponse<Void> registerSlackChannel(@RequestBody ReqSlackDto request) {
