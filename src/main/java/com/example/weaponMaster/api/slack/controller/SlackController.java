@@ -35,7 +35,10 @@ public class SlackController {
     }
 
     // 슬랙 채널 정보 수정
-    // @PutMapping("/slack/channel")
+    @PutMapping("/slack/channel")
+    public ApiResponse<Void> updateSlackChannel(@RequestBody ReqSlackDto request) {
+        return slackService.updateSlackChannel(request);
+    }
 
     // // 슬랙 채널 정보 삭제
     // @DeleteMapping("/slack/channel")
