@@ -167,6 +167,16 @@ public class SlackService {
         return ApiResponse.success();
     }
 
+    public ApiResponse<Void> deleteSlackChannel(ReqSlackDto request) {
+        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(request.getUserId(), Integer.valueOf(request.getNoticeType()));
+        if (userSlack == null) {
+            throw new IllegalArgumentException(String.format("[Slack 채널 삭제 에러] 유저의 채널 정보를 확인할 수 없습니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
+        }
+
+        userSlackNoticeRepo.delete(userSlack);
+        return ApiResponse.success();
+    }
+
     private UserSlackDto convertToDto(UserSlackNotice userSlack) {
         if (userSlack == null) {
             return null;

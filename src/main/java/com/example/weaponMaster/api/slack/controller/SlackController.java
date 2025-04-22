@@ -40,10 +40,10 @@ public class SlackController {
         return slackService.updateSlackChannel(request);
     }
 
-    // // 슬랙 채널 정보 삭제
-    // @DeleteMapping("/slack/channel")
-    // public ApiResponse<Void> removeAuctionNotice(@RequestBody ReqAuctionDto request) {
-    //     return neopleApiService.removeAuctionNotice(request);
-    // }
+     // 슬랙 채널 정보 삭제
+     @DeleteMapping("/slack/channel")
+     public ApiResponse<Void> deleteSlackChannel(@RequestBody ReqSlackDto request) {
+         return slackService.deleteSlackChannel(request);
+     }
 }
 
