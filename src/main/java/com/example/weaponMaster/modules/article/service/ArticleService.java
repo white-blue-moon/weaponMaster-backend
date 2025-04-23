@@ -10,7 +10,7 @@ import com.example.weaponMaster.modules.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.article.entity.Article;
 import com.example.weaponMaster.modules.article.repository.ArticleRepository;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
-import com.example.weaponMaster.modules.slack.constant.AdminSlackType;
+import com.example.weaponMaster.modules.slack.constant.AdminSlackChannelType;
 import com.example.weaponMaster.modules.slack.service.SlackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class ArticleService {
         Article userArticle = articleRepository.save(article);
         if(userArticle.getCategoryType() == CategoryType.SERVICE_CENTER) {
             if (userArticle.getArticleType() == ArticleType.SERVICE_CENTER.PRIVATE_CONTACT) {
-                slackService.sendMessageAdmin(AdminSlackType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(userArticle));
+                slackService.sendMessageAdmin(AdminSlackChannelType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(userArticle));
             }
         }
 

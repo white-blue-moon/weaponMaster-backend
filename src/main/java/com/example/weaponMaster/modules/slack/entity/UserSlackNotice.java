@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_slack_notice", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "notice_type"})) // TODO uniqueConstraints 를 선언하면 얻는 장점에 대해 알아보기
+@Table(name = "user_slack_notice", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "notice_type"}))
 public class UserSlackNotice {
 
     @Id
@@ -27,6 +27,9 @@ public class UserSlackNotice {
 
     @Column(name = "slack_bot_type", nullable = false)
     private Byte slackBotType;
+
+    @Column(name = "slack_bot_token", nullable = false, length = 255)
+    private String slackBotToken;
 
     @Column(name = "slack_channel_id", nullable = false, length = 255)
     private String slackChannelId;

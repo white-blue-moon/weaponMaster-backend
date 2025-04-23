@@ -2,18 +2,13 @@ package com.example.weaponMaster.modules.slack.service;
 
 import com.example.weaponMaster.api.slack.dto.ReqSlackDto;
 import com.example.weaponMaster.api.slack.dto.RespSlackDto;
-import com.example.weaponMaster.modules.article.dto.ArticleDto;
-import com.example.weaponMaster.modules.article.entity.Article;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.slack.constant.SlackApi;
 import com.example.weaponMaster.modules.slack.constant.SlackBotType;
-import com.example.weaponMaster.modules.slack.constant.UserSlackType;
 import com.example.weaponMaster.modules.slack.dto.UserSlackDto;
 import com.example.weaponMaster.modules.slack.entity.AdminSlackNotice;
-import com.example.weaponMaster.modules.slack.entity.SlackBotToken;
 import com.example.weaponMaster.modules.slack.entity.UserSlackNotice;
 import com.example.weaponMaster.modules.slack.repository.AdminSlackNoticeRepository;
-import com.example.weaponMaster.modules.slack.repository.SlackBotTokenRepository;
 import com.example.weaponMaster.modules.slack.repository.UserSlackNoticeRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

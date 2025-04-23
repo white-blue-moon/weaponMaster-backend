@@ -10,7 +10,7 @@ import com.example.weaponMaster.modules.neopleAPI.entity.UserAuctionNotice;
 import com.example.weaponMaster.modules.neopleAPI.repository.UserAuctionNoticeRepository;
 import com.example.weaponMaster.modules.neopleAPI.util.UrlUtil;
 import com.example.weaponMaster.api.neople.dto.RespAuctionDto;
-import com.example.weaponMaster.modules.slack.constant.UserSlackType;
+import com.example.weaponMaster.modules.slack.constant.UserSlackNoticeType;
 import com.example.weaponMaster.modules.slack.service.SlackService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -111,7 +111,7 @@ public class NeopleApiService {
                 String message = "[판매 기간 만료 알림] \n";
                 message += userNotice.getItemInfo().path("itemName").asText() + " 의 판매 기간이 만료되었습니다. \n";
                 message += "판매 만료 시각 : " + userNotice.getItemInfo().path("expireDate").asText();
-                slackService.sendMessage(userNotice.getUserId(), UserSlackType.AUCTION_NOTICE, message);
+                slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.AUCTION_NOTICE, message);
 
                 stopMonitoring(userNotice.getId());
                 return;
@@ -148,7 +148,7 @@ public class NeopleApiService {
                                 itemName,
                                 formattedPrice
                         );
-                        slackService.sendMessage(userNotice.getUserId(), UserSlackType.AUCTION_NOTICE, message);
+                        slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.AUCTION_NOTICE, message);
 
                         stopMonitoring(userNotice.getId());
                         return;
