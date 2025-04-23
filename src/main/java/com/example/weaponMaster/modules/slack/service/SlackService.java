@@ -20,9 +20,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -35,9 +39,11 @@ public class SlackService {
     private final RestClient                 restClient = RestClient.create();
 
     public ApiResponse<RespSlackDto> getSlackChannel(String userId, Integer noticeType) {
+        // 1. 슬랙봇 정보 확인
         SlackBot slackBot      = slackBotRepo.findByType(SlackBotType.NORMAL_BOT);
         String   botInstallUrl = getBotInstallUrl(slackBot, userId);
 
+        // 2. 유저 슬랙 알림 정보 확인
         UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(userId, noticeType);
         UserSlackDto    userDto   = convertToDto(userSlack);
 
@@ -64,10 +70,11 @@ public class SlackService {
     }
 
     @SneakyThrows
+    @Transactional
     public ApiResponse<Void> handleSlackOauthCallback(String code, String state) {
         // 1. 슬랙 봇 정보 조회
-        String     userId = state;
-        SlackBot slackBot = slackBotRepo.findByType(SlackBotType.NORMAL_BOT);
+        String     userId   = state;
+        SlackBot   slackBot = slackBotRepo.findByType(SlackBotType.NORMAL_BOT);
 
         // 2. request body 세팅
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
@@ -76,7 +83,7 @@ public class SlackService {
         formData.add("client_secret", slackBot.getClientSecret());
         formData.add("redirect_uri", slackBot.getRedirectUri());
 
-        // 3. API 요청
+        // 3. OAuth 토큰 요청
         ResponseEntity<String> response = restClient.post()
                 .uri(SlackApi.OAUTH_URL)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -91,18 +98,44 @@ public class SlackService {
             throw new RuntimeException(String.format("[Slack Bot 설치 에러] userId: %s, error: %s", userId, error));
         }
 
-        // 4. DB 저장
+        // 4. 봇 토큰 및 사용자 슬랙 ID 확인
         String accessToken = jsonNode.path("access_token").asText();
+        String slackUserId = jsonNode.path("authed_user").path("id").asText();
+
+        // 5. DM 채널 정보 확인
+        Map<String, String> dmFormData = new HashMap<>();
+        dmFormData.put("users", slackUserId);
+
+        ResponseEntity<String> dmResponse = restClient.post()
+                .uri(SlackApi.DM_OPEN_URL)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(dmFormData)
+                .retrieve()
+                .toEntity(String.class);
+
+        JsonNode dmNode = mapper.readTree(dmResponse.getBody());
+        boolean  dmOk   = dmNode.path("ok").asBoolean();
+        if (!dmOk) {
+            String error = dmNode.path("error").asText();
+            throw new RuntimeException(String.format("[Slack DM 채널 오픈 실패] userId: %s, error: %s", userId, error));
+        }
+
+        String channelId = dmNode.path("channel").path("id").asText();
+
+        // 6. DB 저장
         UserSlackNotice userSlack = new UserSlackNotice(
                 userId,
                 UserSlackNoticeType.AUCTION_NOTICE,
                 SlackBotType.NORMAL_BOT,
-                accessToken
+                accessToken,
+                channelId
         );
         userSlackNoticeRepo.save(userSlack);
 
         return ApiResponse.success();
     }
+
 
 //    @SneakyThrows
 //    public ApiResponse<Void> testSlackChannel(ReqSlackDto request) {
@@ -204,22 +237,22 @@ public class SlackService {
 
 
 
-    public ApiResponse<Void> registerSlackChannel(ReqSlackDto request) {
-        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(request.getUserId(), Integer.valueOf(request.getNoticeType()));
-        if (userSlack != null) {
-            throw new IllegalArgumentException(String.format("[Slack 채널 등록 에러] 이미 등록된 정보가 존재합니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
-        }
-
-        UserSlackNotice newUserSlack = new UserSlackNotice(
-                request.getUserId(),
-                request.getNoticeType(),
-                SlackBotType.NORMAL_BOT,
-                request.getChannelId()
-        );
-
-        userSlackNoticeRepo.save(newUserSlack);
-        return ApiResponse.success();
-    }
+//    public ApiResponse<Void> registerSlackChannel(ReqSlackDto request) {
+//        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(request.getUserId(), Integer.valueOf(request.getNoticeType()));
+//        if (userSlack != null) {
+//            throw new IllegalArgumentException(String.format("[Slack 채널 등록 에러] 이미 등록된 정보가 존재합니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
+//        }
+//
+//        UserSlackNotice newUserSlack = new UserSlackNotice(
+//                request.getUserId(),
+//                request.getNoticeType(),
+//                SlackBotType.NORMAL_BOT,
+//                request.getChannelId()
+//        );
+//
+//        userSlackNoticeRepo.save(newUserSlack);
+//        return ApiResponse.success();
+//    }
 
     public ApiResponse<Void> updateSlackChannel(ReqSlackDto request) {
         UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(request.getUserId(), Integer.valueOf(request.getNoticeType()));
@@ -253,17 +286,5 @@ public class SlackService {
                 .noticeType(userSlack.getNoticeType())
                 .slackChannelId(userSlack.getSlackChannelId())
                 .build();
-    }
-
-    private UserSlackNotice convertToEntity(UserSlackDto dto) {
-        UserSlackNotice userSlack = new UserSlackNotice(
-                dto.getUserId(),
-                dto.getNoticeType(),
-                dto.getSlackBotType(),
-                dto.getSlackChannelId()
-        );
-
-        userSlack.setId(dto.getId());
-        return userSlack;
     }
 }
