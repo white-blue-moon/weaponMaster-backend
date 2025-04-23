@@ -39,7 +39,7 @@ public class ArticleService {
         Article userArticle = articleRepository.save(article);
         if(userArticle.getCategoryType() == CategoryType.SERVICE_CENTER) {
             if (userArticle.getArticleType() == ArticleType.SERVICE_CENTER.PRIVATE_CONTACT) {
-                slackService.sendMessageAdmin(AdminSlackChannelType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(userArticle));
+                // slackService.sendMessageAdmin(AdminSlackChannelType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(userArticle));
             }
         }
 
