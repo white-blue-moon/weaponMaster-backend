@@ -16,14 +16,25 @@ public class SlackController {
 
     private final SlackService slackService;
 
-    // // 슬랙 채널 정보 조회
-    // @GetMapping("/slack/channel")
-    // public ApiResponse<RespSlackDto> getSlackChannel(
-    //         @RequestParam("userId")     String  userId,
-    //         @RequestParam("noticeType") Integer noticeType) {
+     // 슬랙 채널 정보 조회
+     @GetMapping("/slack/channel")
+     public ApiResponse<RespSlackDto> getSlackChannel(
+             @RequestParam("userId")     String  userId,
+             @RequestParam("noticeType") Integer noticeType) {
 
-    //     return slackService.getSlackChannel(userId, noticeType);
-    // }
+         return slackService.getSlackChannel(userId, noticeType);
+     }
+
+    // 슬랙봇 설치 콜백
+    @GetMapping("/slack/oauth/callback")
+    public ApiResponse<Void> handleSlackOauthCallback(
+            @RequestParam("code")  String code,
+            @RequestParam("state") String state) {
+
+        return slackService.handleSlackOauthCallback(code, state);
+    }
+
+
 
     // // 슬랙 채널 정보 등록
     // @PostMapping("/slack/channel")
@@ -49,14 +60,7 @@ public class SlackController {
     //     return slackService.deleteSlackChannel(request);
     // }
 
-    // 슬랙봇 설치 콜백
-    @GetMapping("/slack/oauth/callback")
-    public ApiResponse<Void> handleSlackOauthCallback(
-            @RequestParam("code")  String code,
-            @RequestParam("state") String state) {
 
-        return ApiResponse.success();
-    }
 
     // // 슬랙봇 구독 메시지 확인 (Request URL 최초 1회 등록 및 확인용)
     // @PostMapping("/slack/events")

@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface SlackBotRepository extends JpaRepository<SlackBot, Integer> {
 
     @Query(value = "SELECT * FROM slack_bot WHERE type = :botType", nativeQuery = true)
-    SlackBot findByType(Integer botType);
+    SlackBot findByType(Byte botType);
 }

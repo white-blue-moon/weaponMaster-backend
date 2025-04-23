@@ -40,10 +40,11 @@ public class UserSlackNotice {
     @Column(name = "update_date", nullable = false, insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updateDate;
 
-    public UserSlackNotice(String userId, Byte noticeType, Byte slackBotType, String slackChannelId) {
+    public UserSlackNotice(String userId, Byte noticeType, Byte slackBotType, String slackBotToken) {
         this.userId         = userId;
         this.noticeType     = noticeType;
         this.slackBotType   = slackBotType;
-        this.slackChannelId = slackChannelId;
+        this.slackBotToken  = slackBotToken;
+        this.slackChannelId = "NO CHANNEL LINKED YET";
     }
 }
