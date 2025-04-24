@@ -108,10 +108,18 @@ public class NeopleApiService {
                 userNotice.setAuctionState(AuctionState.EXPIRED);
                 userAuctionNoticeRepo.save(userNotice);
 
-                String message = "[판매 기간 만료 알림] \n";
-                message += userNotice.getItemInfo().path("itemName").asText() + " 의 판매 기간이 만료되었습니다. \n";
-                message += "판매 만료 시각 : " + userNotice.getItemInfo().path("expireDate").asText();
-                // slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.AUCTION_NOTICE, message);
+                String itemName   = userNotice.getItemInfo().path("itemName").asText();
+                String expireDate = userNotice.getItemInfo().path("expireDate").asText();
+                String message = String.format(
+                        "`[판매 기간 만료 알림]`\n" +
+                                "```\n" +
+                                "아이템명: %s\n" +
+                                "만료시각: %s\n" +
+                                "```",
+                        itemName,
+                        expireDate
+                );
+                slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.AUCTION_NOTICE, message);
 
                 stopMonitoring(userNotice.getId());
                 return;
@@ -148,7 +156,7 @@ public class NeopleApiService {
                                 itemName,
                                 formattedPrice
                         );
-                        // slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.AUCTION_NOTICE, message);
+                        slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.AUCTION_NOTICE, message);
 
                         stopMonitoring(userNotice.getId());
                         return;
