@@ -1,6 +1,5 @@
 package com.example.weaponMaster.modules.slack.service;
 
-import com.example.weaponMaster.api.slack.dto.ReqSlackDto;
 import com.example.weaponMaster.api.slack.dto.RespSlackDto;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.slack.constant.SlackApi;
@@ -23,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestClient;
 
 import java.util.HashMap;
@@ -38,7 +39,7 @@ public class SlackService {
     private final ObjectMapper               mapper;
     private final RestClient                 restClient = RestClient.create();
 
-    public ApiResponse<RespSlackDto> getSlackChannel(String userId, Byte noticeType) {
+    public ApiResponse<RespSlackDto> getSlackIntegration(String userId, Byte noticeType) {
         // 1. 슬랙봇 정보 확인
         SlackBot slackBot      = slackBotRepo.findByType(SlackBotType.NORMAL_BOT);
         String   botInstallUrl = getBotInstallUrl(slackBot, userId);
@@ -139,15 +140,12 @@ public class SlackService {
         );
         UserSlackNotice savedUserSlack = userSlackNoticeRepo.save(userSlack);
 
-        // 객체 -> JSON 문자열
-        String          slackInfoJson  = mapper.writeValueAsString(convertToDto(savedUserSlack));
+        // 7. 사용자에게 등록 완료 Slack 알림 전송
+        testSlackIntegration(savedUserSlack.getUserId(), savedUserSlack.getNoticeType());
 
-        // HTML 내 문자열 이스케이프 (큰 따옴표, 줄바꿈 등)
-        slackInfoJson = slackInfoJson.replace("\\", "\\\\").replace("\"", "\\\"");
-
-        // 사용자에게 등록 완료 Slack 알림 전송
-        ReqSlackDto testRequest = new ReqSlackDto(savedUserSlack.getUserId(), savedUserSlack.getNoticeType(), savedUserSlack.getSlackChannelId());
-        testSlackChannel(testRequest);
+        // 8. 프론트로 보낼 콜백 정보 할당
+        String slackInfoJson  = mapper.writeValueAsString(convertToDto(savedUserSlack));
+        slackInfoJson         = slackInfoJson.replace("\\", "\\\\").replace("\"", "\\\""); // HTML 내 문자열 이스케이프 (큰 따옴표, 줄바꿈 등)
 
         String html = """
             <html><body>
@@ -168,8 +166,14 @@ public class SlackService {
     }
 
     @SneakyThrows
-    public ApiResponse<Void> testSlackChannel(ReqSlackDto request) {
-        // 1. 테스트 메시지 작성
+    public ApiResponse<Void> testSlackIntegration(String userId, Byte noticeType) {
+        // 1. 유저 연동 정보 확인
+        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(userId, noticeType);
+        if (userSlack == null) {
+            throw new IllegalArgumentException(String.format("[Slack 통신 테스트 에러] 슬랙 토큰 정보를 확인할 수 없습니다. userId: %s, noticeType: %d", userId, noticeType));
+        }
+
+        // 2. 테스트 메시지 작성
         String message = String.format(
                 "`[Slack 연동 확인 알림]`\n" +
                         "```\n" +
@@ -177,16 +181,10 @@ public class SlackService {
                         "이 메시지는 Slack 연동 확인을 위해 발송되었습니다. \n" +
                         "이용해 주셔서 감사드립니다. \n" +
                         "```",
-                request.getUserId()
+                userId
         );
 
-        // 2. 슬랙 메시지 전송 테스트 진행
-        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(request.getUserId(), UserSlackNoticeType.AUCTION_NOTICE);
-        if (userSlack == null) {
-            throw new IllegalArgumentException(String.format("[Slack 통신 테스트 에러] 슬랙 토큰 정보를 확인할 수 없습니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
-        }
-
-        String payload = String.format("{ \"channel\": \"%s\", \"text\": \"%s\" }", request.getChannelId(), message);
+        String payload = String.format("{ \"channel\": \"%s\", \"text\": \"%s\" }", userSlack.getSlackChannelId(), message);
         ResponseEntity<String> response = restClient.post()
                 .uri(SlackApi.SEND_MESSAGE_URL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSlack.getSlackBotToken())
@@ -197,7 +195,7 @@ public class SlackService {
 
         // 3. 통신 상태 값 확인
         if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException(String.format("[Slack 에러] slack API 통신에 실패하였습니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
+            throw new RuntimeException(String.format("[Slack 에러] slack API 통신에 실패하였습니다. userId: %s, noticeType: %d", userId, noticeType));
         }
 
         // 4. 메시지 전송 테스트에 실패했을 때 실패 반환
@@ -208,6 +206,16 @@ public class SlackService {
             return ApiResponse.error(errorMessage);
         }
 
+        return ApiResponse.success();
+    }
+
+    public ApiResponse<Void> deleteSlackIntegration(String userId, Byte noticeType) {
+        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(userId, noticeType);
+        if (userSlack == null) {
+            throw new IllegalArgumentException(String.format("[Slack 채널 삭제 에러] 유저의 채널 정보를 확인할 수 없습니다. userId: %s, noticeType: %d", userId, noticeType));
+        }
+
+        userSlackNoticeRepo.delete(userSlack);
         return ApiResponse.success();
     }
 
@@ -261,39 +269,6 @@ public class SlackService {
 //            throw new RuntimeException(String.format("[Admin Slack 에러] slack API 통신에 실패하였습니다 noticeType: %d", noticeType));
 //        }
 //    }
-
-
-
-
-
-
-
-//    public ApiResponse<Void> registerSlackChannel(ReqSlackDto request) {
-//        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(request.getUserId(), Integer.valueOf(request.getNoticeType()));
-//        if (userSlack != null) {
-//            throw new IllegalArgumentException(String.format("[Slack 채널 등록 에러] 이미 등록된 정보가 존재합니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
-//        }
-//
-//        UserSlackNotice newUserSlack = new UserSlackNotice(
-//                request.getUserId(),
-//                request.getNoticeType(),
-//                SlackBotType.NORMAL_BOT,
-//                request.getChannelId()
-//        );
-//
-//        userSlackNoticeRepo.save(newUserSlack);
-//        return ApiResponse.success();
-//    }
-
-    public ApiResponse<Void> deleteSlackChannel(ReqSlackDto request) {
-        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(request.getUserId(), request.getNoticeType());
-        if (userSlack == null) {
-            throw new IllegalArgumentException(String.format("[Slack 채널 삭제 에러] 유저의 채널 정보를 확인할 수 없습니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
-        }
-
-        userSlackNoticeRepo.delete(userSlack);
-        return ApiResponse.success();
-    }
 
     private UserSlackDto convertToDto(UserSlackNotice userSlack) {
         if (userSlack == null) {
