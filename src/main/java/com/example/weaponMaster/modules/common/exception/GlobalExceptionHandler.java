@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<String>> handleGeneralException(Exception e) {
         System.err.println(e.getMessage());
-        return ResponseEntity.internalServerError().body(ApiResponse.error("An unexpected error occurred"));
+        return ResponseEntity.internalServerError().body(ApiResponse.error(String.format("[UNEXPECTED ERROR] %s", e.getMessage())));
     }
 }
 

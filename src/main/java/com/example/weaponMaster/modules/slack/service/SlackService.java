@@ -20,10 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestClient;
 
 import java.util.HashMap;
@@ -48,9 +44,9 @@ public class SlackService {
         }
 
         // 2. payload 준비
-        MultiValueMap<String, String> payload = new LinkedMultiValueMap<>();
-        payload.add("channel", userSlack.getSlackChannelId());
-        payload.add("text", message);
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("channel", userSlack.getSlackChannelId());
+        payload.put("text", message);
 
         // 3. Slack 전송
         ResponseEntity<String> response = restClient.post()
@@ -120,17 +116,17 @@ public class SlackService {
         SlackBot   slackBot = slackBotRepo.findByType(SlackBotType.NORMAL_BOT);
 
         // 2. request body 세팅
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("code", code);
-        formData.add("client_id", slackBot.getClientId());
-        formData.add("client_secret", slackBot.getClientSecret());
-        formData.add("redirect_uri", slackBot.getRedirectUri());
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("code", code);
+        requestBody.put("client_id", slackBot.getClientId());
+        requestBody.put("client_secret", slackBot.getClientSecret());
+        requestBody.put("redirect_uri", slackBot.getRedirectUri());
 
         // 3. OAuth 토큰 요청
         ResponseEntity<String> response = restClient.post()
                 .uri(SlackApi.OAUTH_URL)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                .body(formData)
+                .body(requestBody)
                 .retrieve()
                 .toEntity(String.class);
 
