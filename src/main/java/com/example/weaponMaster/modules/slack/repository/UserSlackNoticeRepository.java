@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface UserSlackNoticeRepository extends JpaRepository<UserSlackNotice, Integer> {
 
     @Query(value = "SELECT * FROM user_slack_notice WHERE user_id = :userId AND notice_type = :noticeType", nativeQuery = true)
-    UserSlackNotice findByUserIdAndType(String userId, Integer noticeType);
+    UserSlackNotice findByUserIdAndType(String userId, Byte noticeType);
 }

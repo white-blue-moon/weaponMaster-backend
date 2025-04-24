@@ -38,7 +38,7 @@ public class SlackService {
     private final ObjectMapper               mapper;
     private final RestClient                 restClient = RestClient.create();
 
-    public ApiResponse<RespSlackDto> getSlackChannel(String userId, Integer noticeType) {
+    public ApiResponse<RespSlackDto> getSlackChannel(String userId, Byte noticeType) {
         // 1. 슬랙봇 정보 확인
         SlackBot slackBot      = slackBotRepo.findByType(SlackBotType.NORMAL_BOT);
         String   botInstallUrl = getBotInstallUrl(slackBot, userId);
@@ -71,9 +71,15 @@ public class SlackService {
 
     @SneakyThrows
     @Transactional
-    public ApiResponse<Void> handleSlackOauthCallback(String code, String state) {
+    public ResponseEntity<String> handleSlackOauthCallback(String code, String state) {
+        // 이미 등록되어 있는 정보가 있는지 확인
+        String          userId        = state;
+        UserSlackNotice findUserSlack = userSlackNoticeRepo.findByUserIdAndType(userId, UserSlackNoticeType.AUCTION_NOTICE);
+        if (findUserSlack != null) {
+            throw new IllegalArgumentException(String.format("[Slack Bot 설치 에러] 이미 등록된 정보가 존재합니다 userId: %s", userId));
+        }
+
         // 1. 슬랙 봇 정보 조회
-        String     userId   = state;
         SlackBot   slackBot = slackBotRepo.findByType(SlackBotType.NORMAL_BOT);
 
         // 2. request body 세팅
@@ -131,54 +137,79 @@ public class SlackService {
                 accessToken,
                 channelId
         );
-        userSlackNoticeRepo.save(userSlack);
+        UserSlackNotice savedUserSlack = userSlackNoticeRepo.save(userSlack);
+
+        // 객체 -> JSON 문자열
+        String          slackInfoJson  = mapper.writeValueAsString(convertToDto(savedUserSlack));
+
+        // HTML 내 문자열 이스케이프 (큰 따옴표, 줄바꿈 등)
+        slackInfoJson = slackInfoJson.replace("\\", "\\\\").replace("\"", "\\\"");
+
+        // 사용자에게 등록 완료 Slack 알림 전송
+        ReqSlackDto testRequest = new ReqSlackDto(savedUserSlack.getUserId(), savedUserSlack.getNoticeType(), savedUserSlack.getSlackChannelId());
+        testSlackChannel(testRequest);
+
+        String html = """
+            <html><body>
+            <script>
+                if (window.opener) {
+                    window.opener.postMessage({
+                        success:   true,
+                        slackInfo: JSON.parse("%s"),
+                    }, "*");
+                }
+                window.close();
+            </script>
+            연동이 완료되었습니다. 이 창은 곧 자동으로 닫힐 예정입니다.
+            </body></html>
+        """.formatted(slackInfoJson);
+
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(html);
+    }
+
+    @SneakyThrows
+    public ApiResponse<Void> testSlackChannel(ReqSlackDto request) {
+        // 1. 테스트 메시지 작성
+        String message = String.format(
+                "`[Slack 연동 확인 알림]`\n" +
+                        "```\n" +
+                        "%s 님 안녕하세요.\n" +
+                        "이 메시지는 Slack 연동 확인을 위해 발송되었습니다. \n" +
+                        "이용해 주셔서 감사드립니다. \n" +
+                        "```",
+                request.getUserId()
+        );
+
+        // 2. 슬랙 메시지 전송 테스트 진행
+        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(request.getUserId(), UserSlackNoticeType.AUCTION_NOTICE);
+        if (userSlack == null) {
+            throw new IllegalArgumentException(String.format("[Slack 통신 테스트 에러] 슬랙 토큰 정보를 확인할 수 없습니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
+        }
+
+        String payload = String.format("{ \"channel\": \"%s\", \"text\": \"%s\" }", request.getChannelId(), message);
+        ResponseEntity<String> response = restClient.post()
+                .uri(SlackApi.SEND_MESSAGE_URL)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSlack.getSlackBotToken())
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(payload)
+                .retrieve()
+                .toEntity(String.class);
+
+        // 3. 통신 상태 값 확인
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException(String.format("[Slack 에러] slack API 통신에 실패하였습니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
+        }
+
+        // 4. 메시지 전송 테스트에 실패했을 때 실패 반환
+        JsonNode jsonNode = mapper.readTree(response.getBody());
+        boolean  isTestOk = jsonNode.path("ok").asBoolean();
+        if (!isTestOk) {
+            String errorMessage = jsonNode.path("error").asText("테스트 통신 실패"); // error 키 값이 없으면 기본 문구 전달
+            return ApiResponse.error(errorMessage);
+        }
 
         return ApiResponse.success();
     }
-
-
-//    @SneakyThrows
-//    public ApiResponse<Void> testSlackChannel(ReqSlackDto request) {
-//        // 1. 테스트 메시지 작성
-//        String message = String.format(
-//                "`[Slack 통신 테스트 알림]`\n" +
-//                        "```\n" +
-//                        "수신자: %s 님 \n" +
-//                        "이 메시지는 시스템 알림 테스트를 위해 발송되었습니다. \n" +
-//                        "```",
-//                request.getUserId()
-//        );
-//
-//        // 2. 슬랙 메시지 전송 테스트 진행
-//        SlackBotToken slackToken = slackBotTokenRepo.findByType(Integer.valueOf(SlackBotType.NORMAL_BOT));
-//        if (slackToken == null) {
-//            throw new IllegalArgumentException(String.format("[Slack 통신 테스트 에러] 슬랙 토큰 정보를 확인할 수 없습니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
-//        }
-//
-//        String payload = String.format("{ \"channel\": \"%s\", \"text\": \"%s\" }", request.getChannelId(), message);
-//        ResponseEntity<String> response = restClient.post()
-//                .uri(SlackApi.SEND_MESSAGE_URL)
-//                .header(HttpHeaders.AUTHORIZATION, "Bearer " + slackToken.getToken())
-//                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-//                .body(payload)
-//                .retrieve()
-//                .toEntity(String.class);
-//
-//        // 3. 통신 상태 값 확인
-//        if (!response.getStatusCode().is2xxSuccessful()) {
-//            throw new RuntimeException(String.format("[Slack 에러] slack API 통신에 실패하였습니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
-//        }
-//
-//        // 4. 메시지 전송 테스트에 실패했을 때 실패 반환
-//        JsonNode jsonNode = mapper.readTree(response.getBody());
-//        boolean  isTestOk = jsonNode.path("ok").asBoolean();
-//        if (!isTestOk) {
-//            String errorMessage = jsonNode.path("error").asText("테스트 통신 실패"); // error 키 값이 없으면 기본 문구 전달
-//            return ApiResponse.error(errorMessage);
-//        }
-//
-//        return ApiResponse.success();
-//    }
 
 //    public void sendMessage(String userId, int noticeType, String message) {
 //        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(userId, noticeType);
@@ -255,7 +286,7 @@ public class SlackService {
 //    }
 
     public ApiResponse<Void> deleteSlackChannel(ReqSlackDto request) {
-        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(request.getUserId(), Integer.valueOf(request.getNoticeType()));
+        UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(request.getUserId(), request.getNoticeType());
         if (userSlack == null) {
             throw new IllegalArgumentException(String.format("[Slack 채널 삭제 에러] 유저의 채널 정보를 확인할 수 없습니다. userId: %s, noticeType: %d", request.getUserId(), request.getNoticeType()));
         }
@@ -274,6 +305,7 @@ public class SlackService {
                 .userId(userSlack.getUserId())
                 .noticeType(userSlack.getNoticeType())
                 .slackChannelId(userSlack.getSlackChannelId())
+                .createDate(userSlack.getCreateDate())
                 .build();
     }
 }
