@@ -45,7 +45,7 @@ CREATE TABLE ref_publisher_logo (
 -------------------------------------------------------------------------
 ----------------------------[ 사용자 별 참조 값 ]----------------------------
 
--- TODO id 컬럼 추가된 부분 백엔드 반영 필요
+-- TODO id 컬럼 추가된 부분 백엔드 반영 필요, 컬럼 수정 내역 반영 필요
 -- 유저 회원 정보 관리 테이블
 DROP TABLE IF EXISTS user_info;
 CREATE TABLE user_info (
@@ -60,7 +60,23 @@ CREATE TABLE user_info (
     UNIQUE (user_id)
 ) CHARSET=utf8 COMMENT='유저 회원 정보 관리 테이블';
 
--- TODO 유저 로그 테이블 만들기
+-- TODO 추후 로그 확인용 페이지 만들기
+-- 유저 로그 관리 테이블
+DROP TABLE IF EXISTS user_log;
+CREATE TABLE user_log (
+    id              INT AUTO_INCREMENT PRIMARY KEY COMMENT 'row 고유 ID',
+    user_id         VARCHAR(255)    NOT NULL COMMENT '유저 ID',
+    is_admin_mode   TINYINT         NOT NULL DEFAULT 0 COMMENT '로그인 모드 (0: 일반모드, 1: 관리자모드)',
+    contents_type   SMALLINT        NOT NULL COMMENT '컨텐츠 타입 (ex. 0: 웨펀마스터 시스템 자체, 1: 게시물)',
+    act_type   		SMALLINT        NOT NULL COMMENT '행동 타입 (ex. 1: 로그인, 2: 로그아웃, 3: 읽기)',
+    ref_value       SMALLINT        NOT NULL DEFAULT 0 COMMENT '참고 데이터',
+    extra_ref_value SMALLINT        NOT NULL DEFAULT 0 COMMENT '추가 참고 데이터',
+    create_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '로그 생성 날짜',
+    update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '로그 수정 날짜'
+) CHARSET=utf8mb4 COMMENT='유저 로그 관리 테이블';
+-- 유저 로그 관리 테이블 인덱스 추가
+CREATE INDEX idx_user_log_user_id        ON user_log(user_id);
+CREATE INDEX idx_user_log_is_admin_mode  ON user_log(is_admin_mode);
 
 -- 유저 게시물 관리 테이블
 DROP TABLE IF EXISTS user_article;
