@@ -29,11 +29,11 @@ public class UserLog {
     @Column(name = "act_type", nullable = false)
     private Short actType;
 
-    @Column(name = "ref_value", nullable = false, columnDefinition = "INT DEFAULT 0")
-    private Short refValue;
+    @Column(name = "ref_value", columnDefinition = "SMALLINT DEFAULT 0")
+    private Short refValue = 0;
 
-    @Column(name = "extra_ref_value", nullable = false, columnDefinition = "INT DEFAULT 0")
-    private Short extraRefValue;
+    @Column(name = "extra_ref_value", columnDefinition = "SMALLINT DEFAULT 0")
+    private Short extraRefValue = 0;
 
     @Column(name = "create_date", nullable = false, insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createDate;

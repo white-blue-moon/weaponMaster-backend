@@ -69,8 +69,8 @@ CREATE TABLE user_log (
     is_admin_mode   TINYINT         NOT NULL DEFAULT 0 COMMENT '로그인 모드 (0: 일반모드, 1: 관리자모드)',
     contents_type   SMALLINT        NOT NULL COMMENT '컨텐츠 타입 (ex. 0: 웨펀마스터 시스템 자체, 1: 게시물)',
     act_type   		SMALLINT        NOT NULL COMMENT '행동 타입 (ex. 1: 로그인, 2: 로그아웃, 3: 읽기)',
-    ref_value       SMALLINT        NOT NULL DEFAULT 0 COMMENT '참고 데이터',
-    extra_ref_value SMALLINT        NOT NULL DEFAULT 0 COMMENT '추가 참고 데이터',
+    ref_value       SMALLINT        DEFAULT 0 COMMENT '참고 데이터',
+    extra_ref_value SMALLINT        DEFAULT 0 COMMENT '추가 참고 데이터',
     create_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '로그 생성 날짜',
     update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '로그 수정 날짜'
 ) CHARSET=utf8mb4 COMMENT='유저 로그 관리 테이블';
