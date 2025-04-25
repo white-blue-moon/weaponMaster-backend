@@ -14,14 +14,14 @@ public class AccountController {
     private final UserInfoService userInfoService;
 
     // 아이디 중복체크
-    @GetMapping("/account/{userId}/exists")
+    @GetMapping("/accounts/{userId}/exists")
     public ApiResponse<Boolean> checkUserIdExist(@PathVariable("userId") String userId) {
         boolean isUserIdAvailable = userInfoService.isUserIdAvailable(userId);
         return ApiResponse.success(isUserIdAvailable);
     }
 
     // 회원가입
-    @PostMapping("/account/join")
+    @PostMapping("/accounts")
     public ApiResponse<Void> join(@RequestBody ReqJoinDto request) {
         return userInfoService.createUserInfo(request);
     }
