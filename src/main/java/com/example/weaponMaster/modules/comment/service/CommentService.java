@@ -1,9 +1,12 @@
 package com.example.weaponMaster.modules.comment.service;
 
 import com.example.weaponMaster.api.comments.dto.ReqCommentsDto;
+import com.example.weaponMaster.modules.account.constant.LogActType;
+import com.example.weaponMaster.modules.account.constant.LogContentsType;
 import com.example.weaponMaster.modules.account.constant.UserType;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.service.UserInfoService;
+import com.example.weaponMaster.modules.account.service.UserLogService;
 import com.example.weaponMaster.modules.article.constant.ArticleDetailType;
 import com.example.weaponMaster.modules.article.constant.ArticleType;
 import com.example.weaponMaster.modules.article.constant.CategoryType;
@@ -27,6 +30,7 @@ public class CommentService {
     private final ArticleService    articleService;
     private final UserInfoService   userInfoService;
     private final CommentRepository commentRepository;
+    private final UserLogService    userLogService;
     
     @Transactional
     public ApiResponse<Void> createComment(ReqCommentsDto request) {
@@ -42,11 +46,13 @@ public class CommentService {
             if (isAdminUser(request)) {
                 saveComment(request);
                 updateArticleIfFirstReply(request);
+                userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)request.getReCommentId());
                 return ApiResponse.success();
             }
 
             if (isArticleOwner(request, article)) {
                 saveComment(request);
+                userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)request.getReCommentId());
                 return ApiResponse.success();
             }
 
@@ -56,6 +62,8 @@ public class CommentService {
 
         // 일반 게시글의 경우
         saveComment(request);
+        userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)request.getReCommentId());
+
         return ApiResponse.success();
     }
 
@@ -156,6 +164,8 @@ public class CommentService {
 
         comment.setIsDeleted(true);
         commentRepository.save(comment);
+        userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.DELETE_COMMENT, (short)(int)request.getArticleId(), (short)(int)request.getReCommentId());
+
         return ApiResponse.success();
     }
 

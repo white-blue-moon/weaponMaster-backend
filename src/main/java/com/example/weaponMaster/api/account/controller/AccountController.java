@@ -31,4 +31,6 @@ public class AccountController {
     public ApiResponse<Void> login(@RequestBody ReqLoginDto request) {
         return userInfoService.login(request);
     }
+
+    // TODO 토큰 통신으로 개선할 때 로그아웃 API 생성 필요
 }

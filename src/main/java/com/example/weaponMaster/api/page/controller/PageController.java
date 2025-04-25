@@ -20,6 +20,7 @@ public class PageController {
         return pageService.getPageHome(request);
     }
 
+    // TODO {} 경로 말고 ? 로 받도록 수정 필요
     @GetMapping("/page/inspection/{bannerType}")
     public ApiResponse<RespInspectionDto> getPageInspection(@PathVariable("bannerType") Integer bannerType) {
         return pageService.getPageInspection(bannerType);
