@@ -6,6 +6,7 @@ import com.example.weaponMaster.modules.slack.constant.SlackApi;
 import com.example.weaponMaster.modules.slack.constant.SlackBotType;
 import com.example.weaponMaster.modules.slack.constant.UserSlackNoticeType;
 import com.example.weaponMaster.modules.slack.dto.UserSlackDto;
+import com.example.weaponMaster.modules.slack.entity.AdminSlackNotice;
 import com.example.weaponMaster.modules.slack.entity.SlackBot;
 import com.example.weaponMaster.modules.slack.entity.UserSlackNotice;
 import com.example.weaponMaster.modules.slack.repository.AdminSlackNoticeRepository;
@@ -66,6 +67,42 @@ public class SlackService {
         if (!ok) {
             String error = jsonNode.path("error").asText();
             throw new RuntimeException(String.format("[Slack 전송 에러] userId: %s, error: %s", userId, error));
+        }
+
+        return;
+    }
+
+    @SneakyThrows
+    public void sendMessageAdmin(int channelType, String message) {
+        // 1. Slack 연동 정보 확인
+        AdminSlackNotice adminSlack = adminSlackNoticeRepo.findByType(channelType);
+        if (adminSlack == null) {
+            throw new IllegalArgumentException(String.format("[Admin Slack 전송 에러] 관련 Slack 정보를 DB 에서 확인할 수 없습니다. channelType: %d", channelType));
+        }
+
+        // 2. payload 준비
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("channel", adminSlack.getSlackChannelId());
+        payload.put("text", message);
+
+        // 3. Slack 전송
+        ResponseEntity<String> response = restClient.post()
+                .uri(SlackApi.SEND_MESSAGE_URL)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminSlack.getSlackBotToken())
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(payload)
+                .retrieve()
+                .toEntity(String.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException(String.format("[Admin Slack 전송 에러] slack API 통신에 실패하였습니다. channelType: %d", channelType));
+        }
+
+        JsonNode jsonNode = mapper.readTree(response.getBody());
+        boolean  ok       = jsonNode.path("ok").asBoolean();
+        if (!ok) {
+            String error = jsonNode.path("error").asText();
+            throw new RuntimeException(String.format("[Admin Slack 전송 에러] channelType: %d, error: %s", channelType, error));
         }
 
         return;
@@ -250,31 +287,6 @@ public class SlackService {
         userSlackNoticeRepo.delete(userSlack);
         return ApiResponse.success();
     }
-
-//    public void sendMessageAdmin(int noticeType, String message) {
-//        AdminSlackNotice adminSlack = adminSlackNoticeRepo.findByType(noticeType);
-//        if (adminSlack == null) {
-//            throw new IllegalArgumentException(String.format("[Admin Slack 에러] 관리자 슬랙 알림 정보를 확인할 수 없습니다. noticeType: %d", noticeType));
-//        }
-//
-//        SlackBotToken slackToken = slackBotTokenRepo.findByType(Integer.valueOf(adminSlack.getSlackBotType()));
-//        if (slackToken == null) {
-//            throw new IllegalArgumentException(String.format("[Admin Slack 에러] 슬랙 토큰 정보를 확인할 수 없습니다. 메시지를 보낼 수 없습니다. noticeType: %d", noticeType));
-//        }
-//
-//        String payload = String.format("{ \"channel\": \"%s\", \"text\": \"%s\" }", adminSlack.getSlackChannelId(), message);
-//        ResponseEntity<String> response = restClient.post()
-//                .uri(SlackApi.SEND_MESSAGE_URL)
-//                .header(HttpHeaders.AUTHORIZATION, "Bearer " + slackToken.getToken())
-//                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-//                .body(payload)
-//                .retrieve()
-//                .toEntity(String.class);
-//
-//        if (!response.getStatusCode().is2xxSuccessful()) {
-//            throw new RuntimeException(String.format("[Admin Slack 에러] slack API 통신에 실패하였습니다 noticeType: %d", noticeType));
-//        }
-//    }
 
     private UserSlackDto convertToDto(UserSlackNotice userSlack) {
         if (userSlack == null) {

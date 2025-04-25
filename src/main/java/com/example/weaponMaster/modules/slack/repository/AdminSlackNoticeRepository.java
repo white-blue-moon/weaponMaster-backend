@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AdminSlackNoticeRepository extends JpaRepository<AdminSlackNotice, Integer> {
 
-    @Query(value = "SELECT * FROM admin_slack_notice WHERE notice_type = :noticeType", nativeQuery = true)
-    AdminSlackNotice findByType(Integer noticeType);
+    @Query(value = "SELECT * FROM admin_slack_notice WHERE channel_type = :channelType", nativeQuery = true)
+    AdminSlackNotice findByType(Integer channelType);
 }
