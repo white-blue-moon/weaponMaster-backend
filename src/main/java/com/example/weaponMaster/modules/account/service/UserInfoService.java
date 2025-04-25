@@ -18,33 +18,20 @@ public class UserInfoService {
     private final UserInfoRepository userInfoRepository;
 
     @Transactional
-    public ApiResponse<Void> loginNormal(ReqLoginDto request) {
+    public ApiResponse<Void> login(ReqLoginDto request) {
+        String mode = request.getIsAdminMode() ? "관리자모드" : "일반모드";
+
         UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
         if (userInfo == null) {
-            throw new IllegalArgumentException("userId doesn't exist: " + request.getUserId());
+            throw new IllegalArgumentException(String.format("[%s 로그인 실패] 유저 정보 없음 userId: %s", mode, request.getUserId()));
         }
 
         if (!Objects.equals(userInfo.getUserPw(), request.getUserPw())) {
-            throw new IllegalArgumentException("wrong password: " + request.getUserId());
+            throw new IllegalArgumentException(String.format("[%s 로그인 실패] 비밀번호 불일치 userId: %s", mode, request.getUserId()));
         }
 
-        userInfoRepository.updateLastLoginDate(request.getUserId());
-        return ApiResponse.success();
-    }
-
-    @Transactional
-    public ApiResponse<Void> loginAdmin(ReqLoginDto request) {
-        UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
-        if (userInfo == null) {
-            throw new IllegalArgumentException(String.format("[관리자모드 로그인 실패] 유저 정보 조회 불가 userId: %s", request.getUserId()));
-        }
-
-        if (!Objects.equals(userInfo.getUserPw(), request.getUserPw())) {
-            throw new IllegalArgumentException(String.format("[관리자모드 로그인 실패] 비밀번호 불일치 userId: %s", request.getUserId()));
-        }
-
-        if (userInfo.getUserType() != UserType.ADMIN) {
-            throw new IllegalArgumentException(String.format("[관리자모드 로그인 실패] 관리자 권한이 없으나 관리자모드 로그인 시도 userId: %s", request.getUserId()));
+        if (request.getIsAdminMode() && userInfo.getUserType() != UserType.ADMIN) {
+            throw new IllegalArgumentException(String.format("[%s 로그인 실패] 관리자 권한 없음 userId: %s", mode, request.getUserId()));
         }
 
         userInfoRepository.updateLastLoginDate(request.getUserId());

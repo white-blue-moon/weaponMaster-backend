@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReqLoginDto {
 
-    private final String userId;
-    private final String userPw;
+    private final Boolean isAdminMode;
+    private final String  userId;
+    private final String  userPw;
 }

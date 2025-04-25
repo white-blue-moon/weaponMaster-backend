@@ -14,7 +14,7 @@ public class AccountController {
     private final UserInfoService userInfoService;
 
     // 아이디 중복체크
-    @GetMapping("/account/exist/{userId}")
+    @GetMapping("/account/{userId}/exists")
     public ApiResponse<Boolean> checkUserIdExist(@PathVariable("userId") String userId) {
         boolean isUserIdAvailable = userInfoService.isUserIdAvailable(userId);
         return ApiResponse.success(isUserIdAvailable);
@@ -26,15 +26,9 @@ public class AccountController {
         return userInfoService.createUserInfo(request);
     }
 
-    // 일반모드 로그인
-    @PostMapping("/account/login/normal")
-    public ApiResponse<Void> loginNormal(@RequestBody ReqLoginDto request) {
-        return userInfoService.loginNormal(request);
-    }
-
-    // 관리자모드 로그인
-    @PostMapping("/account/login/admin")
-    public ApiResponse<Void> loginAdmin(@RequestBody ReqLoginDto request) {
-        return userInfoService.loginAdmin(request);
+    // 로그인
+    @PostMapping("/accounts/login")
+    public ApiResponse<Void> login(@RequestBody ReqLoginDto request) {
+        return userInfoService.login(request);
     }
 }
