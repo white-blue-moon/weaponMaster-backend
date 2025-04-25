@@ -2,6 +2,8 @@ package com.example.weaponMaster.modules.account.service;
 
 import com.example.weaponMaster.api.account.dto.ReqJoinDto;
 import com.example.weaponMaster.api.account.dto.ReqLoginDto;
+import com.example.weaponMaster.modules.account.constant.LogActType;
+import com.example.weaponMaster.modules.account.constant.LogContentsType;
 import com.example.weaponMaster.modules.account.constant.UserType;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
@@ -16,6 +18,7 @@ import java.util.Objects;
 public class UserInfoService {
 
     private final UserInfoRepository userInfoRepository;
+    private final UserLogService     userLogService;
 
     @Transactional
     public ApiResponse<Void> login(ReqLoginDto request) {
@@ -35,6 +38,8 @@ public class UserInfoService {
         }
 
         userInfoRepository.updateLastLoginDate(request.getUserId());
+        userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.WEAPON_MASTER, LogActType.LOGIN);
+
         return ApiResponse.success();
     }
 
@@ -45,7 +50,11 @@ public class UserInfoService {
 
     public boolean isUserIdAvailable(String userId) {
         UserInfo userInfo = userInfoRepository.findByUserId(userId);
-        return userInfo == null;
+        if (userInfo == null) {
+            return true;
+        }
+
+        return false;
     }
 
     @Transactional
@@ -62,6 +71,8 @@ public class UserInfoService {
         );
 
         userInfoRepository.save(userInfo);
+        userLogService.saveLog(request.getUserId(), LogContentsType.WEAPON_MASTER, LogActType.JOIN);
+
         return ApiResponse.success();
     }
 

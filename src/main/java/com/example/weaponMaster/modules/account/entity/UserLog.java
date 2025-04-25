@@ -21,7 +21,7 @@ public class UserLog {
     private String userId;
 
     @Column(name = "is_admin_mode", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
-    private Byte isAdminMode;
+    private Boolean isAdminMode;
 
     @Column(name = "contents_type", nullable = false)
     private Short contentsType;
@@ -41,14 +41,20 @@ public class UserLog {
     @Column(name = "update_date", nullable = false, insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updateDate;
 
-    public UserLog(String userId, Byte isAdminMode, Short contentsType, Short actType) {
+    public UserLog(String userId, Short contentsType, Short actType) {
+        this.userId       = userId;
+        this.contentsType = contentsType;
+        this.actType      = actType;
+    }
+
+    public UserLog(String userId, Boolean isAdminMode, Short contentsType, Short actType) {
         this.userId       = userId;
         this.isAdminMode  = isAdminMode;
         this.contentsType = contentsType;
         this.actType      = actType;
     }
 
-    public UserLog(String userId, Byte isAdminMode, Short contentsType, Short actType, Short refValue) {
+    public UserLog(String userId, Boolean isAdminMode, Short contentsType, Short actType, Short refValue) {
         this.userId       = userId;
         this.isAdminMode  = isAdminMode;
         this.contentsType = contentsType;
@@ -56,7 +62,7 @@ public class UserLog {
         this.refValue     = refValue;
     }
 
-    public UserLog(String userId, Byte isAdminMode, Short contentsType, Short actType, Short refValue, Short extraRefValue) {
+    public UserLog(String userId, Boolean isAdminMode, Short contentsType, Short actType, Short refValue, Short extraRefValue) {
         this.userId        = userId;
         this.isAdminMode   = isAdminMode;
         this.contentsType  = contentsType;
