@@ -77,6 +77,7 @@ CREATE TABLE user_log (
 -- 유저 로그 관리 테이블 인덱스 추가
 CREATE INDEX idx_user_log_user_id        ON user_log(user_id);
 CREATE INDEX idx_user_log_is_admin_mode  ON user_log(is_admin_mode);
+CREATE INDEX idx_user_log_create_date    ON user_log(create_date);
 
 -- 유저 게시물 관리 테이블
 DROP TABLE IF EXISTS user_article;

@@ -38,31 +38,31 @@ public class CommentService {
 
         // 공지사항/업데이트 게시글에는 댓글 기재 불가
         if (isNewsAndNotCommentable(article)) {
-            throw new IllegalArgumentException(String.format("[댓글 등록 에러] 공지사항/업데이트 게시글에 댓글 등록 시도 userId: %s", request.getUserId()));
+            throw new IllegalArgumentException(String.format("[댓글 등록 에러] 공지사항/업데이트 게시글에 댓글 등록 시도 userId: %s, articleID: %d, categoryType: %d", request.getUserId(), request.getArticleId(), article.getCategoryType()));
         }
 
         // 1:1 문의 게시글인 경우
         if (isPrivateContact(article)) {
             if (isAdminUser(request)) {
-                saveComment(request);
+                Comment savedComment = saveComment(request);
                 updateArticleIfFirstReply(request);
-                userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)request.getReCommentId());
+                userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)savedComment.getId());
                 return ApiResponse.success();
             }
 
             if (isArticleOwner(request, article)) {
-                saveComment(request);
-                userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)request.getReCommentId());
+                Comment savedComment = saveComment(request);
+                userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)savedComment.getId());
                 return ApiResponse.success();
             }
 
             // 관리자도 아니고 소유자도 아닌 경우
-            throw new IllegalArgumentException(String.format("[1:1문의 댓글 등록 에러] 관리자/소유자가 아니지만 댓글 등록 시도 userId: %s", request.getUserId()));
+            throw new IllegalArgumentException(String.format("[1:1문의 댓글 등록 에러] 관리자/소유자가 아니지만 댓글 등록 시도 userId: %s, articleID: %d, author: %s", request.getUserId(), request.getArticleId(), article.getUserId()));
         }
 
         // 일반 게시글의 경우
-        saveComment(request);
-        userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)request.getReCommentId());
+        Comment savedComment = saveComment(request);
+        userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)savedComment.getId());
 
         return ApiResponse.success();
     }
@@ -106,7 +106,7 @@ public class CommentService {
         return false;
     }
 
-    private void saveComment(ReqCommentsDto request) {
+    private Comment saveComment(ReqCommentsDto request) {
         Comment comment = new Comment(
                 request.getUserId(),
                 request.getArticleId(),
@@ -114,8 +114,9 @@ public class CommentService {
                 request.getContents()
         );
 
-        commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
         updateArticleCommentCount(request.getArticleId());
+        return savedComment;
     }
 
     private void updateArticleIfFirstReply(ReqCommentsDto request) {
@@ -128,6 +129,7 @@ public class CommentService {
         }
     }
 
+    @Transactional
     public ApiResponse<CommentDto[]> getCommentList(Integer articleId) {
         Comment[] comments = commentRepository.findByArticleId(articleId);
         if (comments == null || comments.length == 0) {
@@ -144,27 +146,27 @@ public class CommentService {
     @Transactional
     public ApiResponse<Void> deleteComment(ReqCommentsDto request, Integer id) {
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Comment not found, id: " + id));
+                .orElseThrow(() -> new IllegalArgumentException(String.format("[댓글 삭제 에러] 삭제하려는 댓글 정보를 확인할 수 없습니다. userId: %s, comment ID: %d", request.getUserId(), id)));
 
         // 1. 댓글 소유자가 맞는지 확인
         if (!comment.getUserId().equals(request.getUserId())) {
             UserInfo userInfo = userInfoService.getUserInfoEntity(request.getUserId());
             if (userInfo == null) {
-                throw new IllegalArgumentException("User not found, userId: " + request.getUserId());
+                throw new IllegalArgumentException("[댓글 삭제 에러] User not found, userId: " + request.getUserId());
             }
 
             // 2. 소유자가 다를 경우 관리자 권한 있는지 확인
             if (!request.getIsAdmin()) {
-                throw new IllegalArgumentException(String.format("[댓글 삭제 에러] 관리자모드가 아닌 상태에서 삭제 시도 userId: %s", request.getUserId()));
+                throw new IllegalArgumentException(String.format("[댓글 삭제 에러] 관리자모드가 아닌 상태에서 삭제 시도 userId: %s, comment ID: %d, commentUserId: %s" , request.getUserId(), id, comment.getUserId()));
             }
             if (userInfo.getUserType() != UserType.ADMIN) {
-                throw new IllegalArgumentException("User does not have admin privileges: " + request.getUserId());
+                throw new IllegalArgumentException(String.format("[댓글 삭제 에러] User does not have admin privileges. userId: %s, comment ID: %d", request.getUserId(), id));
             }
         }
 
         comment.setIsDeleted(true);
-        commentRepository.save(comment);
-        userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.DELETE_COMMENT, (short)(int)request.getArticleId(), (short)(int)request.getReCommentId());
+        Comment savedComment = commentRepository.save(comment);
+        userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.DELETE_COMMENT, (short)(int)request.getArticleId(), (short)(int)savedComment.getId());
 
         return ApiResponse.success();
     }
