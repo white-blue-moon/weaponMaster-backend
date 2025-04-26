@@ -5,6 +5,7 @@ import com.example.weaponMaster.modules.account.constant.LogActType;
 import com.example.weaponMaster.modules.account.constant.LogContentsType;
 import com.example.weaponMaster.modules.account.constant.UserType;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
+import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
 import com.example.weaponMaster.modules.account.service.UserInfoService;
 import com.example.weaponMaster.modules.account.service.UserLogService;
 import com.example.weaponMaster.modules.article.constant.ArticleDetailType;
@@ -12,6 +13,7 @@ import com.example.weaponMaster.modules.article.constant.ArticleType;
 import com.example.weaponMaster.modules.article.constant.CategoryType;
 import com.example.weaponMaster.modules.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.article.entity.Article;
+import com.example.weaponMaster.modules.article.repository.ArticleRepository;
 import com.example.weaponMaster.modules.article.service.ArticleService;
 import com.example.weaponMaster.modules.comment.dto.CommentDto;
 import com.example.weaponMaster.modules.comment.entity.Comment;
@@ -32,15 +34,16 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class CommentService {
 
-    private final ArticleService    articleService;
-    private final UserInfoService   userInfoService;
-    private final CommentRepository commentRepository;
-    private final UserLogService    userLogService;
-    private final SlackService      slackService;
-    
+    private final ArticleRepository  articleRepository;
+    private final CommentRepository  commentRepository;
+    private final UserInfoRepository userInfoRepository;
+    private final UserLogService     userLogService;
+    private final SlackService       slackService;
+
     @Transactional
     public ApiResponse<Void> createComment(ReqCommentsDto request) {
-        ArticleDto article = articleService.getArticle(request.getArticleId()).getData();
+        // 게시글 정보 조회
+        Article article = articleRepository.findById(request.getArticleId()).orElse(null);
         if (article == null) {
             throw new IllegalArgumentException(String.format("[댓글 등록 에러] 게시글 정보를 확인할 수 없습니다. userId: %s, articleID: %d", request.getUserId(), request.getArticleId()));
         }
@@ -54,7 +57,7 @@ public class CommentService {
         if (isPrivateContact(article)) {
             if (isAdminUser(request)) {
                 Comment savedComment = saveComment(request);
-                updateArticleIfFirstReply(request);
+                updateArticleIfFirstReply(article);
                 userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)savedComment.getId());
                 return ApiResponse.success();
             }
@@ -77,7 +80,7 @@ public class CommentService {
         return ApiResponse.success();
     }
 
-    private String getNoticeMessage(ArticleDto userArticle, Comment userComment) {
+    private String getNoticeMessage(Article article, Comment userComment) {
         // 1. HTML 태그 제거 및 정리
         String plainText = HtmlUtil.getPlainText(userComment.getContents());
 
@@ -88,7 +91,7 @@ public class CommentService {
         }
 
         // 이모지코드: 💬
-        String link = String.format("%s/service/%d", MyURL.WEAPON_MASTER, userArticle.getId());
+        String link = String.format("%s/service/%d", MyURL.WEAPON_MASTER, article.getId());
         String message = String.format(
                 "`\uD83D\uDCAC 1:1 문의 댓글 등록` - <%s|링크 바로가기>\n" +
                         "```" +
@@ -97,14 +100,14 @@ public class CommentService {
                         "댓글: %s" +
                         "```",
                 link,
-                userArticle.getTitle(),
-                userArticle.getUserId(),
+                article.getTitle(),
+                article.getUserId(),
                 plainText
         );
         return message;
     }
 
-    private boolean isNewsAndNotCommentable(ArticleDto article) {
+    private boolean isNewsAndNotCommentable(Article article) {
         if (article.getCategoryType() == CategoryType.NEWS) {
             if (article.getArticleType() == ArticleType.NEWS.NOTICE || article.getArticleType() == ArticleType.NEWS.UPDATE) {
                 return true;
@@ -114,7 +117,7 @@ public class CommentService {
         return false;
     }
 
-    private boolean isPrivateContact(ArticleDto article) {
+    private boolean isPrivateContact(Article article) {
         if (article.getCategoryType() == CategoryType.SERVICE_CENTER) {
             if (article.getArticleType() == ArticleType.SERVICE_CENTER.PRIVATE_CONTACT) {
                 return true;
@@ -125,9 +128,11 @@ public class CommentService {
     }
 
     private boolean isAdminUser(ReqCommentsDto request) {
-        if (!request.getIsAdmin()) return false;
+        if (!request.getIsAdmin()) {
+            return false;
+        }
 
-        UserInfo userInfo = userInfoService.getUserInfoEntity(request.getUserId());
+        UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
         if (userInfo.getUserType() == UserType.ADMIN) {
             return true;
         }
@@ -135,7 +140,7 @@ public class CommentService {
         return false;
     }
 
-    private boolean isArticleOwner(ReqCommentsDto request, ArticleDto article) {
+    private boolean isArticleOwner(ReqCommentsDto request, Article article) {
         if (Objects.equals(request.getUserId(), article.getUserId())) {
             return true;
         }
@@ -144,25 +149,34 @@ public class CommentService {
     }
 
     private Comment saveComment(ReqCommentsDto request) {
+        // 댓글 저장
         Comment comment = new Comment(
                 request.getUserId(),
                 request.getArticleId(),
                 request.getReCommentId(),
                 request.getContents()
         );
-
         Comment savedComment = commentRepository.save(comment);
-        updateArticleCommentCount(request.getArticleId());
+
+        // 게시물 정보 확인
+        Article article = articleRepository.findById(request.getArticleId()).orElse(null);
+        if (article == null) {
+            throw new IllegalArgumentException(String.format("[댓글 등록 에러] 게시글 정보를 확인할 수 없습니다. userId: %s, articleID: %d", request.getUserId(), request.getArticleId()));
+        }
+
+        // 게시물 댓글 개수 수정
+        int commentCount = commentRepository.countByArticleId(request.getArticleId());
+        article.setCommentCount(commentCount);
+        articleRepository.save(article);
+
         return savedComment;
     }
 
-    private void updateArticleIfFirstReply(ReqCommentsDto request) {
-        // saveComment() 이후 최신 정보로 다시 조회
-        ArticleDto article = articleService.getArticle(request.getArticleId()).getData();
-
+    private void updateArticleIfFirstReply(Article article) {
+        // 관리자의 첫 댓글인 경우, 게시글 상태를 답변완료로 변경
         if (article.getArticleDetailType() == ArticleDetailType.SERVICE_CENTER.PRIVATE_CONTACT.WAITING) {
             article.setArticleDetailType(ArticleDetailType.SERVICE_CENTER.PRIVATE_CONTACT.ANSWERED);
-            articleService.updateArticleDto(article);
+            articleRepository.save(article);
         }
     }
 
@@ -187,30 +201,23 @@ public class CommentService {
 
         // 1. 댓글 소유자가 맞는지 확인
         if (!comment.getUserId().equals(request.getUserId())) {
-            UserInfo userInfo = userInfoService.getUserInfoEntity(request.getUserId());
+            UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
             if (userInfo == null) {
                 throw new IllegalArgumentException("[댓글 삭제 에러] User not found, userId: " + request.getUserId());
             }
 
             // 2. 소유자가 다를 경우 관리자 권한 있는지 확인
-            if (!request.getIsAdmin()) {
-                throw new IllegalArgumentException(String.format("[댓글 삭제 에러] 관리자모드가 아닌 상태에서 삭제 시도 userId: %s, comment ID: %d, commentUserId: %s" , request.getUserId(), id, comment.getUserId()));
-            }
-            if (userInfo.getUserType() != UserType.ADMIN) {
-                throw new IllegalArgumentException(String.format("[댓글 삭제 에러] User does not have admin privileges. userId: %s, comment ID: %d", request.getUserId(), id));
+            if (!request.getIsAdmin() || userInfo.getUserType() != UserType.ADMIN) {
+                throw new IllegalArgumentException(String.format("[댓글 삭제 에러] 권한 없음 userId: %s, comment ID: %d", request.getUserId(), id));
             }
         }
 
+        // 3. 댓글 삭제 상태로 업데이트
         comment.setIsDeleted(true);
         Comment savedComment = commentRepository.save(comment);
         userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.DELETE_COMMENT, (short)(int)request.getArticleId(), (short)(int)savedComment.getId());
 
         return ApiResponse.success();
-    }
-
-    private void updateArticleCommentCount(Integer articleId) {
-        int commentCount = commentRepository.countByArticleId(articleId);
-        articleService.updateCommentCount(articleId, commentCount);
     }
 
     private CommentDto convertToDto(Comment comment) {
@@ -226,3 +233,4 @@ public class CommentService {
                 .build();
     }
 }
+

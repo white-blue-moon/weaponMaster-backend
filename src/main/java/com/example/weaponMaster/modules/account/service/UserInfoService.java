@@ -43,11 +43,6 @@ public class UserInfoService {
         return ApiResponse.success();
     }
 
-    // TODO 함수명 그대로 쓸지 고민
-    public UserInfo getUserInfoEntity(String userId) {
-        return userInfoRepository.findByUserId(userId);
-    }
-
     public boolean isUserIdAvailable(String userId) {
         UserInfo userInfo = userInfoRepository.findByUserId(userId);
         if (userInfo == null) {

@@ -9,6 +9,8 @@ import com.example.weaponMaster.modules.article.constant.CategoryType;
 import com.example.weaponMaster.modules.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.article.entity.Article;
 import com.example.weaponMaster.modules.article.repository.ArticleRepository;
+import com.example.weaponMaster.modules.comment.repository.CommentRepository;
+import com.example.weaponMaster.modules.comment.service.CommentService;
 import com.example.weaponMaster.modules.common.constant.MyURL;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.slack.constant.AdminSlackChannelType;
@@ -24,6 +26,7 @@ import java.util.Arrays;
 public class ArticleService {
 
     private final ArticleRepository  articleRepository;
+    private final CommentRepository  commentRepository;
     private final UserInfoRepository userInfoRepository;
     private final SlackService       slackService;
 
@@ -104,17 +107,23 @@ public class ArticleService {
     }
 
     @Transactional
-    public ApiResponse<Void> deleteArticle(ReqArticlesDto request, Integer id) {
-        Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Article not found: " + id));
+    public ApiResponse<Void> deleteArticle(ReqArticlesDto request, Integer articleId) {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("[게시물 삭제 에러] Article not found. userId: %s, articleId: %d", request.getUserId(), articleId)));
 
         if (article.getCategoryType() == CategoryType.NEWS) {
             UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
             if (userInfo == null || userInfo.getUserType() == UserType.NORMAL) {
-                throw new IllegalArgumentException("Permission denied");
+                throw new IllegalArgumentException(String.format("[게시물 삭제 에러] Permission denied. userId: %s, articleId: %d", request.getUserId(), articleId));
             }
         }
-        articleRepository.deleteById(id);
+
+        // 게시물 삭제
+        articleRepository.deleteById(articleId);
+
+        // 게시물 댓글 삭제
+        commentRepository.deleteByArticleId(articleId);
+
         return ApiResponse.success();
     }
 
