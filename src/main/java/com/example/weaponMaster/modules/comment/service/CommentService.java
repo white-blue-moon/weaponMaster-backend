@@ -11,11 +11,15 @@ import com.example.weaponMaster.modules.article.constant.ArticleDetailType;
 import com.example.weaponMaster.modules.article.constant.ArticleType;
 import com.example.weaponMaster.modules.article.constant.CategoryType;
 import com.example.weaponMaster.modules.article.dto.ArticleDto;
+import com.example.weaponMaster.modules.article.entity.Article;
 import com.example.weaponMaster.modules.article.service.ArticleService;
 import com.example.weaponMaster.modules.comment.dto.CommentDto;
 import com.example.weaponMaster.modules.comment.entity.Comment;
 import com.example.weaponMaster.modules.comment.repository.CommentRepository;
+import com.example.weaponMaster.modules.common.constant.MyURL;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
+import com.example.weaponMaster.modules.slack.constant.AdminSlackChannelType;
+import com.example.weaponMaster.modules.slack.service.SlackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,10 +35,14 @@ public class CommentService {
     private final UserInfoService   userInfoService;
     private final CommentRepository commentRepository;
     private final UserLogService    userLogService;
+    private final SlackService      slackService;
     
     @Transactional
     public ApiResponse<Void> createComment(ReqCommentsDto request) {
         ArticleDto article = articleService.getArticle(request.getArticleId()).getData();
+        if (article == null) {
+            throw new IllegalArgumentException(String.format("[댓글 등록 에러] 게시글 정보를 확인할 수 없습니다. userId: %s, articleID: %d", request.getUserId(), request.getArticleId()));
+        }
 
         // 공지사항/업데이트 게시글에는 댓글 기재 불가
         if (isNewsAndNotCommentable(article)) {
@@ -53,6 +61,7 @@ public class CommentService {
             if (isArticleOwner(request, article)) {
                 Comment savedComment = saveComment(request);
                 userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)savedComment.getId());
+                slackService.sendMessageAdmin(AdminSlackChannelType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(article));
                 return ApiResponse.success();
             }
 
@@ -65,6 +74,21 @@ public class CommentService {
         userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)savedComment.getId());
 
         return ApiResponse.success();
+    }
+
+    private String getNoticeMessage(ArticleDto userArticle) {
+        String link = String.format("%s/service/%d", MyURL.WEAPON_MASTER, userArticle.getId());
+        String message = String.format(
+                "`[\uD83D\uDCAC 1:1 문의 댓글 등록]` - <%s|링크 바로가기>\n" +
+                        "```" +
+                        "제목: %s\n" +
+                        "작성자: %s" +
+                        "```",
+                link,
+                userArticle.getTitle(),
+                userArticle.getUserId()
+        );
+        return message;
     }
 
     private boolean isNewsAndNotCommentable(ArticleDto article) {

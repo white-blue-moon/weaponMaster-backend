@@ -9,6 +9,7 @@ import com.example.weaponMaster.modules.article.constant.CategoryType;
 import com.example.weaponMaster.modules.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.article.entity.Article;
 import com.example.weaponMaster.modules.article.repository.ArticleRepository;
+import com.example.weaponMaster.modules.common.constant.MyURL;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.slack.constant.AdminSlackChannelType;
 import com.example.weaponMaster.modules.slack.service.SlackService;
@@ -23,7 +24,7 @@ public class ArticleService {
 
     private final ArticleRepository  articleRepository;
     private final UserInfoRepository userInfoRepository;
-    private final SlackService slackService;
+    private final SlackService       slackService;
 
     @Transactional
     public ApiResponse<Void> createArticle(ReqArticlesDto request) {
@@ -39,17 +40,17 @@ public class ArticleService {
         Article userArticle = articleRepository.save(article);
         if(userArticle.getCategoryType() == CategoryType.SERVICE_CENTER) {
             if (userArticle.getArticleType() == ArticleType.SERVICE_CENTER.PRIVATE_CONTACT) {
-                // slackService.sendMessageAdmin(AdminSlackChannelType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(userArticle));
+                slackService.sendMessageAdmin(AdminSlackChannelType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(userArticle));
             }
         }
 
         return ApiResponse.success();
     }
 
-    private static String getNoticeMessage(Article userArticle) {
-        String link = String.format("http://localhost:8080/service/%d", userArticle.getId());
+    private String getNoticeMessage(Article userArticle) {
+        String link = String.format("%s/service/%d", MyURL.WEAPON_MASTER, userArticle.getId());
         String message = String.format(
-                "`[1대1 문의 등록 알림]` - <%s|링크 바로가기>\n" +
+                "`[\uD83D\uDCE9 1:1 새 문의 등록]` - <%s|링크 바로가기>\n" +
                         "```" +
                         "제목: %s\n" +
                         "작성자: %s" +
