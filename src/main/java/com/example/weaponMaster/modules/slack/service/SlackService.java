@@ -21,6 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
 import java.util.HashMap;
@@ -152,18 +154,18 @@ public class SlackService {
         // 1. 슬랙 봇 정보 조회
         SlackBot   slackBot = slackBotRepo.findByType(SlackBotType.NORMAL_BOT);
 
-        // 2. request body 세팅
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("code", code);
-        requestBody.put("client_id", slackBot.getClientId());
-        requestBody.put("client_secret", slackBot.getClientSecret());
-        requestBody.put("redirect_uri", slackBot.getRedirectUri());
+        // 2. payload 세팅
+        MultiValueMap<String, String> payload = new LinkedMultiValueMap<>();
+        payload.add("code", code);
+        payload.add("client_id", slackBot.getClientId());
+        payload.add("client_secret", slackBot.getClientSecret());
+        payload.add("redirect_uri", slackBot.getRedirectUri());
 
         // 3. OAuth 토큰 요청
         ResponseEntity<String> response = restClient.post()
                 .uri(SlackApi.OAUTH_URL)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                .body(requestBody)
+                .body(payload)
                 .retrieve()
                 .toEntity(String.class);
 
