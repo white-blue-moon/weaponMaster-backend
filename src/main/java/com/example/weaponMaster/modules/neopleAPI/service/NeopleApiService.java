@@ -105,44 +105,23 @@ public class NeopleApiService {
     // 스레드 풀에서의 에러는 글로벌 에러에서 잡지 못하므로 try, catch 필요
     private void monitorAuction(UserAuctionNotice userNotice) {
         try {
-            // 경매 상태가 SELLING 이 아닌 경우 모니터링 중지
             if (userNotice.getAuctionState() != AuctionState.SELLING) {
                 stopMonitoring(userNotice.getId());
                 return;
             }
 
-            String            expireDateStr = userNotice.getItemInfo().path("expireDate").asText();
-            DateTimeFormatter formatter     = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            LocalDateTime     expireTime    = LocalDateTime.parse(expireDateStr, formatter);
-            LocalDateTime     now           = LocalDateTime.now();
-
-            // 만료 시간이거나 만료된 경우
-            if (now.isEqual(expireTime) || now.isAfter(expireTime)) {
-                userNotice.setAuctionState(AuctionState.EXPIRED);
-                userAuctionNoticeRepo.save(userNotice);
-
-                String itemName = userNotice.getItemInfo().path("itemName").asText();
-                String message = String.format(
-                        "`판매 기간 만료 알림`\n" +
-                                "```\n" +
-                                "아이템명: %s\n" +
-                                "만료시각: %s\n" +
-                                "```",
-                        itemName,
-                        expireDateStr
-                );
-
-                slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
-                stopMonitoring(userNotice.getId());
+            if (isExpired(userNotice)) {
+                handleExpired(userNotice);
                 return;
             }
 
-            // 경매 정보 조회 -> 조회되지 않는 404 에러로 SOLD_OUT 상태 판단
+            // SOLD_OUT 여부 확인 -> 기존 정보가 조회되지 않는 404 에러로 SOLD_OUT 상태 판단
             restClient.get()
                     .uri(urlUtil.getAuctionNoSearchUrl(userNotice.getAuctionNo()))
                     .retrieve()
                     .toEntity(String.class);
 
+          // SOLD_OUT 처리
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 handleSoldOut(e.getResponseBodyAsString(), userNotice);
@@ -153,6 +132,38 @@ public class NeopleApiService {
             slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, errMessage);
             stopMonitoring(userNotice.getId());
         }
+    }
+
+    private Boolean isExpired(UserAuctionNotice userNotice) {
+        String            expireDateStr = userNotice.getItemInfo().path("expireDate").asText();
+        DateTimeFormatter formatter     = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime     expireTime    = LocalDateTime.parse(expireDateStr, formatter);
+        LocalDateTime     now           = LocalDateTime.now();
+
+        if (now.isEqual(expireTime) || now.isAfter(expireTime)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void handleExpired(UserAuctionNotice userNotice) {
+        userNotice.setAuctionState(AuctionState.EXPIRED);
+        userAuctionNoticeRepo.save(userNotice);
+
+        String itemName = userNotice.getItemInfo().path("itemName").asText();
+        String message = String.format(
+                "`판매 기간 만료 알림`\n" +
+                        "```\n" +
+                        "아이템명: %s\n" +
+                        "만료시각: %s\n" +
+                        "```",
+                itemName,
+                userNotice.getItemInfo().path("expireDate").asText()
+        );
+
+        slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
+        stopMonitoring(userNotice.getId());
     }
 
     private void handleSoldOut(String errorBody, UserAuctionNotice userNotice) {
