@@ -1,16 +1,18 @@
 package com.example.weaponMaster.modules.article.service;
 
 import com.example.weaponMaster.api.articles.dto.ReqArticlesDto;
+import com.example.weaponMaster.modules.account.constant.LogActType;
+import com.example.weaponMaster.modules.account.constant.LogContentsType;
 import com.example.weaponMaster.modules.account.constant.UserType;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
+import com.example.weaponMaster.modules.account.service.UserLogService;
 import com.example.weaponMaster.modules.article.constant.ArticleType;
 import com.example.weaponMaster.modules.article.constant.CategoryType;
 import com.example.weaponMaster.modules.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.article.entity.Article;
 import com.example.weaponMaster.modules.article.repository.ArticleRepository;
 import com.example.weaponMaster.modules.comment.repository.CommentRepository;
-import com.example.weaponMaster.modules.comment.service.CommentService;
 import com.example.weaponMaster.modules.common.constant.MyURL;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.slack.constant.AdminSlackChannelType;
@@ -29,6 +31,7 @@ public class ArticleService {
     private final CommentRepository  commentRepository;
     private final UserInfoRepository userInfoRepository;
     private final SlackService       slackService;
+    private final UserLogService     userLogService;
 
     @Transactional
     public ApiResponse<Void> createArticle(ReqArticlesDto request) {
@@ -48,6 +51,7 @@ public class ArticleService {
             }
         }
 
+        userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.ARTICLE, LogActType.CREATE, (short)(int)userArticle.getId());
         return ApiResponse.success();
     }
 
@@ -84,25 +88,9 @@ public class ArticleService {
                 .orElseThrow(() -> new IllegalArgumentException("Article not found: " + id));
 
         article.update(request);
-        articleRepository.save(article);
-        return ApiResponse.success();
-    }
+        Article savedArticle = articleRepository.save(article);
 
-    // TODO 업데이트 방식 하나로 통일 가능할지 고려해 보기
-    @Transactional
-    public ArticleDto updateArticleDto(ArticleDto articleDto) {
-        Article article        = convertToEntity(articleDto);
-        Article updatedArticle = articleRepository.save(article);
-        return convertToDto(updatedArticle);
-    }
-
-    @Transactional
-    public ApiResponse<Void> updateCommentCount(Integer articleId, Integer commentCount) {
-        Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new IllegalArgumentException("Article not found: " + articleId));
-
-        article.setCommentCount(commentCount);
-        articleRepository.save(article);
+        userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.ARTICLE, LogActType.UPDATE, (short)(int)savedArticle.getId());
         return ApiResponse.success();
     }
 
@@ -124,6 +112,7 @@ public class ArticleService {
         // 게시물 댓글 삭제
         commentRepository.deleteByArticleId(articleId);
 
+        userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.ARTICLE, LogActType.DELETE, (short)(int)articleId);
         return ApiResponse.success();
     }
 
@@ -151,12 +140,13 @@ public class ArticleService {
                 .toArray(ArticleDto[]::new));
     }
 
-    public ApiResponse<ArticleDto> getArticle(Integer id) {
-        Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Article not found: " + id));
+    public ApiResponse<ArticleDto> getArticle(Integer articleId) {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("[게시물 읽기 에러] Article not found. articleId: %d", articleId)));
 
         article.setViewCount(article.getViewCount() + 1);
         Article updatedArticle = articleRepository.save(article);
+
         return ApiResponse.success(convertToDto(updatedArticle));
     }
 
@@ -176,22 +166,4 @@ public class ArticleService {
                 .isPinned(article.getIsPinned())
                 .build();
     }
-
-    private Article convertToEntity(ArticleDto dto) {
-        Article article = new Article(
-                dto.getCategoryType(),
-                dto.getArticleType(),
-                dto.getArticleDetailType(),
-                dto.getTitle(),
-                dto.getContents(),
-                dto.getUserId()
-        );
-
-        article.setId(dto.getId());
-        article.setCommentCount(dto.getCommentCount());
-        article.setViewCount(dto.getViewCount());
-        article.setIsPinned(dto.getIsPinned());
-        return article;
-    }
-
 }

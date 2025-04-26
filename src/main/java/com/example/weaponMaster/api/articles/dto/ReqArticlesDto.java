@@ -9,10 +9,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReqArticlesDto {
 
+    private Boolean isAdminMode;
+    private String  userId;
     private Integer categoryType;
     private Integer articleType;
     private Integer articleDetailType;
     private String  title;
     private String  contents;
-    private String  userId;
+
 }
