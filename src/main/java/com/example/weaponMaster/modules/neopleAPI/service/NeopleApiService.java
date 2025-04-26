@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,7 @@ public class NeopleApiService {
     private final TaskScheduler                 taskScheduler;
     private final SlackService                  slackService;
     private final UserLogService                userLogService;
+    private final SimpMessagingTemplate         messagingTemplate;
 
     private final ConcurrentHashMap<Integer, ScheduledFuture<?>> auctionMonitorMap = new ConcurrentHashMap<>(); // 추적 중인 경매 판매 알림을 관리하는 맵
 
@@ -163,6 +165,7 @@ public class NeopleApiService {
         );
 
         slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
+        sendAuctionStateChange(userNotice);
         stopMonitoring(userNotice.getId());
     }
 
@@ -189,6 +192,7 @@ public class NeopleApiService {
                 );
 
                 slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
+                sendAuctionStateChange(userNotice);
                 stopMonitoring(userNotice.getId());
             }
         } catch (Exception e) {
@@ -199,6 +203,18 @@ public class NeopleApiService {
         }
     }
 
+    // TODO 경로 상수화 하기
+    // 프론트가 구독 중인 topic 으로 메시지를 보냄 (WebSocket 통신)
+    private void sendAuctionStateChange(UserAuctionNotice userNotice) {
+        messagingTemplate.convertAndSend(
+                "/topic/auction-state",
+                new RespAuctionDto(
+                        userNotice.getItemImg(),
+                        userNotice.getItemInfo(),
+                        userNotice.getAuctionState())
+        );
+    }
+    
     private void stopMonitoring(Integer id) {
         ScheduledFuture<?> future = auctionMonitorMap.remove(id); // 맵에서 제거
         if (future != null) {
