@@ -94,7 +94,7 @@ CREATE TABLE user_article (
     is_pinned               TINYINT         NOT NULL DEFAULT 0 COMMENT '게시물 상단 고정 여부 (0: 고정 안 함, 1: 고정함)',
     create_date             TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '게시물 최초 작성일자',
     update_date             TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '게시물 최종 수정일자'
-) CHARSET=utf8 COMMENT='게시물 관리 테이블';
+) CHARSET=utf8mb4 COMMENT='게시물 관리 테이블';
 -- 유저 게시물 관리 테이블 인덱스 추가
 CREATE INDEX idx_user_article_category_type  ON user_article(category_type);
 CREATE INDEX idx_user_article_article_type   ON user_article(article_type);
@@ -112,7 +112,7 @@ CREATE TABLE user_comments (
     is_deleted      TINYINT         NOT NULL DEFAULT 0 COMMENT '댓글 삭제 여부 (0: 삭제 안 함, 1: 삭제됨)',
     create_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '댓글 최초 작성일자',
     update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '댓글 최종 수정일자'
-) CHARSET=utf8 COMMENT='유저 댓글 관리 테이블';
+) CHARSET=utf8mb4 COMMENT='유저 댓글 관리 테이블';
 -- 유저 댓글 관리 테이블 인덱스 추가
 CREATE INDEX idx_user_comments_article_id ON user_comments(article_id);
 
