@@ -13,11 +13,13 @@ import com.example.weaponMaster.modules.neopleAPI.entity.UserAuctionNotice;
 import com.example.weaponMaster.modules.neopleAPI.repository.UserAuctionNoticeRepository;
 import com.example.weaponMaster.modules.neopleAPI.util.UrlUtil;
 import com.example.weaponMaster.api.neople.dto.RespAuctionDto;
+import com.example.weaponMaster.modules.slack.constant.AdminSlackChannelType;
 import com.example.weaponMaster.modules.slack.constant.UserSlackNoticeType;
 import com.example.weaponMaster.modules.slack.service.SlackService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
@@ -47,14 +49,15 @@ public class NeopleApiService {
 
     private final ConcurrentHashMap<Integer, ScheduledFuture<?>> auctionMonitorMap = new ConcurrentHashMap<>(); // 추적 중인 경매 판매 알림을 관리하는 맵
 
-    public ApiResponse<RespAuctionDto[]> searchAuction(String itemName) throws Exception {
+    @SneakyThrows
+    public ApiResponse<RespAuctionDto[]> searchAuction(String itemName) {
         ResponseEntity<String> response = restClient.get()
                 .uri(urlUtil.getAuctionSearchUrl(itemName))
                 .retrieve()
                 .toEntity(String.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new Exception("neople 경매 아이템 명 검색 API 호출 실패: " + response.getStatusCode());
+            throw new RuntimeException("neople 경매 아이템 명 검색 API 호출 실패: " + response.getStatusCode());
         }
 
         String   res      = response.getBody();
@@ -99,8 +102,10 @@ public class NeopleApiService {
     }
 
     // TODO 서버 통신이 끊겼다가 다시 연결될 때 DB 에서 SELLING 상태의 알림은 다시 1분 마다 추적하도록 세팅 필요
+    // 스레드 풀에서의 에러는 글로벌 에러에서 잡지 못하므로 try, catch 필요
     private void monitorAuction(UserAuctionNotice userNotice) {
         try {
+            // 경매 상태가 SELLING 이 아닌 경우 모니터링 중지
             if (userNotice.getAuctionState() != AuctionState.SELLING) {
                 stopMonitoring(userNotice.getId());
                 return;
@@ -111,73 +116,75 @@ public class NeopleApiService {
             LocalDateTime     expireTime    = LocalDateTime.parse(expireDateStr, formatter);
             LocalDateTime     now           = LocalDateTime.now();
 
+            // 만료 시간이거나 만료된 경우
             if (now.isEqual(expireTime) || now.isAfter(expireTime)) {
                 userNotice.setAuctionState(AuctionState.EXPIRED);
                 userAuctionNoticeRepo.save(userNotice);
 
-                String itemName   = userNotice.getItemInfo().path("itemName").asText();
-                String expireDate = userNotice.getItemInfo().path("expireDate").asText();
+                String itemName = userNotice.getItemInfo().path("itemName").asText();
                 String message = String.format(
-                        "`[판매 기간 만료 알림]`\n" +
+                        "`판매 기간 만료 알림`\n" +
                                 "```\n" +
                                 "아이템명: %s\n" +
                                 "만료시각: %s\n" +
                                 "```",
                         itemName,
-                        expireDate
+                        expireDateStr
                 );
-                slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
 
+                slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
                 stopMonitoring(userNotice.getId());
                 return;
             }
 
-            ResponseEntity<String> response = null;
-            try {
-                response = restClient.get()
-                        .uri(urlUtil.getAuctionNoSearchUrl(userNotice.getAuctionNo()))
-                        .retrieve()
-                        .toEntity(String.class);
-            } catch (HttpClientErrorException e) {
-                if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                    String   errorBody = e.getResponseBodyAsString();
-                    JsonNode rootNode  = objectMapper.readTree(errorBody);
-                    String   errorCode = rootNode.path("error").path("code").asText();
+            // 경매 정보 조회 -> 조회되지 않는 404 에러로 SOLD_OUT 상태 판단
+            restClient.get()
+                    .uri(urlUtil.getAuctionNoSearchUrl(userNotice.getAuctionNo()))
+                    .retrieve()
+                    .toEntity(String.class);
 
-                    // TODO 슬랙 알림 외에 웨펀마스터 쪽지 함에도 알림 가도록 하는 방식도 고려해 보기 (쪽지함 만들지 고려 중)
-                    if ("DNF004".equals(errorCode)) {
-                        userNotice.setAuctionState(AuctionState.SOLD_OUT);
-                        userAuctionNoticeRepo.save(userNotice);
-
-                        // TODO regCount 로 계산해서 정보 알리도록 수정 필요
-                        // TODO 10,000 골드 보증금 합산 및 수수료 제외한 가격으로도 알리기
-                        String priceStr       = userNotice.getItemInfo().path("currentPrice").asText();
-                        String formattedPrice = priceStr.replaceAll("(\\d)(?=(\\d{3})+$)", "$1,");
-                        String itemName       = userNotice.getItemInfo().path("itemName").asText();
-                        String message = String.format(
-                                "`[판매 완료 알림]`\n" +
-                                        "```\n" +
-                                        "아이템명: %s\n" +
-                                        "판매가격: %s G\n" +
-                                        "```",
-                                itemName,
-                                formattedPrice
-                        );
-                        slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
-
-                        stopMonitoring(userNotice.getId());
-                        return;
-                    }
-                }
-                throw e;
-            }
-
-            // TODO 최신 경매 정보로 DB 알림 update 해야할지 고민 (몇 개 남았는지 등)
-
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                handleSoldOut(e.getResponseBodyAsString(), userNotice);
+            } else { throw e; } // 다른 예외는 다시 던져서 상위에서 처리
         } catch (Exception e) {
-            System.err.println("Auction monitoring error: " + e.getMessage());
-            stopMonitoring(userNotice.getId()); // 에러 발생 시에도 추적 종료
-            return;
+            String errMessage = String.format("[경매 판매 알림 추적 에러] userId: %s, noticeId: %d, error: %s", userNotice.getUserId(), userNotice.getId(), e.getMessage());
+            System.err.println(errMessage);
+            slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, errMessage);
+            stopMonitoring(userNotice.getId());
+        }
+    }
+
+    private void handleSoldOut(String errorBody, UserAuctionNotice userNotice) {
+        try {
+            JsonNode rootNode = objectMapper.readTree(errorBody);
+            String  errorCode = rootNode.path("error").path("code").asText();
+
+            if ("DNF004".equals(errorCode)) {
+                userNotice.setAuctionState(AuctionState.SOLD_OUT);
+                userAuctionNoticeRepo.save(userNotice);
+
+                String priceStr       = userNotice.getItemInfo().path("currentPrice").asText();
+                String formattedPrice = priceStr.replaceAll("(\\d)(?=(\\d{3})+$)", "$1,");
+                String itemName       = userNotice.getItemInfo().path("itemName").asText();
+                String message        = String.format(
+                        "`[판매 완료 알림]`\n" +
+                                "```\n" +
+                                "아이템명: %s\n" +
+                                "판매가격: %s G\n" +
+                                "```",
+                        itemName,
+                        formattedPrice
+                );
+
+                slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
+                stopMonitoring(userNotice.getId());
+            }
+        } catch (Exception e) {
+            String errMessage = String.format("[경매 판매 알림 추적 에러] userId: %s, noticeId: %d, error: %s", userNotice.getUserId(), userNotice.getId(), e.getMessage());
+            System.err.println(errMessage);
+            slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, errMessage);
+            stopMonitoring(userNotice.getId());
         }
     }
 

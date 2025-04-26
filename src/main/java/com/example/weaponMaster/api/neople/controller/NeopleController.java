@@ -16,7 +16,7 @@ public class NeopleController {
 
     // 경매장 등록 아이템 검색
     @GetMapping("/neople/auction/{itemName}")
-    public ApiResponse<RespAuctionDto[]> searchAuction(@PathVariable("itemName") String itemName) throws Exception {
+    public ApiResponse<RespAuctionDto[]> searchAuction(@PathVariable("itemName") String itemName) {
         return neopleApiService.searchAuction(itemName);
     }
 
