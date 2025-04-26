@@ -20,6 +20,7 @@ import com.example.weaponMaster.modules.common.constant.MyURL;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.slack.constant.AdminSlackChannelType;
 import com.example.weaponMaster.modules.slack.service.SlackService;
+import com.example.weaponMaster.modules.slack.util.HtmlUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,20 +77,9 @@ public class CommentService {
         return ApiResponse.success();
     }
 
-    // TODO -> 1:1 게시물 쪽 함수 getNoticeMessage() 랑 공통화 하기
     private String getNoticeMessage(ArticleDto userArticle, Comment userComment) {
-        // 1. HTML 태그 제거
-        String plainText = userComment.getContents()
-                .replaceAll("(?i)<br\\s*/?>", "\n")             // <br>, <br/> → 줄바꿈
-                .replaceAll("(?i)</p>", "\n")                   // </p> → 줄바꿈
-                .replaceAll("(?i)</h[1-6]>", "\n")              // 제목 태그 종료 → 줄바꿈
-                .replaceAll("(?i)</(em|strong|span)>", " ")     // 강조, span 태그 종료 → 공백으로 대체
-                .replaceAll("(?i)<[^>]*>", "")                  // 나머지 HTML 태그 제거
-                .replaceAll("&nbsp;", " ")                      // &nbsp; → 일반 공백
-                .replaceAll("[ \\t]+", " ")                     // 연속된 공백 정리
-                .replaceAll("(?m)^\\s+", "")                    // 각 줄 시작의 공백 제거
-                .replaceAll("(?m)\\s+\n", "\n")                 // 줄 끝의 불필요한 공백 제거
-                .trim();
+        // 1. HTML 태그 제거 및 정리
+        String plainText = HtmlUtil.getPlainText(userComment.getContents());
 
         // 2. 길이 제한
         int maxLength = 80;

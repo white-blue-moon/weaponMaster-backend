@@ -13,4 +13,6 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
     @Query(value = "SELECT COUNT(id) FROM user_comments WHERE article_id = :articleId", nativeQuery = true)
     int countByArticleId(Integer articleId);
+    @Query(value = "DELETE FROM user_comments WHERE article_id = :articleId", nativeQuery = true)
+    void deleteByArticleId(Integer articleId);
 }
