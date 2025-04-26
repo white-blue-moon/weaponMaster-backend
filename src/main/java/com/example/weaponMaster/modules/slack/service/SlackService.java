@@ -1,6 +1,9 @@
 package com.example.weaponMaster.modules.slack.service;
 
 import com.example.weaponMaster.api.slack.dto.RespSlackDto;
+import com.example.weaponMaster.modules.account.constant.LogActType;
+import com.example.weaponMaster.modules.account.constant.LogContentsType;
+import com.example.weaponMaster.modules.account.service.UserLogService;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.slack.constant.SlackApi;
 import com.example.weaponMaster.modules.slack.constant.SlackBotType;
@@ -35,6 +38,7 @@ public class SlackService {
     private final UserSlackNoticeRepository  userSlackNoticeRepo;
     private final AdminSlackNoticeRepository adminSlackNoticeRepo;
     private final SlackBotRepository         slackBotRepo;
+    private final UserLogService             userLogService;
     private final ObjectMapper               mapper;
     private final RestClient                 restClient = RestClient.create();
 
@@ -146,7 +150,7 @@ public class SlackService {
     public ResponseEntity<String> handleSlackOauthCallback(String code, String state) {
         // 이미 등록되어 있는 정보가 있는지 확인
         String          userId        = state;
-        UserSlackNotice findUserSlack = userSlackNoticeRepo.findByUserIdAndType(userId, UserSlackNoticeType.AUCTION_NOTICE);
+        UserSlackNotice findUserSlack = userSlackNoticeRepo.findByUserIdAndType(userId, UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT);
         if (findUserSlack != null) {
             throw new IllegalArgumentException(String.format("[Slack Bot 설치 에러] 이미 등록된 정보가 존재합니다 userId: %s", userId));
         }
@@ -204,7 +208,7 @@ public class SlackService {
         // 6. DB 저장
         UserSlackNotice userSlack = new UserSlackNotice(
                 userId,
-                UserSlackNoticeType.AUCTION_NOTICE,
+                UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT,
                 SlackBotType.NORMAL_BOT,
                 accessToken,
                 channelId
@@ -233,6 +237,7 @@ public class SlackService {
             </body></html>
         """.formatted(slackInfoJson);
 
+        userLogService.saveLog(savedUserSlack.getUserId(), false, LogContentsType.SLACK_INTEGRATION, LogActType.CREATE, Short.valueOf(savedUserSlack.getNoticeType()), (short) (int) savedUserSlack.getId());
         return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(html);
     }
 
@@ -277,9 +282,11 @@ public class SlackService {
             return ApiResponse.error(errorMessage);
         }
 
+        userLogService.saveLog(userSlack.getUserId(), false, LogContentsType.SLACK_INTEGRATION, LogActType.TEST, Short.valueOf(userSlack.getNoticeType()), (short) (int) userSlack.getId());
         return ApiResponse.success();
     }
 
+    @Transactional
     public ApiResponse<Void> deleteSlackIntegration(String userId, Byte noticeType) {
         UserSlackNotice userSlack = userSlackNoticeRepo.findByUserIdAndType(userId, noticeType);
         if (userSlack == null) {
@@ -287,6 +294,7 @@ public class SlackService {
         }
 
         userSlackNoticeRepo.delete(userSlack);
+        userLogService.saveLog(userSlack.getUserId(), false, LogContentsType.SLACK_INTEGRATION, LogActType.DELETE, Short.valueOf(userSlack.getNoticeType()), (short) (int) userSlack.getId());
         return ApiResponse.success();
     }
 

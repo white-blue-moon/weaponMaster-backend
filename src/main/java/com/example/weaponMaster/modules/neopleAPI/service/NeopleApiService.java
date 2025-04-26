@@ -126,7 +126,7 @@ public class NeopleApiService {
                         itemName,
                         expireDate
                 );
-                slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.AUCTION_NOTICE, message);
+                slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
 
                 stopMonitoring(userNotice.getId());
                 return;
@@ -163,7 +163,7 @@ public class NeopleApiService {
                                 itemName,
                                 formattedPrice
                         );
-                        slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.AUCTION_NOTICE, message);
+                        slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
 
                         stopMonitoring(userNotice.getId());
                         return;

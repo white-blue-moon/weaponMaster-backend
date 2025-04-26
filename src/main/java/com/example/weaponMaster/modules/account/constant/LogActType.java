@@ -13,4 +13,6 @@ public class LogActType {
 
     public static final Short CREATE_COMMENT = 20; // 댓글 작성
     public static final Short DELETE_COMMENT = 21; // 댓글 삭제
+
+    public static final Short TEST = 30; // 테스트
 }

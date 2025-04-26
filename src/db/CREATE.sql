@@ -68,7 +68,7 @@ CREATE TABLE user_log (
     user_id         VARCHAR(255)    NOT NULL COMMENT '유저 ID',
     is_admin_mode   TINYINT         NOT NULL DEFAULT 0 COMMENT '로그인 모드 (0: 일반모드, 1: 관리자모드)',
     contents_type   SMALLINT        NOT NULL COMMENT '컨텐츠 타입 (ex. 0: 웨펀마스터 시스템 자체, 1: 게시물)',
-    act_type   		SMALLINT        NOT NULL COMMENT '행동 타입 (ex. 1: 로그인, 2: 로그아웃, 3: 읽기)',
+    act_type   		SMALLINT        NOT NULL COMMENT '행동 타입 (ex. 1: 로그인, 2: 로그아웃, 3: 회원가입)',
     ref_value       SMALLINT        DEFAULT 0 COMMENT '참고 데이터',
     extra_ref_value SMALLINT        DEFAULT 0 COMMENT '추가 참고 데이터',
     create_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '로그 생성 날짜',
@@ -135,7 +135,7 @@ DROP TABLE IF EXISTS user_slack_notice;
 CREATE TABLE user_slack_notice (
     id                  INT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 row ID',
     user_id             VARCHAR(255)    NOT NULL COMMENT '유저 ID',
-    notice_type         TINYINT         NOT NULL COMMENT '알림 종류 (ex. 1: 경매 판매 알림)',
+    notice_type         TINYINT         NOT NULL COMMENT '알림 종류 (ex. 1: 웨펀마스터 서비스 알림)',
     slack_bot_type      TINYINT         NOT NULL COMMENT '슬랙봇 종류 (ex. 1: 일반 웨펀마스터 알림봇)',
     slack_bot_token     VARCHAR(255)    NOT NULL COMMENT '슬랙 봇 토큰',
     slack_channel_id    VARCHAR(255)    NOT NULL COMMENT '개인 슬랙 채널 아이디',
