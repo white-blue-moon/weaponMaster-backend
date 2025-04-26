@@ -48,16 +48,30 @@ public class ArticleService {
     }
 
     private String getNoticeMessage(Article userArticle) {
+        // 1. HTML 태그 제거
+        String plainText = userArticle.getContents()
+                .replaceAll("<[^>]*>", "")  // HTML 태그 제거
+                .replaceAll("&nbsp;", " "); // &nbsp;를 일반 공백으로 치환
+
+        // 2. 길이 제한
+        int maxLength = 80;
+        if (plainText.length() > maxLength) {
+            plainText = plainText.substring(0, maxLength) + "...";
+        }
+
+        // 이모지코드: 📩
         String link = String.format("%s/service/%d", MyURL.WEAPON_MASTER, userArticle.getId());
         String message = String.format(
-                "`[\uD83D\uDCE9 1:1 새 문의 등록]` - <%s|링크 바로가기>\n" +
+                "`\uD83D\uDCE9 1:1 새 문의 등록` - <%s|링크 바로가기>\n" +
                         "```" +
                         "제목: %s\n" +
-                        "작성자: %s" +
+                        "이름: %s\n" +
+                        "본문: %s" +
                         "```",
                 link,
                 userArticle.getTitle(),
-                userArticle.getUserId()
+                userArticle.getUserId(),
+                plainText
         );
         return message;
     }

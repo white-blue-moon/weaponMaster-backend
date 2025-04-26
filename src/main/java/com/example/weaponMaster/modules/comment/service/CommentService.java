@@ -61,7 +61,7 @@ public class CommentService {
             if (isArticleOwner(request, article)) {
                 Comment savedComment = saveComment(request);
                 userLogService.saveLog(request.getUserId(), request.getIsAdmin(), LogContentsType.ARTICLE, LogActType.CREATE_COMMENT, (short)(int)request.getArticleId(), (short)(int)savedComment.getId());
-                slackService.sendMessageAdmin(AdminSlackChannelType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(article));
+                slackService.sendMessageAdmin(AdminSlackChannelType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(article, savedComment));
                 return ApiResponse.success();
             }
 
@@ -76,17 +76,31 @@ public class CommentService {
         return ApiResponse.success();
     }
 
-    private String getNoticeMessage(ArticleDto userArticle) {
+    private String getNoticeMessage(ArticleDto userArticle, Comment userComment) {
+        // 1. HTML 태그 제거
+        String plainText = userComment.getContents()
+                .replaceAll("<[^>]*>", "")  // HTML 태그 제거
+                .replaceAll("&nbsp;", " "); // &nbsp;를 일반 공백으로 치환
+
+        // 2. 길이 제한
+        int maxLength = 80;
+        if (plainText.length() > maxLength) {
+            plainText = plainText.substring(0, maxLength) + "...";
+        }
+
+        // 이모지코드: 💬
         String link = String.format("%s/service/%d", MyURL.WEAPON_MASTER, userArticle.getId());
         String message = String.format(
-                "`[\uD83D\uDCAC 1:1 문의 댓글 등록]` - <%s|링크 바로가기>\n" +
+                "`\uD83D\uDCAC 1:1 문의 댓글 등록` - <%s|링크 바로가기>\n" +
                         "```" +
                         "제목: %s\n" +
-                        "작성자: %s" +
+                        "이름: %s\n" +
+                        "댓글: %s" +
                         "```",
                 link,
                 userArticle.getTitle(),
-                userArticle.getUserId()
+                userArticle.getUserId(),
+                plainText
         );
         return message;
     }
