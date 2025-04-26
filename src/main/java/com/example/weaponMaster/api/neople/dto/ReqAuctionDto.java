@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReqAuctionDto {
 
+    private Boolean  isAdminMode;
     private String   userId;
     private String   itemImg;
     private JsonNode itemInfo;

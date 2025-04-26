@@ -2,6 +2,9 @@ package com.example.weaponMaster.modules.neopleAPI.service;
 
 import com.example.weaponMaster.api.neople.dto.ReqAuctionDto;
 import com.example.weaponMaster.api.neople.dto.RespUserAuctionDto;
+import com.example.weaponMaster.modules.account.constant.LogActType;
+import com.example.weaponMaster.modules.account.constant.LogContentsType;
+import com.example.weaponMaster.modules.account.service.UserLogService;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.neopleAPI.constant.AuctionNotice;
 import com.example.weaponMaster.modules.neopleAPI.constant.AuctionState;
@@ -34,13 +37,15 @@ import java.util.concurrent.ScheduledFuture;
 @RequiredArgsConstructor
 public class NeopleApiService {
 
-    private final UrlUtil                                        urlUtil;
-    private final RestClient                                     restClient = RestClient.create();
-    private final ObjectMapper                                   objectMapper;
-    private final UserAuctionNoticeRepository                    userAuctionNoticeRepo;
-    private final TaskScheduler                                  taskScheduler;
+    private final UrlUtil                       urlUtil;
+    private final RestClient                    restClient = RestClient.create();
+    private final ObjectMapper                  objectMapper;
+    private final UserAuctionNoticeRepository   userAuctionNoticeRepo;
+    private final TaskScheduler                 taskScheduler;
+    private final SlackService                  slackService;
+    private final UserLogService                userLogService;
+
     private final ConcurrentHashMap<Integer, ScheduledFuture<?>> auctionMonitorMap = new ConcurrentHashMap<>(); // 추적 중인 경매 판매 알림을 관리하는 맵
-    private final SlackService slackService;
 
     public ApiResponse<RespAuctionDto[]> searchAuction(String itemName) throws Exception {
         ResponseEntity<String> response = restClient.get()
@@ -88,6 +93,8 @@ public class NeopleApiService {
 
         // 4. 등록한 스케줄을 맵에 저장하여 관리
         auctionMonitorMap.put(userNotice.getId(), future);
+
+        userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.AUCTION_NOTICE, LogActType.CREATE, (short)(int)userNotice.getId());
         return ApiResponse.success();
     }
 
@@ -165,7 +172,7 @@ public class NeopleApiService {
                 throw e;
             }
 
-            // TODO 최신 경매 정보로 DB 알림 update 필요 (몇 개 남았는지 등)
+            // TODO 최신 경매 정보로 DB 알림 update 해야할지 고민 (몇 개 남았는지 등)
 
         } catch (Exception e) {
             System.err.println("Auction monitoring error: " + e.getMessage());
@@ -205,6 +212,8 @@ public class NeopleApiService {
 
         // 2. 맵에 등록된 알림 정보 삭제
         stopMonitoring(userNotice.getId());
+
+        userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.AUCTION_NOTICE, LogActType.DELETE, (short)(int)userNotice.getId());
         return ApiResponse.success();
     }
 
