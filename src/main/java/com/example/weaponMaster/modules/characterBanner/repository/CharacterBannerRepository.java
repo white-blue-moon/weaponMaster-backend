@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CharacterBannerRepository extends JpaRepository<CharacterBanner, Integer> {
 
-    @Query(value = "SELECT * FROM ref_character_banner WHERE version = :version ORDER BY character_type", nativeQuery = true)
+    @Query(value = "SELECT * FROM ref_character_banner WHERE version = :version ORDER BY banner_order", nativeQuery = true)
     CharacterBanner[] findByVersion(Integer version);
 }
