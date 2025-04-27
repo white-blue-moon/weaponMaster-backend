@@ -43,10 +43,11 @@ public class Comment {
     @Column(name = "update_date", nullable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updateDate;
 
-    public Comment(String userId, Integer articleId, Integer reCommentId, String contents) {
+    public Comment(String userId, Integer articleId, Integer reCommentId, String contents, Boolean isAdminMode) {
         this.userId      = userId;
         this.articleId   = articleId;
         this.reCommentId = reCommentId;
         this.contents    = contents;
+        this.isAdminMode = isAdminMode;
     }
 }

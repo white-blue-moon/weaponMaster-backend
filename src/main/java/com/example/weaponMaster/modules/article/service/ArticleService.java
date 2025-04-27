@@ -177,6 +177,7 @@ public class ArticleService {
                 .commentCount(article.getCommentCount())
                 .viewCount(article.getViewCount())
                 .isPinned(article.getIsPinned())
+                .isAdminMode((article.getIsAdminMode()))
                 .build();
     }
 }

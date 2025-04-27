@@ -20,4 +20,5 @@ public class ArticleDto {
     private Integer       commentCount;       // 댓글 수
     private Integer       viewCount;          // 조회수
     private Boolean       isPinned;           // 상단 고정 여부
+    private Boolean       isAdminMode;        // 관리자 모드에서의 작성 여부
 }

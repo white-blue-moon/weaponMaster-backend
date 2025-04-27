@@ -14,6 +14,7 @@ public class CommentDto {
     private Integer       reCommentId;
     private String        contents;
     private Boolean       isDeleted;
+    private Boolean       isAdminMode;
     private LocalDateTime createDate;
     private LocalDateTime updateDate;
 }
