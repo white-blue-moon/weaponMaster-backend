@@ -9,8 +9,7 @@ import com.example.weaponMaster.modules.characterBanner.repository.CharacterBann
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -21,37 +20,32 @@ public class CharacterBannerService {
 
     public CharacterBannerFullInfoDto[] getBannerFullInfo(Integer version) {
         CharacterBanner[]       banners       = characterBannerRepo.findByVersion(version);       // 배너 기본 정보 가져오기
-        CharacterBannerDetail[] bannerDetails = characterBannerDetailRepo.findByVersion(version); // 배너 상세 정보 가져오기 (이미 정렬된 상태)
+        CharacterBannerDetail[] bannerDetails = characterBannerDetailRepo.findByVersion(version); // 배너 상세 정보 가져오기 (정렬된 상태)
+
+        // characterType 별로 미리 그룹화
+        Map<Byte, List<CharacterBannerDetailDto>> detailsMap = groupDetailsByCharacterType(bannerDetails);
 
         CharacterBannerFullInfoDto[] result = new CharacterBannerFullInfoDto[banners.length];
-        int findStartIndex = 0;
-        int resultIndex    = 0;
+        int resultIndex = 0;
 
-        // 캐릭터 타입 별로 필터링해서 full 조합
+        // characterType 별로 매칭해서 full info 생성
         for (CharacterBanner banner : banners) {
-            List<CharacterBannerDetailDto> filteredDetails = findDetailsByCharacterType(banner.getCharacterType(), bannerDetails, findStartIndex);
-            findStartIndex += filteredDetails.size(); // 이미 필터링한 배너 디테일 인덱스 쪽은 건너뜀
-
-            result[resultIndex++] = createFullInfoDto(banner, filteredDetails);
+            List<CharacterBannerDetailDto> bannerDetailList = detailsMap.getOrDefault(banner.getCharacterType(), Collections.emptyList());
+            result[resultIndex++] = createFullInfoDto(banner, bannerDetailList);
         }
 
         return result;
     }
 
-    private List<CharacterBannerDetailDto> findDetailsByCharacterType(Byte characterType, CharacterBannerDetail[] bannerDetails, int findStartIndex) {
-        List<CharacterBannerDetailDto> filteredDetails = new ArrayList<>();
+    private Map<Byte, List<CharacterBannerDetailDto>> groupDetailsByCharacterType(CharacterBannerDetail[] bannerDetails) {
+        Map<Byte, List<CharacterBannerDetailDto>> map = new HashMap<>();
 
-        for (int i = findStartIndex; i < bannerDetails.length; i++) {
-            CharacterBannerDetail bannerDetail = bannerDetails[i];
-            if (characterType != bannerDetail.getCharacterType()) {
-                break;
-            }
-
-            CharacterBannerDetailDto bannerDetailDto = createBannerDetailDto(bannerDetail);
-            filteredDetails.add(bannerDetailDto);
+        for (CharacterBannerDetail detail : bannerDetails) {
+            map.computeIfAbsent(detail.getCharacterType(), k -> new ArrayList<>())
+                    .add(createBannerDetailDto(detail));
         }
 
-        return filteredDetails;
+        return map;
     }
 
     private CharacterBannerDetailDto createBannerDetailDto(CharacterBannerDetail bannerDetail) {
