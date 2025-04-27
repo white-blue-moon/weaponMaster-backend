@@ -12,8 +12,8 @@ import java.util.Map;
 @NoArgsConstructor
 public class RespHomeDto {
 
-    private Map<Integer, BannerDto[]>   focusBanners; // Map<배너 타입 번호, 배너 리스트>
-    private ArticleDto[]                newsArticles;
-    private ArticleDto[]                bestViewArticles;
-    private CharacterBannerFullInfoDto  characterBanners;
+    private Map<Integer, BannerDto[]>     focusBanners; // Map<배너 타입 번호, 배너 리스트>
+    private ArticleDto[]                  newsArticles;
+    private ArticleDto[]                  bestViewArticles;
+    private CharacterBannerFullInfoDto[]  characterBanners;
 }

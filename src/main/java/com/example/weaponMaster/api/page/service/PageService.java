@@ -7,6 +7,8 @@ import com.example.weaponMaster.modules.article.constant.ArticleType;
 import com.example.weaponMaster.modules.article.constant.CategoryType;
 import com.example.weaponMaster.modules.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.article.service.ArticleService;
+import com.example.weaponMaster.modules.characterBanner.dto.CharacterBannerFullInfoDto;
+import com.example.weaponMaster.modules.characterBanner.service.CharacterBannerService;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.focusBanner.dto.BannerDto;
 import com.example.weaponMaster.modules.siteSetting.record.Settings;
@@ -21,27 +23,32 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PageService {
 
-    private final SiteSettingService   siteSettingService;
-    private final FocusBannerService   focusBannerService;
-    private final ArticleService       articleService;
+    private final SiteSettingService     siteSettingService;
+    private final FocusBannerService     focusBannerService;
+    private final ArticleService         articleService;
+    private final CharacterBannerService characterBannerService;
 
     public ApiResponse<RespHomeDto> getPageHome(ReqHomeDto request) {
         // 홈페이지 설정 조회
         Settings settings = siteSettingService.getSetting();
 
-        // 홈페이지 설정과 request 값을 조합하여 배너 정보 조회
+        // 포커스 배너
         Map<Integer, BannerDto[]> bannersMap = focusBannerService.getBannersMap(request.getBannerTypes(), settings);
         RespHomeDto resp = new RespHomeDto();
         resp.setFocusBanners(bannersMap);
 
-        // 뉴스 배너 게시글 조회
+        // 뉴스 배너 게시글
         ArticleDto[] newsArticles = articleService.getArticleList(CategoryType.NEWS, ArticleType.ALL).getData();
         resp.setNewsArticles(newsArticles);
 
-        // 인기 게시물 조회 (리스트 박스 배너)
+        // 인기 게시물
         final int    ARTICLE_COUNT    = 9; // TODO 조회하는 게시물 개수 (임시 지정)
         ArticleDto[] bestViewArticles = articleService.getBestViewArticles(ARTICLE_COUNT);
         resp.setBestViewArticles(bestViewArticles);
+
+        // 캐릭터 배너
+        CharacterBannerFullInfoDto[] characterBanners = characterBannerService.getBannerFullInfo(settings.characterBannerVer());
+        resp.setCharacterBanners(characterBanners);
 
         return ApiResponse.success(resp);
     }
