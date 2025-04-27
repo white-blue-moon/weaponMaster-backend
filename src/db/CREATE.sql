@@ -123,6 +123,7 @@ CREATE TABLE user_article (
     comment_count           INT             NOT NULL DEFAULT 0 COMMENT '댓글 개수',
     view_count              INT             NOT NULL DEFAULT 0 COMMENT '조회수',
     is_pinned               TINYINT         NOT NULL DEFAULT 0 COMMENT '게시물 상단 고정 여부 (0: 고정 안 함, 1: 고정함)',
+    is_admin_mode           TINYINT         NOT NULL DEFAULT 0 COMMENT '관리자 모드에서의 작성 여부 (0: X, 1: 관리자모드)',
     create_date             TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '게시물 최초 작성일자',
     update_date             TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '게시물 최종 수정일자'
 ) CHARSET=utf8mb4 COMMENT='게시물 관리 테이블';
@@ -141,6 +142,7 @@ CREATE TABLE user_comments (
     re_comment_id   INT             NOT NULL DEFAULT 0 COMMENT '대댓글 타겟 아이디 (대댓글이 아닌 일반 댓글이면 0)',
     contents        TEXT            NOT NULL COMMENT '내용',
     is_deleted      TINYINT         NOT NULL DEFAULT 0 COMMENT '댓글 삭제 여부 (0: 삭제 안 함, 1: 삭제됨)',
+    is_admin_mode   TINYINT         NOT NULL DEFAULT 0 COMMENT '관리자 모드에서의 작성 여부 (0: X, 1: 관리자모드)',
     create_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '댓글 최초 작성일자',
     update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '댓글 최종 수정일자'
 ) CHARSET=utf8mb4 COMMENT='유저 댓글 관리 테이블';

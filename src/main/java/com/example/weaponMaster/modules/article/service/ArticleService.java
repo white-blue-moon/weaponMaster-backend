@@ -44,6 +44,19 @@ public class ArticleService {
                 request.getUserId()
         );
 
+        if (request.getIsAdminMode()) {
+            UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
+            if (userInfo == null) {
+                throw new IllegalArgumentException(String.format("[게시물 등록 에러] 작성 요청한 유저의 정보를 확인할 수 없습니다. userId: %s", request.getUserId()));
+            }
+
+            if (userInfo.getUserType() != UserType.ADMIN) {
+                throw new IllegalArgumentException(String.format("[게시물 등록 에러] 관리자 권한이 없으나 관리자모드에서 작성 요청하였습니다. userId: %s, userType: %d", request.getUserId(), userInfo.getUserType()));
+            }
+
+            article.setIsAdminMode(true);
+        }
+
         Article userArticle = articleRepository.save(article);
         if(userArticle.getCategoryType() == CategoryType.SERVICE_CENTER) {
             if (userArticle.getArticleType() == ArticleType.SERVICE_CENTER.PRIVATE_CONTACT) {

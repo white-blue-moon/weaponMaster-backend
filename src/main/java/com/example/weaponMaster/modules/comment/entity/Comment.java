@@ -34,6 +34,9 @@ public class Comment {
     @Column(name = "is_deleted", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private Boolean isDeleted = false;
 
+    @Column(name = "is_admin_mode", columnDefinition = "TINYINT DEFAULT 0")
+    private Boolean isAdminMode = false;
+
     @Column(name = "create_date", nullable = false, updatable = false, insertable = false,  columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createDate;
 

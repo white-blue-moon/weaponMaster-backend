@@ -50,6 +50,9 @@ public class Article {
     @Column(name = "is_pinned", columnDefinition = "TINYINT DEFAULT 0")
     private Boolean isPinned = false;
 
+    @Column(name = "is_admin_mode", columnDefinition = "TINYINT DEFAULT 0")
+    private Boolean isAdminMode = false;
+
     public Article(Integer categoryType, Integer articleType, Integer articleDetailType, String title, String contents, String userId) {
         this.categoryType      = categoryType;
         this.articleType       = articleType;
