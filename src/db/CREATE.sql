@@ -41,6 +41,37 @@ CREATE TABLE ref_publisher_logo (
     CONSTRAINT unique_ref_bannerInfo UNIQUE (version)
 ) CHARSET=utf8 COMMENT='퍼블리셔 로고 관리 테이블';
 
+-- 캐릭터 배너 이름 이미지 관리 테이블
+DROP TABLE IF EXISTS ref_character_banner;
+CREATE TABLE ref_character_banner (
+    id              INT AUTO_INCREMENT PRIMARY KEY COMMENT '기본 키 컬럼',
+    version         INT             NOT NULL COMMENT '배너 버전',
+    character_type  TINYINT         NOT NULL COMMENT '캐릭터 타입 (ex. 1: 귀검사(남), 4: 격투가(여))',
+    character_desc  VARCHAR(255)    COMMENT '캐릭터 설명 (참고용)',
+    name_img_url    VARCHAR(255)    NOT NULL COMMENT '캐릭터 이름 이미지 URL',
+    thumb_img_url   VARCHAR(255)    NOT NULL COMMENT '하단 썸네일 이미지 URL',
+    banner_order    TINYINT         NOT NULL COMMENT '배너 출력 순서',
+    create_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '데이터 생성 날짜',
+    update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '데이터 수정 날짜',
+    UNIQUE (version, character_type, banner_order)
+) CHARSET=utf8 COMMENT='캐릭터 배너 이름 이미지 관리 테이블';
+
+-- 캐릭터 배너 상세 정보 관리 테이블
+DROP TABLE IF EXISTS ref_character_banner_detail;
+CREATE TABLE ref_character_banner_detail (
+    id                    INT AUTO_INCREMENT PRIMARY KEY COMMENT '기본 키 컬럼',
+    version               INT             NOT NULL COMMENT '배너 버전',
+    character_type        TINYINT         NOT NULL COMMENT '캐릭터 타입 (ex. 1: 귀검사(남), 4: 격투가(여))',
+    character_detail_type TINYINT         NOT NULL COMMENT '캐릭터 > 직업 타입 (ex. 4 > 1: 넨마스터, 2: 스트라이커)',
+    character_name        VARCHAR(100)    NOT NULL COMMENT '캐릭터 > 직업 이름',
+    character_intro       VARCHAR(255)    NOT NULL COMMENT '캐릭터 > 직업 소개 1줄',
+    img_url               VARCHAR(255)    NOT NULL COMMENT '캐릭터 > 직업 메인 이미지 URL',
+    homepage_link_url     VARCHAR(255)    COMMENT '던파 홈페이지 캐릭터 설명 링크',
+    create_date           TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '데이터 생성 날짜',
+    update_date           TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '데이터 수정 날짜',
+    UNIQUE (version, character_type, character_detail_type)
+) CHARSET=utf8 COMMENT='캐릭터 배너 상세 정보 관리 테이블';
+
 
 -------------------------------------------------------------------------
 ----------------------------[ 사용자 별 참조 값 ]----------------------------
