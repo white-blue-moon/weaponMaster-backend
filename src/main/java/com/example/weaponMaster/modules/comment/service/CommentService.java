@@ -18,6 +18,7 @@ import com.example.weaponMaster.modules.comment.repository.CommentRepository;
 import com.example.weaponMaster.modules.common.constant.MyURL;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.slack.constant.AdminSlackChannelType;
+import com.example.weaponMaster.modules.slack.constant.UserSlackNoticeType;
 import com.example.weaponMaster.modules.slack.service.SlackService;
 import com.example.weaponMaster.modules.slack.util.HtmlUtil;
 import lombok.RequiredArgsConstructor;
@@ -81,18 +82,19 @@ public class CommentService {
     }
 
     private void handlePrivateContactComment(Article article, ReqCommentsDto request, Comment savedComment) {
-        // 1:1 문의 > 관리자의 최초 댓글 기재면 답변 완료 상태로 업데이트
+        // 1:1 문의 > 관리자의 최초 댓글 기재면 답변 완료 상태로 업데이트 및 유저에게 슬랙 알림 발송
         if (request.getIsAdmin()) {
             if (article.getArticleDetailType() == ArticleDetailType.SERVICE_CENTER.PRIVATE_CONTACT.WAITING) {
                 article.setArticleDetailType(ArticleDetailType.SERVICE_CENTER.PRIVATE_CONTACT.ANSWERED);
                 articleRepository.save(article);
+                slackService.sendMessage(article.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, getUserNoticeMessage(article, savedComment));
                 return;
             }
         }
 
         // 1:1 문의 > 유저가 추가 댓글을 기재했다면 관리자 슬랙 알림 발송
         if (isArticleOwner(request, article)) {
-            slackService.sendMessageAdmin(AdminSlackChannelType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(article, savedComment));
+            slackService.sendMessageAdmin(AdminSlackChannelType.PRIVATE_CONTACT_NOTICE, getAdminNoticeMessage(article, savedComment));
             return;
         }
 
@@ -124,7 +126,33 @@ public class CommentService {
         return savedComment;
     }
 
-    private String getNoticeMessage(Article article, Comment userComment) {
+    private String getUserNoticeMessage(Article article, Comment userComment) {
+        // 1. HTML 태그 제거 및 정리
+        String plainText = HtmlUtil.getPlainText(userComment.getContents());
+
+        // 2. 길이 제한
+        int maxLength = 80;
+        if (plainText.length() > maxLength) {
+            plainText = plainText.substring(0, maxLength) + "...";
+        }
+
+        // 이모지코드: 💬
+        String link = String.format("%s/service/%d", MyURL.WEAPON_MASTER, article.getId());
+        String message = String.format(
+                "문의 주신 내용에 대한 답변이 완료되었습니다.\n" +
+                        "`\uD83D\uDCAC 1:1 문의 답변완료 알림` - <%s|링크 바로가기>\n" +
+                        "```" +
+                        "제목: %s\n" +
+                        "답변: %s" +
+                        "```",
+                link,
+                article.getTitle(),
+                plainText
+        );
+        return message;
+    }
+
+    private String getAdminNoticeMessage(Article article, Comment userComment) {
         // 1. HTML 태그 제거 및 정리
         String plainText = HtmlUtil.getPlainText(userComment.getContents());
 
