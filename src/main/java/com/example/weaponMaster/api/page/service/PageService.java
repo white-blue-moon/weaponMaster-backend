@@ -10,7 +10,7 @@ import com.example.weaponMaster.modules.article.service.ArticleService;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.focusBanner.dto.BannerDto;
 import com.example.weaponMaster.modules.siteSetting.record.Settings;
-import com.example.weaponMaster.modules.focusBanner.service.BannerService;
+import com.example.weaponMaster.modules.focusBanner.service.FocusBannerService;
 import com.example.weaponMaster.modules.siteSetting.service.SiteSettingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.Map;
 public class PageService {
 
     private final SiteSettingService   siteSettingService;
-    private final BannerService        bannerService;
+    private final FocusBannerService   focusBannerService;
     private final ArticleService       articleService;
 
     public ApiResponse<RespHomeDto> getPageHome(ReqHomeDto request) {
@@ -30,7 +30,7 @@ public class PageService {
         Settings settings = siteSettingService.getSetting();
 
         // 홈페이지 설정과 request 값을 조합하여 배너 정보 조회
-        Map<Integer, BannerDto[]> bannersMap = bannerService.getBannersMap(request.getBannerTypes(), settings);
+        Map<Integer, BannerDto[]> bannersMap = focusBannerService.getBannersMap(request.getBannerTypes(), settings);
         RespHomeDto resp = new RespHomeDto();
         resp.setFocusBanners(bannersMap);
 
@@ -51,7 +51,7 @@ public class PageService {
         Settings settings = siteSettingService.getSetting();
 
         // 홈페이지 설정과 request 값을 조합하여 배너 정보 조회
-        Map<Integer, BannerDto[]> bannersMap = bannerService.getBannersMap(new int[]{bannerType}, settings);
+        Map<Integer, BannerDto[]> bannersMap = focusBannerService.getBannersMap(new int[]{bannerType}, settings);
         RespInspectionDto resp = new RespInspectionDto();
         resp.setFocusBanners(bannersMap);
 

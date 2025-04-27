@@ -12,5 +12,8 @@ public record Settings(
         @JsonProperty("home_news_focus_second_ver") int homeNewsFocusSecondVer,
 
         // 점검페이지 포커스 배너
-        @JsonProperty("inspection_main_focus_ver")  int inspectionMainFocusVer
+        @JsonProperty("inspection_main_focus_ver")  int inspectionMainFocusVer,
+
+        // 캐릭터 배너
+        @JsonProperty("character_banner_ver")       int characterBannerVer
 ) {}

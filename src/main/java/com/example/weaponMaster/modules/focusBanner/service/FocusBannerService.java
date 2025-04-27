@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class BannerService {
+public class FocusBannerService {
 
     private final BannerInfoRepository bannerInfoRepository;
 

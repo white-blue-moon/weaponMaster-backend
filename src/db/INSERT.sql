@@ -59,6 +59,25 @@ INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img
 INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/0a3b7ce4-cb9c-1144-461d-634afa4f27c7.jpg', 5, ' ');
 INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/9a10acd4-d732-4002-2bec-c0a09bbfff45.jpg', 6, ' ');
 
+-- 캐릭터 배너 1 버전 추가
+DELETE FROM ref_character_banner WHERE version = 1;
+INSERT INTO ref_character_banner (version, character_type, character_desc, name_img_url, thumb_img_url, banner_order) VALUES (1, 4, '격투가(여)', 'https://bbscdn.df.nexon.com/pg/characters/img/main/mc_txt04.png', 'https://bbscdn.df.nexon.com/pg/characters/img/thum/thum_char_04.png', 1);
+INSERT INTO ref_character_banner (version, character_type, character_desc, name_img_url, thumb_img_url, banner_order) VALUES (1, 1, '귀검사(남)', 'https://bbscdn.df.nexon.com/pg/characters/img/main/mc_txt01.png', 'https://bbscdn.df.nexon.com/pg/characters/img/thum/thum_char_01.png', 2);
+
+-- 캐릭터 배너 상세 정보 1 버전 추가
+DELETE FROM ref_character_banner_detail WHERE version = 1 AND character_type = 4;
+INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 4, 1, '넨마스터(여)', '넨의 힘을 활용하기 위한 수련을 한 격투가', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg14_3.jpg', '/pg/characters/cim14');
+INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 4, 2, '스트라이커(여)', '육체를 극한까지 단련한 정통파 격투가', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg15_3.jpg', '/pg/characters/cim15');
+INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 4, 3, '스트리트파이터(여)', '이기는 싸움을 추구하는 실전 격투가', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg16_3.jpg', '/pg/characters/cim16');
+INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 4, 4, '그래플러(여)', '잡기 기술을 극한까지 연마한 격투가', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg17_3.jpg', '/pg/characters/cim17');
+
+DELETE FROM ref_character_banner_detail WHERE version = 1 AND character_type = 1;
+INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 1, 1, '웨펀마스터', '귀수에 깃든 귀신을 억누르며 검술 연마에 매진하는 귀검사', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg01_3.jpg', '/pg/characters/cim01');
+INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 1, 2, '소울브링어', '귀신과 소통함으로써 그 힘을 활용할 수 있게 된 귀검사', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg02_3.jpg', '/pg/characters/cim02');
+INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 1, 3, '버서커', '강력한 힘을 위해 부작용을 감수하며 카잔증후군을 받아들인 귀검사', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg03_3.jpg', '/pg/characters/cim03');
+INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 1, 4, '아수라', '파동의 힘을 느끼기 위해 스스로 시력을 포기한 귀검사', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg04_3.jpg', '/pg/characters/cim04');
+INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 1, 5, '검귀', '원귀의 혼과 융합하여 귀신과 인간의 경계에 선 귀검사', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg05_3.jpg', '/pg/characters/cim05');
+
 -- 홈페이지 설정 값 리스트 테스트 정보 추가
 DELETE FROM site_setting WHERE settings_comment = "설정 테스트";
-INSERT INTO site_setting (active_state, settings, settings_comment) VALUES(1, '{"publisher_logo_ver": 1, "home_main_focus_ver": 2, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1, "inspection_main_focus_ver": 1}', '설정 테스트');
+INSERT INTO site_setting (active_state, settings, settings_comment) VALUES(1, '{"publisher_logo_ver": 1, "home_main_focus_ver": 2, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1, "inspection_main_focus_ver": 1, character_banner_ver}', '설정 테스트');
