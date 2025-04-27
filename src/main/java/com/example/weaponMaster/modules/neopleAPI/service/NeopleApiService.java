@@ -178,6 +178,7 @@ public class NeopleApiService {
                 userNotice.setAuctionState(AuctionState.SOLD_OUT);
                 userAuctionNoticeRepo.save(userNotice);
 
+                // TODO regCount 에 대한 최종 가격 정보 전달하기 (수수료, 보증금 모두 계산한 결과 전달하기), 아이템 개수 정보도 전달하기
                 String priceStr       = userNotice.getItemInfo().path("currentPrice").asText();
                 String formattedPrice = priceStr.replaceAll("(\\d)(?=(\\d{3})+$)", "$1,");
                 String itemName       = userNotice.getItemInfo().path("itemName").asText();
