@@ -129,8 +129,19 @@ public class NeopleApiService {
                 handleSoldOut(e.getResponseBodyAsString(), userNotice);
             } else { throw e; } // 다른 예외는 다시 던져서 상위에서 처리
         } catch (Exception e) {
-            String errMessage = String.format("[경매 판매 알림 추적 에러] userId: %s, noticeId: %d, error: %s", userNotice.getUserId(), userNotice.getId(), e.getMessage());
-            System.err.println(errMessage);
+            String errMessage     = String.format(
+                    "`[경매 판매 알림 추적 에러]`\n" +
+                            "```\n" +
+                            "유저 ID: %s\n" +
+                            "추적 ID: %d\n" +
+                            "에러: %s\n" +
+                            "```",
+                    userNotice.getUserId(),
+                    userNotice.getId(),
+                    e.getMessage()
+            );
+
+            System.err.println(e.getMessage());
             slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, errMessage);
             stopMonitoring(userNotice.getId());
         }
