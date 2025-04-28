@@ -149,14 +149,14 @@ public class SlackService {
     @Transactional
     public ResponseEntity<String> handleSlackOauthCallback(String code, String state) {
         // 이미 등록되어 있는 정보가 있는지 확인
-        String          userId        = state;
+        String userId = state;
         UserSlackNotice findUserSlack = userSlackNoticeRepo.findByUserIdAndType(userId, UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT);
         if (findUserSlack != null) {
             throw new IllegalArgumentException(String.format("[Slack Bot 설치 에러] 이미 등록된 정보가 존재합니다 userId: %s", userId));
         }
 
         // 1. 슬랙 봇 정보 조회
-        SlackBot   slackBot = slackBotRepo.findByType(SlackBotType.NORMAL_BOT);
+        SlackBot slackBot = slackBotRepo.findByType(SlackBotType.NORMAL_BOT);
 
         // 2. payload 세팅
         MultiValueMap<String, String> payload = new LinkedMultiValueMap<>();
@@ -185,14 +185,14 @@ public class SlackService {
         String slackUserId = jsonNode.path("authed_user").path("id").asText();
 
         // 5. DM 채널 정보 확인
-        Map<String, String> dmFormData = new HashMap<>();
-        dmFormData.put("users", slackUserId);
+        Map<String, String> dmPayload = new HashMap<>();
+        dmPayload.put("users", slackUserId);
 
         ResponseEntity<String> dmResponse = restClient.post()
                 .uri(SlackApi.DM_OPEN_URL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(dmFormData)
+                .body(dmPayload)
                 .retrieve()
                 .toEntity(String.class);
 
@@ -251,7 +251,7 @@ public class SlackService {
 
         // 2. 테스트 메시지 작성
         String message = String.format(
-                "`[Slack 연동 확인 알림]`\n" +
+                "`Slack 연동 확인 알림`\n" +
                         "```\n" +
                         "%s 님 안녕하세요.\n" +
                         "이 메시지는 Slack 연동 확인을 위해 발송되었습니다. \n" +
@@ -260,7 +260,11 @@ public class SlackService {
                 userId
         );
 
-        String payload = String.format("{ \"channel\": \"%s\", \"text\": \"%s\" }", userSlack.getSlackChannelId(), message);
+        // 3. payload 준비 및 발송
+        Map<String, String> payload = new HashMap<>();
+        payload.put("channel", userSlack.getSlackChannelId());
+        payload.put("text", message);
+
         ResponseEntity<String> response = restClient.post()
                 .uri(SlackApi.SEND_MESSAGE_URL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSlack.getSlackBotToken())
@@ -269,12 +273,12 @@ public class SlackService {
                 .retrieve()
                 .toEntity(String.class);
 
-        // 3. 통신 상태 값 확인
+        // 4. 통신 상태 값 확인
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new RuntimeException(String.format("[Slack 에러] slack API 통신에 실패하였습니다. userId: %s, noticeType: %d", userId, noticeType));
         }
 
-        // 4. 메시지 전송 테스트에 실패했을 때 실패 반환
+        // 5. 메시지 전송 테스트에 실패했을 때 실패 반환
         JsonNode jsonNode = mapper.readTree(response.getBody());
         boolean  isTestOk = jsonNode.path("ok").asBoolean();
         if (!isTestOk) {
