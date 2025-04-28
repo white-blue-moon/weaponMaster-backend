@@ -13,24 +13,38 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-    // logger 로 에러를 남기면 스택 트레이스를 로깅할 수 있음
+    // logger 로 스택 트레이스를 함께 로깅
     private static final Logger       logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private final        SlackService slackService;
 
     // 클라이언트가 잘못된 요청을 보냈을 때 (400 Bad Request)
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<String>> handleIllegalArgumentException(IllegalArgumentException e) {
+        // 스택 트레이스 필터링 (내가 작성한 코드 중에서는 어디서 발생했는지)
+        StringBuilder filteredStackTrace = new StringBuilder();
+        for (StackTraceElement element : e.getStackTrace()) {
+            if (element.getClassName().startsWith("com.example.weaponMaster")) {
+                filteredStackTrace.append(element).append("\n");
+            }
+        }
+
         logger.error("Bad Request error occurred: ", e);
         slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, String.format(
                 "`400 Bad Request Error`\n" +
                         "```\n" +
-                        " %s\n" +
+                        "%s\n" +
+                          "\n" +
+                          "%s" +
                         "```",
-                e.getMessage()
+                e.getMessage(),
+                filteredStackTrace
         ));
 
         return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
@@ -46,13 +60,24 @@ public class GlobalExceptionHandler {
             return ResponseEntity.ok().build(); // 아무것도 하지 않고 OK 반환
         }
 
+        // 스택 트레이스 필터링 (내가 작성한 코드 중에서는 어디서 발생했는지)
+        StringBuilder filteredStackTrace = new StringBuilder();
+        for (StackTraceElement element : e.getStackTrace()) {
+            if (element.getClassName().startsWith("com.example.weaponMaster")) {
+                filteredStackTrace.append(element).append("\n");
+            }
+        }
+
         logger.error("Unexpected error occurred: ", e);
         slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, String.format(
                 "`500 Internal Server Error`\n" +
                         "```\n" +
                         "%s\n" +
+                          "\n" +
+                          "%s" +
                         "```",
-                e.getMessage()
+                e.getMessage(),
+                filteredStackTrace
         ));
 
         return ResponseEntity.internalServerError().body(ApiResponse.error(String.format("[UNEXPECTED ERROR] %s", e.getMessage())));

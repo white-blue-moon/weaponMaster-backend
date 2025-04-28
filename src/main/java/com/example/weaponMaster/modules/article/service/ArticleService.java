@@ -107,7 +107,7 @@ public class ArticleService {
         userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.ARTICLE, LogActType.UPDATE, (short)(int)savedArticle.getId());
         return ApiResponse.success();
     }
-    
+
     @Transactional
     public ApiResponse<Void> deleteArticle(ReqArticlesDto request, Integer articleId) {
         Article article = articleRepository.findById(articleId).orElse(null);
