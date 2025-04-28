@@ -42,4 +42,10 @@ public class ArticlesController {
     public ApiResponse<Void> deleteArticle(@RequestBody ReqArticlesDto request, @PathVariable("id") Integer id) {
         return articleService.deleteArticle(request, id);
     }
+
+     // 게시물 상단 고정 및 해제
+     @PatchMapping("/articles/{id}/pin")
+     public ApiResponse<Void> toggleArticlePin(@RequestBody ReqArticlesDto request, @PathVariable("id") Integer id) {
+         return articleService.toggleArticlePin(request, id);
+     }
 }

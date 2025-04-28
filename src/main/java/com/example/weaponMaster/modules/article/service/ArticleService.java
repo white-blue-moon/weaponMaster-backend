@@ -3,9 +3,6 @@ package com.example.weaponMaster.modules.article.service;
 import com.example.weaponMaster.api.articles.dto.ReqArticlesDto;
 import com.example.weaponMaster.modules.account.constant.LogActType;
 import com.example.weaponMaster.modules.account.constant.LogContentsType;
-import com.example.weaponMaster.modules.account.constant.UserType;
-import com.example.weaponMaster.modules.account.entity.UserInfo;
-import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
 import com.example.weaponMaster.modules.account.service.UserLogService;
 import com.example.weaponMaster.modules.account.service.UserPermissionService;
 import com.example.weaponMaster.modules.article.constant.ArticleType;
@@ -30,7 +27,6 @@ public class ArticleService {
 
     private final ArticleRepository     articleRepository;
     private final CommentRepository     commentRepository;
-    private final UserInfoRepository    userInfoRepository;
     private final SlackService          slackService;
     private final UserLogService        userLogService;
     private final UserPermissionService userPermissionService;
@@ -122,9 +118,8 @@ public class ArticleService {
         }
 
         if (article.getCategoryType() == CategoryType.NEWS) {
-            UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
-            if (userInfo == null || userInfo.getUserType() == UserType.NORMAL) {
-                throw new IllegalArgumentException(String.format("[게시물 삭제 에러] Permission denied. userId: %s, articleId: %d", request.getUserId(), articleId));
+            if (!userPermissionService.isAdminAuthorized(request.getIsAdminMode(), request.getUserId())) {
+                throw new IllegalArgumentException(String.format("[게시물 삭제 에러] NEWS 게시물을 관리자 권한 없이 삭제 시도하였습니다. Permission denied. userId: %s, articleId: %d", request.getUserId(), articleId));
             }
         }
 
@@ -135,6 +130,24 @@ public class ArticleService {
         commentRepository.deleteByArticleId(articleId);
 
         userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.ARTICLE, LogActType.DELETE, (short)(int)articleId);
+        return ApiResponse.success();
+    }
+
+    @Transactional
+    public ApiResponse<Void> toggleArticlePin(ReqArticlesDto request, Integer articleId) {
+        Article article = articleRepository.findById(articleId).orElse(null);
+        if (article == null) {
+            throw new IllegalArgumentException(String.format("[게시물 상단 고정 토글 에러] Article not found. userId: %s, articleId: %d", request.getUserId(), articleId));
+        }
+
+        if (!userPermissionService.isAdminAuthorized(request.getIsAdminMode(), request.getUserId())) {
+            throw new IllegalArgumentException(String.format("[게시물 상단 고정 토글 에러] 관리자 권한이 없음에도 상단 고정 토글을 요청하였습니다. userId: %s, articleId: %d", request.getUserId(), article.getId()));
+        }
+
+        article.setIsPinned(!article.getIsPinned());
+        articleRepository.save(article);
+
+        userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.ARTICLE, LogActType.TOGGLE_ARTICLE_PIN, (short)(int)articleId, (short) (article.getIsPinned() ? 1 : 0));
         return ApiResponse.success();
     }
 

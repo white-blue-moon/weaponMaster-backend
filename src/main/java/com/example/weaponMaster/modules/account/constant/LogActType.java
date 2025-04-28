@@ -15,4 +15,6 @@ public class LogActType {
     public static final Short DELETE_COMMENT = 21; // 댓글 삭제
 
     public static final Short TEST = 30; // 테스트
+
+    public static final Short TOGGLE_ARTICLE_PIN = 40; // 게시물 상단 고정
 }
