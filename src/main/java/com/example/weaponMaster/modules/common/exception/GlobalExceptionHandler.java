@@ -2,8 +2,6 @@ package com.example.weaponMaster.modules.common.exception;
 
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.slack.constant.AdminSlackChannelType;
-import com.example.weaponMaster.modules.slack.constant.UserSlackNoticeType;
-import com.example.weaponMaster.modules.slack.entity.AdminSlackNotice;
 import com.example.weaponMaster.modules.slack.service.SlackService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
@@ -27,15 +22,7 @@ public class GlobalExceptionHandler {
     // 클라이언트가 잘못된 요청을 보냈을 때 (400 Bad Request)
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<String>> handleIllegalArgumentException(IllegalArgumentException e) {
-        // 스택 트레이스 필터링 (내가 작성한 코드 중에서는 어디서 발생했는지)
-        StringBuilder filteredStackTrace = new StringBuilder();
-        for (StackTraceElement element : e.getStackTrace()) {
-            if (element.getClassName().startsWith("com.example.weaponMaster")) {
-                filteredStackTrace.append(element).append("\n");
-            }
-        }
-
-        logger.error("Bad Request error occurred: ", e);
+        logger.error("400 Bad Request error occurred: ", e);
         slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, String.format(
                 "`400 Bad Request Error`\n" +
                         "```\n" +
@@ -44,7 +31,7 @@ public class GlobalExceptionHandler {
                           "%s" +
                         "```",
                 e.getMessage(),
-                filteredStackTrace
+                getSimpleStackTrace(e.getStackTrace())
         ));
 
         return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
@@ -55,20 +42,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<String>> handleGeneralException(HttpServletRequest request, Exception e) {
         String requestURI = request.getRequestURI();
 
-        // favicon.ico 요청은 무시
+        // favicon.ico 요청은 무시 -> 아무것도 하지 않고 OK 반환
         if ("/favicon.ico".equals(requestURI)) {
-            return ResponseEntity.ok().build(); // 아무것도 하지 않고 OK 반환
+            return ResponseEntity.ok().build();
         }
 
-        // 스택 트레이스 필터링 (내가 작성한 코드 중에서는 어디서 발생했는지)
-        StringBuilder filteredStackTrace = new StringBuilder();
-        for (StackTraceElement element : e.getStackTrace()) {
-            if (element.getClassName().startsWith("com.example.weaponMaster")) {
-                filteredStackTrace.append(element).append("\n");
-            }
-        }
-
-        logger.error("Unexpected error occurred: ", e);
+        logger.error("500 Unexpected error occurred: ", e);
         slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, String.format(
                 "`500 Internal Server Error`\n" +
                         "```\n" +
@@ -77,10 +56,22 @@ public class GlobalExceptionHandler {
                           "%s" +
                         "```",
                 e.getMessage(),
-                filteredStackTrace
+                getSimpleStackTrace(e.getStackTrace())
         ));
 
-        return ResponseEntity.internalServerError().body(ApiResponse.error(String.format("[UNEXPECTED ERROR] %s", e.getMessage())));
+        return ResponseEntity.internalServerError().body(ApiResponse.error(e.getMessage()));
     }
+
+    // 스택 트레이스 요약 필터링 (내가 작성한 코드 중에서는 어디서 발생했는지)
+    private String getSimpleStackTrace(StackTraceElement[] e) {
+        StringBuilder simpleStackTrace = new StringBuilder();
+        for (StackTraceElement element : e) {
+            if (element.getClassName().startsWith("com.example.weaponMaster")) {
+                simpleStackTrace.append(element).append("\n");
+            }
+        }
+        return simpleStackTrace.toString();
+    }
+
 }
 
