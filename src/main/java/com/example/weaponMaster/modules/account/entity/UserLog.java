@@ -21,7 +21,7 @@ public class UserLog {
     private String userId;
 
     @Column(name = "is_admin_mode", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
-    private Boolean isAdminMode;
+    private Boolean isAdminMode = false;
 
     @Column(name = "contents_type", nullable = false)
     private Short contentsType;

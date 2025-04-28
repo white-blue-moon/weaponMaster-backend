@@ -55,7 +55,7 @@ public class UserInfoService {
     @Transactional
     public ApiResponse<Void> createUserInfo(ReqJoinDto request) {
         if (!isUserIdAvailable(request.getUserId())) {
-            throw new IllegalArgumentException("userId already exist: " + request.getUserId());
+            throw new IllegalArgumentException("[회원가입 오류] 이미 존재하는 아이디로 가입 API 를 호출하였습니다. userId already exist: " + request.getUserId());
         }
 
         UserInfo userInfo = new UserInfo(
@@ -68,33 +68,6 @@ public class UserInfoService {
         userInfoRepository.save(userInfo);
         userLogService.saveLog(request.getUserId(), LogContentsType.WEAPON_MASTER, LogActType.JOIN);
 
-        return ApiResponse.success();
-    }
-
-    // TODO 비밀번호 업데이트
-    @Transactional
-    public ApiResponse<Void> updateUserPW(String userId, String newPassword) {
-        UserInfo userInfo = userInfoRepository.findByUserId(userId);
-        if (userInfo == null) {
-            throw new IllegalArgumentException("can't find user info: " + userId);
-        }
-
-        userInfo.setUserPw(newPassword);
-        userInfoRepository.save(userInfo);
-        return ApiResponse.success();
-    }
-
-    // TODO DF 정보 업데이트
-    @Transactional
-    public ApiResponse<Void> updateUserDfInfo(String userId, String dfServerId, String dfCharacterName) {
-        UserInfo userInfo = userInfoRepository.findByUserId(userId);
-        if (userInfo == null) {
-            throw new IllegalArgumentException("can't find user info: " + userId);
-        }
-
-        userInfo.setDfServerId(dfServerId);
-        userInfo.setDfCharacterName(dfCharacterName);
-        userInfoRepository.save(userInfo);
         return ApiResponse.success();
     }
 }
