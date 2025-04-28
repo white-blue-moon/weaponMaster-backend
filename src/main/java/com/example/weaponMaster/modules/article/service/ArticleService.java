@@ -7,6 +7,7 @@ import com.example.weaponMaster.modules.account.constant.UserType;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
 import com.example.weaponMaster.modules.account.service.UserLogService;
+import com.example.weaponMaster.modules.account.service.UserPermissionService;
 import com.example.weaponMaster.modules.article.constant.ArticleType;
 import com.example.weaponMaster.modules.article.constant.CategoryType;
 import com.example.weaponMaster.modules.article.dto.ArticleDto;
@@ -27,11 +28,12 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class ArticleService {
 
-    private final ArticleRepository  articleRepository;
-    private final CommentRepository  commentRepository;
-    private final UserInfoRepository userInfoRepository;
-    private final SlackService       slackService;
-    private final UserLogService     userLogService;
+    private final ArticleRepository     articleRepository;
+    private final CommentRepository     commentRepository;
+    private final UserInfoRepository    userInfoRepository;
+    private final SlackService          slackService;
+    private final UserLogService        userLogService;
+    private final UserPermissionService userPermissionService;
 
     @Transactional
     public ApiResponse<Void> createArticle(ReqArticlesDto request) {
@@ -44,16 +46,7 @@ public class ArticleService {
                 request.getUserId()
         );
 
-        if (request.getIsAdminMode()) {
-            UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
-            if (userInfo == null) {
-                throw new IllegalArgumentException(String.format("[게시물 등록 에러] 작성 요청한 유저의 정보를 확인할 수 없습니다. userId: %s", request.getUserId()));
-            }
-
-            if (userInfo.getUserType() != UserType.ADMIN) {
-                throw new IllegalArgumentException(String.format("[게시물 등록 에러] 관리자 권한이 없으나 관리자모드에서 작성 요청하였습니다. userId: %s, userType: %d", request.getUserId(), userInfo.getUserType()));
-            }
-
+        if (userPermissionService.isAdminAuthorized(request.getIsAdminMode(), request.getUserId())) {
             article.setIsAdminMode(true);
         }
 
@@ -95,6 +88,7 @@ public class ArticleService {
         return message;
     }
 
+    // TODO 수정 권한 있는지 체크 필요
     @Transactional
     public ApiResponse<Void> updateArticle(ReqArticlesDto request, Integer id) {
         Article article = articleRepository.findById(id)
@@ -107,10 +101,13 @@ public class ArticleService {
         return ApiResponse.success();
     }
 
+    // TODO 삭제 권한 있는지 체크 필요
     @Transactional
     public ApiResponse<Void> deleteArticle(ReqArticlesDto request, Integer articleId) {
-        Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new IllegalArgumentException(String.format("[게시물 삭제 에러] Article not found. userId: %s, articleId: %d", request.getUserId(), articleId)));
+        Article article = articleRepository.findById(articleId).orElse(null);
+        if (article == null) {
+           throw new IllegalArgumentException(String.format("[게시물 삭제 에러] Article not found. userId: %s, articleId: %d", request.getUserId(), articleId));
+        }
 
         if (article.getCategoryType() == CategoryType.NEWS) {
             UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
