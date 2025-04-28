@@ -88,11 +88,18 @@ public class ArticleService {
         return message;
     }
 
-    // TODO 수정 권한 있는지 체크 필요
     @Transactional
     public ApiResponse<Void> updateArticle(ReqArticlesDto request, Integer id) {
-        Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Article not found: " + id));
+        Article article = articleRepository.findById(id).orElse(null);
+        if (article == null) {
+            throw new IllegalArgumentException(String.format("[게시물 수정 에러] Article not found. userId: %s, articleId: %d", request.getUserId(), id));
+        }
+
+        if (!request.getUserId().equals(article.getUserId())) {
+            if (!userPermissionService.isAdminAuthorized(request.getIsAdminMode(), request.getUserId())) {
+                throw new IllegalArgumentException(String.format("[게시물 수정 에러] 관리자 권한이 없음에도 다른 작성자의 게시물 수정을 요청하였습니다. userId: %s, articleId: %d, author: %s", request.getUserId(), article.getId(), article.getUserId()));
+            }
+        }
 
         article.update(request);
         Article savedArticle = articleRepository.save(article);
@@ -100,13 +107,18 @@ public class ArticleService {
         userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.ARTICLE, LogActType.UPDATE, (short)(int)savedArticle.getId());
         return ApiResponse.success();
     }
-
-    // TODO 삭제 권한 있는지 체크 필요
+    
     @Transactional
     public ApiResponse<Void> deleteArticle(ReqArticlesDto request, Integer articleId) {
         Article article = articleRepository.findById(articleId).orElse(null);
         if (article == null) {
            throw new IllegalArgumentException(String.format("[게시물 삭제 에러] Article not found. userId: %s, articleId: %d", request.getUserId(), articleId));
+        }
+
+        if (!request.getUserId().equals(article.getUserId())) {
+            if (!userPermissionService.isAdminAuthorized(request.getIsAdminMode(), request.getUserId())) {
+                throw new IllegalArgumentException(String.format("[게시물 삭제 에러] 관리자 권한이 없음에도 다른 작성자의 게시물 삭제를 요청하였습니다. userId: %s, articleId: %d, author: %s", request.getUserId(), article.getId(), article.getUserId()));
+            }
         }
 
         if (article.getCategoryType() == CategoryType.NEWS) {
