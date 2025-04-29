@@ -27,7 +27,6 @@ public class GlobalExceptionHandler {
                 "`400 Bad Request Error`\n" +
                         "```\n" +
                         "%s\n" +
-                          "\n" +
                           "%s" +
                         "```",
                 e.getMessage(),
@@ -52,7 +51,6 @@ public class GlobalExceptionHandler {
                 "`500 Internal Server Error`\n" +
                         "```\n" +
                         "%s\n" +
-                          "\n" +
                           "%s" +
                         "```",
                 e.getMessage(),
@@ -70,7 +68,8 @@ public class GlobalExceptionHandler {
                 simpleStackTrace.append(element).append("\n");
             }
         }
-        return simpleStackTrace.toString();
+
+        return simpleStackTrace.isEmpty() ? "" : ("\n" + simpleStackTrace.toString());
     }
 
 }
