@@ -53,7 +53,7 @@ public class PageService {
         return ApiResponse.success(resp);
     }
 
-    public ApiResponse<RespInspectionDto> getPageInspection(Integer bannerType) {
+    public ApiResponse<RespInspectionDto> getPageMaintenance(Integer bannerType) {
         // 홈페이지 설정 조회
         Settings settings = siteSettingService.getSetting();
 

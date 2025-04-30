@@ -1,7 +1,7 @@
 package com.example.weaponMaster.modules.focusBanner.service;
 
 import com.example.weaponMaster.modules.siteSetting.record.Settings;
-import com.example.weaponMaster.modules.focusBanner.constant.BannerType;
+import com.example.weaponMaster.modules.focusBanner.constant.FocusBannerType;
 import com.example.weaponMaster.modules.focusBanner.dto.BannerDto;
 import com.example.weaponMaster.modules.focusBanner.entity.BannerInfo;
 import com.example.weaponMaster.modules.focusBanner.repository.BannerInfoRepository;
@@ -42,10 +42,10 @@ public class FocusBannerService {
 
     private int getBannerVersion(int bannerType, Settings settings) {
         return switch (bannerType) {
-            case BannerType.MAIN_FOCUS_BANNER  -> settings.homeMainFocusVer();
-            case BannerType.NEWS_BANNER_FIRST  -> settings.homeNewsFocusFirstVer();
-            case BannerType.NEWS_BANNER_SECOND -> settings.homeNewsFocusSecondVer();
-            case BannerType.INSPECTION_MAIN    -> settings.inspectionMainFocusVer();
+            case FocusBannerType.MAIN_FOCUS_BANNER  -> settings.homeMainFocusVer();
+            case FocusBannerType.NEWS_BANNER_FIRST  -> settings.homeNewsFocusFirstVer();
+            case FocusBannerType.NEWS_BANNER_SECOND -> settings.homeNewsFocusSecondVer();
+            case FocusBannerType.MAINTENANCE_MAIN -> settings.inspectionMainFocusVer();
             default -> throw new IllegalArgumentException("Invalid focus banner type: " + bannerType);
         };
     }

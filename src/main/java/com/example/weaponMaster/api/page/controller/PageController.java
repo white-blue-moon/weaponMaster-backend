@@ -4,7 +4,6 @@ import com.example.weaponMaster.api.page.dto.ReqHomeDto;
 import com.example.weaponMaster.api.page.dto.RespHomeDto;
 import com.example.weaponMaster.api.page.dto.RespInspectionDto;
 import com.example.weaponMaster.api.page.service.PageService;
-import com.example.weaponMaster.modules.article.dto.ArticleDto;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +20,8 @@ public class PageController {
     }
 
     // TODO {} 경로 말고 ? 로 받도록 수정 필요
-    @GetMapping("/page/inspection/{bannerType}")
-    public ApiResponse<RespInspectionDto> getPageInspection(@PathVariable("bannerType") Integer bannerType) {
-        return pageService.getPageInspection(bannerType);
+    @GetMapping("/page/maintenance/{bannerType}")
+    public ApiResponse<RespInspectionDto> getPageMaintenance(@PathVariable("bannerType") Integer bannerType) {
+        return pageService.getPageMaintenance(bannerType);
     }
 }
