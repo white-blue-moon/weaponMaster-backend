@@ -1,5 +1,6 @@
 package com.example.weaponMaster.api.page.controller;
 
+import com.example.weaponMaster.api.page.dto.ReqAccessGateDto;
 import com.example.weaponMaster.api.page.dto.ReqHomeDto;
 import com.example.weaponMaster.api.page.dto.RespHomeDto;
 import com.example.weaponMaster.api.page.dto.RespInspectionDto;
@@ -19,9 +20,13 @@ public class PageController {
         return pageService.getPageHome(request);
     }
 
-    // TODO {} 경로 말고 ? 로 받도록 수정 필요
-    @GetMapping("/page/maintenance/{bannerType}")
-    public ApiResponse<RespInspectionDto> getPageMaintenance(@PathVariable("bannerType") Integer bannerType) {
+    @GetMapping("/page/maintenance")
+    public ApiResponse<RespInspectionDto> getPageMaintenance(@RequestParam("bannerType") Integer bannerType) {
         return pageService.getPageMaintenance(bannerType);
+    }
+
+    @PostMapping("/page/access-gate/verify")
+    public ApiResponse<Void> verifyAccessGate(@RequestBody ReqAccessGateDto request) {
+        return pageService.verifyAccessGate(request);
     }
 }

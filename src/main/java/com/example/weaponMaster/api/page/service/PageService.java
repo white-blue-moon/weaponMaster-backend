@@ -1,8 +1,13 @@
 package com.example.weaponMaster.api.page.service;
 
+import com.example.weaponMaster.api.page.dto.ReqAccessGateDto;
 import com.example.weaponMaster.api.page.dto.ReqHomeDto;
 import com.example.weaponMaster.api.page.dto.RespHomeDto;
 import com.example.weaponMaster.api.page.dto.RespInspectionDto;
+import com.example.weaponMaster.modules.accessGate.service.AccessGatePasswordService;
+import com.example.weaponMaster.modules.account.constant.LogActType;
+import com.example.weaponMaster.modules.account.constant.LogContentsType;
+import com.example.weaponMaster.modules.account.service.UserLogService;
 import com.example.weaponMaster.modules.article.constant.ArticleType;
 import com.example.weaponMaster.modules.article.constant.CategoryType;
 import com.example.weaponMaster.modules.article.dto.ArticleDto;
@@ -23,10 +28,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PageService {
 
-    private final SiteSettingService     siteSettingService;
-    private final FocusBannerService     focusBannerService;
-    private final ArticleService         articleService;
-    private final CharacterBannerService characterBannerService;
+    private final SiteSettingService        siteSettingService;
+    private final FocusBannerService        focusBannerService;
+    private final ArticleService            articleService;
+    private final CharacterBannerService    characterBannerService;
+    private final AccessGatePasswordService accessGatePasswordService;
+    private final UserLogService            userLogService;
 
     public ApiResponse<RespHomeDto> getPageHome(ReqHomeDto request) {
         // 홈페이지 설정 조회
@@ -67,5 +74,15 @@ public class PageService {
         resp.setDevNote(devNote);
 
         return ApiResponse.success(resp);
+    }
+
+    public ApiResponse<Void> verifyAccessGate(ReqAccessGateDto request) {
+        if (accessGatePasswordService.isPasswordValid(request.getPassword())) {
+            // TODO 페이지 접근 해제가 몇 번 정도 이루어지는지 확인을 위해 임시 로그 추가 -> 추후 삭제 필요
+            userLogService.saveLog("시스템", false, LogContentsType.WEAPON_MASTER, LogActType.LOGIN_ACCESS_GATE);
+            return ApiResponse.success();
+        }
+
+        return ApiResponse.error("올바르지 않은 비밀코드입니다.");
     }
 }

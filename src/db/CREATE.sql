@@ -208,3 +208,14 @@ CREATE TABLE slack_bot (
     update_date         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '정보 수정 날짜',
     UNIQUE (type)
 ) CHARSET=utf8mb4 COMMENT='슬랙봇 정보 관리 테이블';
+
+-- 페이지 접근 제한 비밀번호 관리 테이블
+DROP TABLE IF EXISTS access_gate_password;
+CREATE TABLE access_gate_password (
+    id              INT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 row ID',
+    type            TINYINT         NOT NULL   COMMENT '비밀번호 타입 (ex. 1: 웨펀마스터, 2: 어드민툴)',
+    password        VARCHAR(255)    NOT NULL   COMMENT '비밀번호',
+    create_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 날짜',
+    update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 날짜',
+    UNIQUE (type)
+) CHARSET=utf8mb4 COMMENT='페이지 접근 제한 비밀번호 관리 테이블';

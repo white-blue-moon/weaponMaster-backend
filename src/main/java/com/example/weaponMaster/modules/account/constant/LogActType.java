@@ -2,6 +2,8 @@ package com.example.weaponMaster.modules.account.constant;
 
 public class LogActType {
 
+    public static final Short LOGIN_ACCESS_GATE  = 0; // 페이지 접근 제한 해제
+
     public static final Short LOGIN  = 1; // 로그인
     public static final Short LOGOUT = 2; // 로그아웃
     public static final Short JOIN   = 3; // 회원가입
