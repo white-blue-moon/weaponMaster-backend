@@ -38,3 +38,8 @@ out/
 
 ### .env ###
 .env
+
+# 전체 config 디렉토리는 무시
+/config/
+# 하지만 예시 파일은 추적 대상에 포함
+!config/application-example.yml
