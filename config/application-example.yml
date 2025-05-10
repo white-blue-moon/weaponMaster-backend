@@ -1,0 +1,16 @@
+server:
+  port: 7070
+
+spring:
+  application:
+    name: weaponMaster-backend
+
+  datasource:
+    url: jdbc:mysql://your-db-host:3306/your-db-name
+    username: your-db-username
+    password: your-db-password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+neople:
+  api:
+    key: your-neople-api-key
