@@ -14,3 +14,6 @@ spring:
 neople:
   api:
     key: your-neople-api-key
+
+cors:
+  allowedOrigins: "http://localhost:8080"  # 로컬 환경에서는 localhost:8080 허용
