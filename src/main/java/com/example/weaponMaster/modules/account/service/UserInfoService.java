@@ -26,11 +26,11 @@ public class UserInfoService {
 
         UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
         if (userInfo == null) {
-            throw new IllegalArgumentException(String.format("[%s 로그인 실패] 유저 정보 없음 userId: %s", mode, request.getUserId()));
+            return ApiResponse.error(String.format("[%s 로그인 실패] 유저 정보 없음 userId: %s", mode, request.getUserId()));
         }
 
         if (!Objects.equals(userInfo.getUserPw(), request.getUserPw())) {
-            throw new IllegalArgumentException(String.format("[%s 로그인 실패] 비밀번호 불일치 userId: %s", mode, request.getUserId()));
+            return ApiResponse.error(String.format("[%s 로그인 실패] 비밀번호 불일치 userId: %s", mode, request.getUserId()));
         }
 
         if (request.getIsAdminMode() && userInfo.getUserType() != UserType.ADMIN) {
