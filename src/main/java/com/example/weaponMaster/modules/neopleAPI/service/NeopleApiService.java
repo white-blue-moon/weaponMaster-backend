@@ -104,7 +104,7 @@ public class NeopleApiService {
     }
 
     // TODO 서버 통신이 끊겼다가 다시 연결될 때 DB 에서 SELLING 상태의 알림은 다시 1분 마다 추적하도록 세팅 필요
-    // 스레드 풀에서의 에러는 글로벌 에러에서 잡지 못하므로 try, catch 필요
+    // 스레드 풀에서의 에러는 글로벌 에러에서 잡지 못하므로 별도 try, catch 필요
     private void monitorAuction(UserAuctionNotice userNotice) {
         try {
             if (userNotice.getAuctionState() != AuctionState.SELLING) {
@@ -112,39 +112,47 @@ public class NeopleApiService {
                 return;
             }
 
-            if (isExpired(userNotice)) {
-                handleExpired(userNotice);
-                return;
-            }
-
-            // SOLD_OUT 여부 확인 -> 기존 정보가 조회되지 않는 404 에러로 SOLD_OUT 상태 판단
+            // 기존 정보가 조회되지 않는 404 에러로 판매 상태 변경 판단
             restClient.get()
                     .uri(urlUtil.getAuctionNoSearchUrl(userNotice.getAuctionNo()))
                     .retrieve()
                     .toEntity(String.class);
 
-          // SOLD_OUT 처리
         } catch (HttpClientErrorException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                handleSoldOut(e.getResponseBodyAsString(), userNotice);
-            } else { throw e; } // 다른 예외는 다시 던져서 상위에서 처리
+            handleAuctionState(userNotice, e);
         } catch (Exception e) {
-            String errMessage = String.format(
-                    "`[경매 판매 알림 추적 에러]`\n" +
-                            "```\n" +
-                            "유저 ID: %s\n" +
-                            "추적 ID: %d\n" +
-                            "에러: %s\n" +
-                            "```",
-                    userNotice.getUserId(),
-                    userNotice.getId(),
-                    e.getMessage()
-            );
-
-            System.err.println(e.getMessage());
-            slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, errMessage);
-            stopMonitoring(userNotice.getId());
+            handleMonitorError(userNotice, e);
         }
+    }
+
+    private void handleAuctionState(UserAuctionNotice userNotice, HttpClientErrorException e) {
+        if (e.getStatusCode() != HttpStatus.NOT_FOUND) {
+            throw e;
+        }
+
+        if (!isCodeDNF004(e.getResponseBodyAsString())) {
+            throw e;
+        }
+
+        if (isExpired(userNotice)) {
+            handleExpired(userNotice);
+            return;
+        }
+
+        handleSoldOut(userNotice);
+        return;
+    }
+
+    @SneakyThrows
+    private Boolean isCodeDNF004(String errorBody) {
+        JsonNode rootNode  = objectMapper.readTree(errorBody);
+        String   errorCode = rootNode.path("error").path("code").asText();
+
+        if ("DNF004".equals(errorCode)) {
+            return true;
+        }
+
+        return false;
     }
 
     private Boolean isExpired(UserAuctionNotice userNotice) {
@@ -180,50 +188,45 @@ public class NeopleApiService {
         stopMonitoring(userNotice.getId());
     }
 
-    private void handleSoldOut(String errorBody, UserAuctionNotice userNotice) {
-        try {
-            JsonNode rootNode = objectMapper.readTree(errorBody);
-            String  errorCode = rootNode.path("error").path("code").asText();
+    private void handleSoldOut(UserAuctionNotice userNotice) {
+        userNotice.setAuctionState(AuctionState.SOLD_OUT);
+        userAuctionNoticeRepo.save(userNotice);
 
-            if ("DNF004".equals(errorCode)) {
-                userNotice.setAuctionState(AuctionState.SOLD_OUT);
-                userAuctionNoticeRepo.save(userNotice);
+        // TODO regCount 에 대한 최종 가격 정보 전달하기 (수수료, 보증금 모두 계산한 결과 전달하기), 아이템 개수 정보도 전달하기
+        String priceStr       = userNotice.getItemInfo().path("currentPrice").asText();
+        String formattedPrice = priceStr.replaceAll("(\\d)(?=(\\d{3})+$)", "$1,");
+        String itemName       = userNotice.getItemInfo().path("itemName").asText();
+        String message        = String.format(
+                "`판매 완료 알림`\n" +
+                        "```\n" +
+                        "아이템명: %s\n" +
+                        "판매가격: %s G\n" +
+                        "```",
+                itemName,
+                formattedPrice
+        );
 
-                // TODO regCount 에 대한 최종 가격 정보 전달하기 (수수료, 보증금 모두 계산한 결과 전달하기), 아이템 개수 정보도 전달하기
-                String priceStr       = userNotice.getItemInfo().path("currentPrice").asText();
-                String formattedPrice = priceStr.replaceAll("(\\d)(?=(\\d{3})+$)", "$1,");
-                String itemName       = userNotice.getItemInfo().path("itemName").asText();
-                String message        = String.format(
-                        "`판매 완료 알림`\n" +
-                                "```\n" +
-                                "아이템명: %s\n" +
-                                "판매가격: %s G\n" +
-                                "```",
-                        itemName,
-                        formattedPrice
-                );
+        slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
+        sendAuctionStateChange(userNotice);
+        stopMonitoring(userNotice.getId());
+    }
 
-                slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
-                sendAuctionStateChange(userNotice);
-                stopMonitoring(userNotice.getId());
-            }
-        } catch (Exception e) {
-            String errMessage = String.format(
-                    "`[경매 판매 알림 추적 에러]`\n" +
-                            "```\n" +
-                            "유저 ID: %s\n" +
-                            "추적 ID: %d\n" +
-                            "에러: %s\n" +
-                            "```",
-                    userNotice.getUserId(),
-                    userNotice.getId(),
-                    e.getMessage()
-            );
+    private void handleMonitorError(UserAuctionNotice userNotice, Exception e) {
+        String errMessage = String.format(
+                "`[경매 판매 알림 추적 에러]`\n" +
+                        "```\n" +
+                        "유저 ID: %s\n" +
+                        "추적 ID: %d\n" +
+                        "에러: %s\n" +
+                        "```",
+                userNotice.getUserId(),
+                userNotice.getId(),
+                e.getMessage()
+        );
 
-            System.err.println(e.getMessage());
-            slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, errMessage);
-            stopMonitoring(userNotice.getId());
-        }
+        System.err.println(e.getMessage());
+        slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, errMessage);
+        stopMonitoring(userNotice.getId());
     }
 
     // TODO 경로 상수화 하기
