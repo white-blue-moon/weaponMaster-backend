@@ -18,14 +18,16 @@ import com.example.weaponMaster.modules.slack.constant.UserSlackNoticeType;
 import com.example.weaponMaster.modules.slack.service.SlackService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RateLimiterConfig;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +58,31 @@ public class NeopleApiService {
 
     private final ConcurrentHashMap<Integer, ScheduledFuture<?>> auctionMonitorMap = new ConcurrentHashMap<>(); // 추적 중인 경매 판매 알림을 관리하는 맵
 
+    // 네오플 API 요청 허용량: 1초 최대 허용량(1,000건), 1분 최대 허용량(60,000건), 1시간 최대 허용량(3,600,000건)
+    // 초당 1000건 이하로 분산 호출되도록 제어하며, 초과 시 최대 3초 대기 후 요청
+    private final RateLimiter rateLimiter = RateLimiter.of("neopleApiRateLimiter",
+            RateLimiterConfig.custom()
+                    .limitForPeriod(1000)
+                    .limitRefreshPeriod(Duration.ofSeconds(1))
+                    .timeoutDuration(Duration.ofSeconds(3))
+                    .build());
+
+    Predicate<Throwable> retryOnGoAwayIOException = ex -> {
+        if (ex instanceof IOException) {
+            String msg = ex.getMessage();
+            return msg != null && msg.contains("GOAWAY received");
+        }
+        return false;
+    };
+
+    // Retry: 최대 3회 재시도, 재시도 간격 2초, 네오플 API 호출 실패 시 재시도
+    private final Retry retry = Retry.of("neopleApiRetry",
+            RetryConfig.custom()
+                    .maxAttempts(3)
+                    .waitDuration(Duration.ofSeconds(2))
+                    .retryOnException(retryOnGoAwayIOException)
+                    .build());
+
     // 서버 재시작 후 SELLING 상태 알림들 스케줄 재등록
     @PostConstruct
     public void continueMonitorAuction() {
@@ -62,11 +90,11 @@ public class NeopleApiService {
 
         for (UserAuctionNotice userNotice : sellingNotices) {
             if (!auctionMonitorMap.containsKey(userNotice.getId())) {
-                // 1분 주기 스케줄 등록
-                ScheduledFuture<?> future = taskScheduler.schedule(
-                        () -> monitorAuction(userNotice),
-                        new PeriodicTrigger(Duration.ofMinutes(1))
-                );
+                ScheduledFuture<?> future = taskScheduler.schedule(() -> monitorAuction(userNotice), new PeriodicTrigger(Duration.ofMinutes(1)));
+                if (future == null) {
+                    throw new RuntimeException(String.format("[경매 알람 추적 스케줄 재등록 실패] userId: %s", userNotice.getUserId()));
+                }
+
                 auctionMonitorMap.put(userNotice.getId(), future);
                 userLogService.saveLog(userNotice.getUserId(), false, LogContentsType.AUCTION_NOTICE, LogActType.CONTINUE, (short)(int)userNotice.getId());
             }
@@ -125,13 +153,7 @@ public class NeopleApiService {
         return ApiResponse.success();
     }
 
-    // TODO 서버 통신이 끊겼다가 다시 연결될 때 DB 에서 SELLING 상태의 알림은 다시 1분 마다 추적하도록 세팅 필요
     // 스레드 풀에서의 에러는 글로벌 에러에서 잡지 못하므로 별도 try, catch 필요
-    @Retryable(
-            value = {HttpClientErrorException.class, IOException.class},
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 2000)
-    )
     private void monitorAuction(UserAuctionNotice userNotice) {
         try {
             if (userNotice.getAuctionState() != AuctionState.SELLING) {
@@ -139,17 +161,27 @@ public class NeopleApiService {
                 return;
             }
 
+            // 허용 가능할 때까지 최대 timeoutDuration 만큼 대기
+            RateLimiter.waitForPermission(rateLimiter);
+
             // 기존 정보가 조회되지 않는 404 에러로 판매 상태 변경 판단
-            restClient.get()
-                    .uri(urlUtil.getAuctionNoSearchUrl(userNotice.getAuctionNo()))
-                    .retrieve()
-                    .toEntity(String.class);
+            Retry.decorateRunnable(retry, () -> {
+                checkAuctionState(userNotice);
+            }).run();
 
         } catch (HttpClientErrorException e) {
             handleAuctionState(userNotice, e);
         } catch (Exception e) {
             handleMonitorError(userNotice, e);
         }
+    }
+
+    // 최대 재시도 횟수: 3회, 재시도 간격: 2000ms (2초) 간격으로 재시도
+    public void checkAuctionState(UserAuctionNotice userNotice) {
+        restClient.get()
+                .uri(urlUtil.getAuctionNoSearchUrl(userNotice.getAuctionNo()))
+                .retrieve()
+                .toEntity(String.class);
     }
 
     private void handleAuctionState(UserAuctionNotice userNotice, HttpClientErrorException e) {
