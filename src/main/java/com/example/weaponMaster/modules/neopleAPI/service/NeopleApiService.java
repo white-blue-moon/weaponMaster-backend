@@ -23,12 +23,15 @@ import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -105,6 +108,11 @@ public class NeopleApiService {
 
     // TODO 서버 통신이 끊겼다가 다시 연결될 때 DB 에서 SELLING 상태의 알림은 다시 1분 마다 추적하도록 세팅 필요
     // 스레드 풀에서의 에러는 글로벌 에러에서 잡지 못하므로 별도 try, catch 필요
+    @Retryable(
+            value = {HttpClientErrorException.class, IOException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000)
+    )
     private void monitorAuction(UserAuctionNotice userNotice) {
         try {
             if (userNotice.getAuctionState() != AuctionState.SELLING) {

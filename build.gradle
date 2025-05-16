@@ -34,6 +34,10 @@ dependencies {
 
 	// WebSocket 의존성 추가
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+	// spring retry 의존성 추가
+	implementation 'org.springframework.retry:spring-retry'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'  // AOP 필요
 }
 
 tasks.named('test') {
