@@ -18,6 +18,7 @@ import com.example.weaponMaster.modules.slack.constant.UserSlackNoticeType;
 import com.example.weaponMaster.modules.slack.service.SlackService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
@@ -53,6 +54,24 @@ public class NeopleApiService {
     private final SimpMessagingTemplate         messagingTemplate;
 
     private final ConcurrentHashMap<Integer, ScheduledFuture<?>> auctionMonitorMap = new ConcurrentHashMap<>(); // 추적 중인 경매 판매 알림을 관리하는 맵
+
+    // 서버 재시작 후 SELLING 상태 알림들 스케줄 재등록
+    @PostConstruct
+    public void continueMonitorAuction() {
+        UserAuctionNotice[] sellingNotices = userAuctionNoticeRepo.findByState(AuctionState.SELLING);
+
+        for (UserAuctionNotice userNotice : sellingNotices) {
+            if (!auctionMonitorMap.containsKey(userNotice.getId())) {
+                // 1분 주기 스케줄 등록
+                ScheduledFuture<?> future = taskScheduler.schedule(
+                        () -> monitorAuction(userNotice),
+                        new PeriodicTrigger(Duration.ofMinutes(1))
+                );
+                auctionMonitorMap.put(userNotice.getId(), future);
+                userLogService.saveLog(userNotice.getUserId(), false, LogContentsType.AUCTION_NOTICE, LogActType.CONTINUE, (short)(int)userNotice.getId());
+            }
+        }
+    }
 
     @SneakyThrows
     public ApiResponse<RespAuctionDto[]> searchAuction(String itemName) {

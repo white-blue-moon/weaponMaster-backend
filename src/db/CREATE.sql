@@ -162,6 +162,8 @@ CREATE TABLE user_auction_notice (
     update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '알림 수정 날짜',
     CONSTRAINT unique_user_auction_notice UNIQUE (user_id, auction_no)
 ) CHARSET=utf8mb4 COMMENT='유저 경매 판매 알림 등록 관리 테이블';
+-- 유저 경매 판매 알림 등록 관리 테이블 인덱스 추가
+CREATE INDEX idx_user_auction_notice_auction_state ON user_auction_notice(auction_state);
 
 -- 유저 개인 슬랙 알림 정보 관리 테이블
 DROP TABLE IF EXISTS user_slack_notice;
