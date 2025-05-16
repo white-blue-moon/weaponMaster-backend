@@ -32,15 +32,17 @@ public class UrlUtil {
 
     // 경매 아이템 이름 검색 API URL
     public String getAuctionSearchUrl(String itemName) {
-        String  defaultWordType = "front"; // 동일 단어(match), 앞 단어 검색(front), 전문 검색(full)
-        String  defaultSort     = "desc";  // 가장 최근 등록된 순으로 조회
-        Integer defaultLimit    = 10;      // 10개 항목만 조회
+        String  defaultWordType      = "front"; // 동일 단어(match), 앞 단어 검색(front), 전문 검색(full)
+        String  defaultUintPriceSort = "asc";   // 낮은 가격 순으로 조회
+        String  defaultAuctionNoSort = "asc";   // 가격이 같다면 먼저 등록된 순으로 조회
+        Integer defaultLimit         = 400;     // 400개 항목만 조회 (2025.05.16 기준 최대 400 제공)
 
         return String.format(
                 NeopleApi.AUCTION_SEARCH_URL,
                 itemName,
                 defaultWordType,
-                defaultSort,
+                defaultUintPriceSort,
+                defaultAuctionNoSort,
                 defaultLimit,
                 apiKey
         );
