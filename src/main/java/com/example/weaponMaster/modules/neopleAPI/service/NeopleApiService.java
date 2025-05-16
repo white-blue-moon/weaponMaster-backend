@@ -61,6 +61,7 @@ public class NeopleApiService {
     // 서버 재시작 후 SELLING 상태 알림들 스케줄 재등록
     @PostConstruct
     public void continueMonitorAuction() {
+        // TODO AuctionState.MONITOR_ERROR 는 어떻게 처리할지 고민
         UserAuctionNotice[] sellingNotices = userAuctionNoticeRepo.findByState(AuctionState.SELLING);
 
         for (UserAuctionNotice userNotice : sellingNotices) {
@@ -246,6 +247,9 @@ public class NeopleApiService {
     }
 
     private void handleMonitorError(UserAuctionNotice userNotice, Exception e) {
+        userNotice.setAuctionState(AuctionState.MONITOR_ERROR);
+        userAuctionNoticeRepo.save(userNotice);
+
         String errMessage = String.format(
                 "`[경매 판매 알림 추적 에러]`\n" +
                         "```\n" +
