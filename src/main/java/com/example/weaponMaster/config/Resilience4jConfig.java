@@ -25,24 +25,29 @@ public class Resilience4jConfig {
     }
 
     @Bean
-    public Predicate<Throwable> retryOnGoAwayIOException() {
+    public Predicate<Throwable> retryOnIOException() {
         return ex -> {
-            if (ex instanceof IOException) {
-                String msg = ex.getMessage();
-                return msg != null && msg.contains("GOAWAY received");
+            if (!(ex instanceof IOException)) {
+                return false;
             }
-            return false;
+
+            String msg = ex.getMessage();
+            if (msg == null) {
+                return false;
+            }
+
+            return msg.contains("GOAWAY received") || msg.contains("Broken pipe");
         };
     }
 
     // Retry: 최대 3회 재시도, 재시도 간격 2초, 네오플 API 호출 실패 시 재시도
     @Bean
-    public Retry neopleApiRetry(Predicate<Throwable> retryOnGoAwayIOException) {
+    public Retry neopleApiRetry(Predicate<Throwable> retryOnIOException) {
         return Retry.of("neopleApiRetry",
                 RetryConfig.custom()
                         .maxAttempts(3)
                         .waitDuration(Duration.ofSeconds(2))
-                        .retryOnException(retryOnGoAwayIOException)
+                        .retryOnException(retryOnIOException)
                         .build());
     }
 }

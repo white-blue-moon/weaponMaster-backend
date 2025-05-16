@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 
+import java.io.IOException;
+
 @Slf4j
 public class LoggingInterceptor implements ClientHttpRequestInterceptor {
     @Override
@@ -14,6 +16,9 @@ public class LoggingInterceptor implements ClientHttpRequestInterceptor {
             ClientHttpResponse response = execution.execute(request, body);
             log.info("[Response] Status: {}", response.getStatusCode());
             return response;
+        } catch (IOException e) {
+            log.error("[IOException] during request: {}", e.getMessage(), e);
+            throw  e;
         } catch (Exception e) {
             log.error("[Exception] during request: {}", e.getMessage(), e);
             throw e;
