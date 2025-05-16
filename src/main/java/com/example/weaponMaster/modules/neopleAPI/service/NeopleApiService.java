@@ -57,10 +57,9 @@ public class NeopleApiService {
     private final RateLimiter neopleApiRateLimiter;
     private final Retry       neopleApiRetry;
 
-
     // 서버 재시작 후 SELLING 상태 알림들 스케줄 재등록
     @PostConstruct
-    public void continueMonitorAuction() {
+    public void resumeAuctionMonitoring() {
         // TODO AuctionState.MONITOR_ERROR 는 어떻게 처리할지 고민
         UserAuctionNotice[] sellingNotices = userAuctionNoticeRepo.findByState(AuctionState.SELLING);
 
@@ -130,6 +129,7 @@ public class NeopleApiService {
     }
 
     // 스레드 풀에서의 에러는 글로벌 에러에서 잡지 못하므로 별도 try, catch 필요
+    @SneakyThrows
     private void monitorAuction(UserAuctionNotice userNotice) {
         try {
             if (userNotice.getAuctionState() != AuctionState.SELLING) {
@@ -141,7 +141,7 @@ public class NeopleApiService {
             RateLimiter.waitForPermission(neopleApiRateLimiter);
 
             // 기존 정보가 조회되지 않는 404 에러로 판매 상태 변경 판단
-            Retry.decorateRunnable(neopleApiRetry, () -> {
+            Retry.decorateCheckedRunnable(neopleApiRetry, () -> {
                 checkAuctionState(userNotice);
             }).run();
 
@@ -152,7 +152,6 @@ public class NeopleApiService {
         }
     }
 
-    // 최대 재시도 횟수: 3회, 재시도 간격: 2000ms (2초) 간격으로 재시도
     public void checkAuctionState(UserAuctionNotice userNotice) {
         restClient.get()
                 .uri(urlUtil.getAuctionNoSearchUrl(userNotice.getAuctionNo()))
