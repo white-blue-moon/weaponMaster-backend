@@ -40,7 +40,7 @@ public class SlackService {
     private final SlackBotRepository         slackBotRepo;
     private final UserLogService             userLogService;
     private final ObjectMapper               mapper;
-    private final RestClient                 restClient = RestClient.create();
+    private final RestClient                 restClient;
 
     @SneakyThrows
     public void sendMessage(String userId, Byte noticeType, String message) {

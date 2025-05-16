@@ -41,7 +41,7 @@ import java.util.concurrent.ScheduledFuture;
 public class NeopleApiService {
 
     private final UrlUtil                       urlUtil;
-    private final RestClient                    restClient = RestClient.create();
+    private final RestClient                    restClient;
     private final ObjectMapper                  objectMapper;
     private final UserAuctionNoticeRepository   userAuctionNoticeRepo;
     private final TaskScheduler                 taskScheduler;
