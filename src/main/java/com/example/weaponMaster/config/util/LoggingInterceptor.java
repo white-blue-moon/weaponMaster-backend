@@ -6,6 +6,7 @@ import org.springframework.http.client.ClientHttpResponse;
 
 import java.io.IOException;
 
+// RestClient -> 필요 시 인터셉터로 통신 로그 확인할 때 사용
 @Slf4j
 public class LoggingInterceptor implements ClientHttpRequestInterceptor {
     @Override
