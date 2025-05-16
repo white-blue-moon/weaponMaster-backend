@@ -19,9 +19,7 @@ import com.example.weaponMaster.modules.slack.service.SlackService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.ratelimiter.RateLimiter;
-import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -34,14 +32,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
-import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
@@ -58,30 +54,9 @@ public class NeopleApiService {
 
     private final ConcurrentHashMap<Integer, ScheduledFuture<?>> auctionMonitorMap = new ConcurrentHashMap<>(); // 추적 중인 경매 판매 알림을 관리하는 맵
 
-    // 네오플 API 요청 허용량: 1초 최대 허용량(1,000건), 1분 최대 허용량(60,000건), 1시간 최대 허용량(3,600,000건)
-    // 초당 1000건 이하로 분산 호출되도록 제어하며, 초과 시 최대 3초 대기 후 요청
-    private final RateLimiter rateLimiter = RateLimiter.of("neopleApiRateLimiter",
-            RateLimiterConfig.custom()
-                    .limitForPeriod(1000)
-                    .limitRefreshPeriod(Duration.ofSeconds(1))
-                    .timeoutDuration(Duration.ofSeconds(3))
-                    .build());
+    private final RateLimiter neopleApiRateLimiter;
+    private final Retry       neopleApiRetry;
 
-    Predicate<Throwable> retryOnGoAwayIOException = ex -> {
-        if (ex instanceof IOException) {
-            String msg = ex.getMessage();
-            return msg != null && msg.contains("GOAWAY received");
-        }
-        return false;
-    };
-
-    // Retry: 최대 3회 재시도, 재시도 간격 2초, 네오플 API 호출 실패 시 재시도
-    private final Retry retry = Retry.of("neopleApiRetry",
-            RetryConfig.custom()
-                    .maxAttempts(3)
-                    .waitDuration(Duration.ofSeconds(2))
-                    .retryOnException(retryOnGoAwayIOException)
-                    .build());
 
     // 서버 재시작 후 SELLING 상태 알림들 스케줄 재등록
     @PostConstruct
@@ -162,10 +137,10 @@ public class NeopleApiService {
             }
 
             // 허용 가능할 때까지 최대 timeoutDuration 만큼 대기
-            RateLimiter.waitForPermission(rateLimiter);
+            RateLimiter.waitForPermission(neopleApiRateLimiter);
 
             // 기존 정보가 조회되지 않는 404 에러로 판매 상태 변경 판단
-            Retry.decorateRunnable(retry, () -> {
+            Retry.decorateRunnable(neopleApiRetry, () -> {
                 checkAuctionState(userNotice);
             }).run();
 
