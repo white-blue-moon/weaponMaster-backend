@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.HttpClientErrorException;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.function.Predicate;
 
@@ -30,41 +30,36 @@ public class Resilience4jConfig {
     }
 
     // 예외가 RuntimeException 등으로 감싸질 수 있으므로,
-    // 근본 원인(root cause)인 IOException 을 확인하기 위해 cause 를 탐색함
+    // 근본 원인(root cause)을 확인하기 위해 cause 를 탐색함
     @Bean
-    public Predicate<Throwable> retryOnIOException() {
+    public Predicate<Throwable> retryOnCustomException() {
         return ex -> {
             Throwable root = ExceptionUtils.getRootCause(ex);
             if (root == null) {
                 root = ex;
             }
 
-            // TODO 예외 타입 로그 확인용 임시 출력
-            log.warn("[Exception chain]: ", ex);
-            log.warn("[Root exception type]: {}", root.getClass().getName());
-            log.warn("[Root exception message]: {}", root.getMessage());
-
-            if (!(root instanceof IOException)) {
+            // 404 NotFound 인 경우 재시도 하지 않음
+            if (root instanceof HttpClientErrorException.NotFound) {
                 return false;
             }
 
-            String msg = root.getMessage();
-            return msg != null && (msg.contains("GOAWAY received") || msg.contains("Broken pipe"));
+            return true;
         };
     }
 
     // Retry: 최대 3회 재시도, 재시도 간격 1초, 네오플 API 호출 실패 시 재시도
     @Bean
-    public Retry neopleApiRetry(Predicate<Throwable> retryOnIOException) {
+    public Retry neopleApiRetry(Predicate<Throwable> retryOnCustomException) {
         RetryConfig config = RetryConfig.custom()
                 .maxAttempts(3)
                 .waitDuration(Duration.ofSeconds(1))
-                .retryOnException(retryOnIOException)
+                .retryOnException(retryOnCustomException)
                 .build();
 
         Retry retry = Retry.of("neopleApiRetry", config);
 
-        // TODO 실제 리트라이를 진행하는지 확인하기 위해 임시 로그 추가
+        // TODO 실제 retry 를 진행하는지 확인하기 위해 임시 로그 추가
         retry.getEventPublisher()
                 .onRetry(event -> {
                     log.warn("[Retry] Attempt {} due to {}",

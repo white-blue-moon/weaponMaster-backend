@@ -153,7 +153,6 @@ public class NeopleApiService {
         }
     }
 
-    @SneakyThrows
     public void checkAuctionState(UserAuctionNotice userNotice) {
         restClient.get()
                 .uri(urlUtil.getAuctionNoSearchUrl(userNotice.getAuctionNo()))
@@ -261,8 +260,10 @@ public class NeopleApiService {
                         "```\n" +
                         "유저 ID: %s\n" +
                         "추적 ID: %d\n" +
+                        "\n" +
                         "예외 타입: %s\n" +
                         "에러 메시지: %s\n" +
+                        "\n" +
                         "루트 예외 타입: %s\n" +
                         "루트 메시지: %s\n" +
                         "```",
