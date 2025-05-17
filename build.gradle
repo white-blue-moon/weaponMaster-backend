@@ -38,6 +38,9 @@ dependencies {
 	// Resilience4j RateLimiter 의존성 추가
 	implementation 'io.github.resilience4j:resilience4j-ratelimiter:1.7.1'
 	implementation 'io.github.resilience4j:resilience4j-retry:1.7.1'
+
+	// ExceptionUtils.getRootCause() 의존성 추가
+	implementation 'org.apache.commons:commons-lang3:3.12.0'
 }
 
 tasks.named('test') {

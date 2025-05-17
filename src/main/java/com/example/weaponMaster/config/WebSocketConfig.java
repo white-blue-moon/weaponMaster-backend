@@ -27,4 +27,3 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .withSockJS(); // SockJS fallback (브라우저 호환성용)
     }
 }
-

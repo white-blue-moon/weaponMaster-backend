@@ -1,8 +1,8 @@
 package com.example.weaponMaster.config;
 
-import com.example.weaponMaster.modules.common.exception.GlobalExceptionHandler;
 import io.github.resilience4j.ratelimiter.*;
 import io.github.resilience4j.retry.*;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -29,19 +29,27 @@ public class Resilience4jConfig {
                         .build());
     }
 
+    // 예외가 RuntimeException 등으로 감싸질 수 있으므로,
+    // 근본 원인(root cause)인 IOException 을 확인하기 위해 cause 를 탐색함
     @Bean
     public Predicate<Throwable> retryOnIOException() {
         return ex -> {
-            if (!(ex instanceof IOException)) {
+            Throwable root = ExceptionUtils.getRootCause(ex);
+            if (root == null) {
+                root = ex;
+            }
+
+            // TODO 예외 타입 로그 확인용 임시 출력
+            log.warn("[Exception chain]: ", ex);
+            log.warn("[Root exception type]: {}", root.getClass().getName());
+            log.warn("[Root exception message]: {}", root.getMessage());
+
+            if (!(root instanceof IOException)) {
                 return false;
             }
 
-            String msg = ex.getMessage();
-            if (msg == null) {
-                return false;
-            }
-
-            return msg.contains("GOAWAY received") || msg.contains("Broken pipe");
+            String msg = root.getMessage();
+            return msg != null && (msg.contains("GOAWAY received") || msg.contains("Broken pipe"));
         };
     }
 

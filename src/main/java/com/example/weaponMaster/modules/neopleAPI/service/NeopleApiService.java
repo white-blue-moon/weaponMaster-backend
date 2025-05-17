@@ -23,6 +23,7 @@ import io.github.resilience4j.retry.Retry;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -152,6 +153,7 @@ public class NeopleApiService {
         }
     }
 
+    @SneakyThrows
     public void checkAuctionState(UserAuctionNotice userNotice) {
         restClient.get()
                 .uri(urlUtil.getAuctionNoSearchUrl(userNotice.getAuctionNo()))
@@ -249,19 +251,30 @@ public class NeopleApiService {
         userNotice.setAuctionState(AuctionState.MONITOR_ERROR);
         userAuctionNoticeRepo.save(userNotice);
 
+        Throwable root = ExceptionUtils.getRootCause(e);
+        if (root == null) {
+            root = e;
+        }
+
         String errMessage = String.format(
                 "`[경매 판매 알림 추적 에러]`\n" +
                         "```\n" +
                         "유저 ID: %s\n" +
                         "추적 ID: %d\n" +
-                        "에러: %s\n" +
+                        "예외 타입: %s\n" +
+                        "에러 메시지: %s\n" +
+                        "루트 예외 타입: %s\n" +
+                        "루트 메시지: %s\n" +
                         "```",
                 userNotice.getUserId(),
                 userNotice.getId(),
-                e.getMessage()
+                e.getMessage(),
+                e.getClass().getName(),
+                root.getClass().getName(),
+                root.getMessage()
         );
 
-        System.err.println(e.getMessage());
+        System.err.println(errMessage);
         slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, errMessage);
         stopMonitoring(userNotice.getId());
     }
