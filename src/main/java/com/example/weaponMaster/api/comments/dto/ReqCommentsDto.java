@@ -14,4 +14,5 @@ public class ReqCommentsDto {
     private Integer articleId;
     private Integer reCommentId;
     private String  contents;
+    private String  adminToken;
 }

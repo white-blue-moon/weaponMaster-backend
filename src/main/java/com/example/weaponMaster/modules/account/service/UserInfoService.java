@@ -2,26 +2,32 @@ package com.example.weaponMaster.modules.account.service;
 
 import com.example.weaponMaster.api.account.dto.ReqJoinDto;
 import com.example.weaponMaster.api.account.dto.ReqLoginDto;
+import com.example.weaponMaster.api.account.dto.RespLoginDto;
 import com.example.weaponMaster.modules.account.constant.LogActType;
 import com.example.weaponMaster.modules.account.constant.LogContentsType;
 import com.example.weaponMaster.modules.account.constant.UserType;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
+import com.example.weaponMaster.modules.adminToken.entity.AdminToken;
+import com.example.weaponMaster.modules.adminToken.repository.AdminTokenRepository;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Objects;
+
 
 @Service
 @RequiredArgsConstructor
 public class UserInfoService {
 
-    private final UserInfoRepository userInfoRepository;
-    private final UserLogService     userLogService;
+    private final UserInfoRepository   userInfoRepository;
+    private final AdminTokenRepository adminTokenRepository;
+    private final UserLogService       userLogService;
 
     @Transactional
-    public ApiResponse<Void> login(ReqLoginDto request) {
+    public ApiResponse<RespLoginDto> login(ReqLoginDto request) {
         String mode = request.getIsAdminMode() ? "관리자모드" : "일반모드";
 
         UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
@@ -34,13 +40,23 @@ public class UserInfoService {
         }
 
         if (request.getIsAdminMode() && userInfo.getUserType() != UserType.ADMIN) {
-            throw new IllegalArgumentException(String.format("[%s 로그인 실패] 관리자 권한 없음 userId: %s", mode, request.getUserId()));
+            return ApiResponse.error(String.format("[%s 로그인 실패] 관리자 권한 없음 userId: %s", mode, request.getUserId()));
+        }
+
+        RespLoginDto resp = new RespLoginDto();
+        if (request.getIsAdminMode()) {
+            AdminToken adminToken = adminTokenRepository.findFirst();
+            if (adminToken == null) {
+                throw new RuntimeException(String.format("[%s 로그인 실패] 관리자 전용 토큰 값이 조회되지 않고 있습니다. userId: %s", mode, request.getUserId()));
+            }
+
+            resp.setAdminToken(adminToken.getToken());
         }
 
         userInfoRepository.updateLastLoginDate(request.getUserId());
         userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.WEAPON_MASTER, LogActType.LOGIN);
 
-        return ApiResponse.success();
+        return ApiResponse.success(resp);
     }
 
     public boolean isUserIdAvailable(String userId) {

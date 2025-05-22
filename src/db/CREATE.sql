@@ -77,6 +77,7 @@ CREATE TABLE ref_character_banner_detail (
 ----------------------------[ 사용자 별 참조 값 ]----------------------------
 
 -- TODO id 컬럼 추가된 부분 백엔드 반영 필요, 컬럼 수정 내역 반영 필요
+-- TODO 더이상 사용하지 않는 컬럼 제거 필요
 -- 유저 회원 정보 관리 테이블
 DROP TABLE IF EXISTS user_info;
 CREATE TABLE user_info (
@@ -221,3 +222,13 @@ CREATE TABLE access_gate_password (
     update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 날짜',
     UNIQUE (type)
 ) CHARSET=utf8mb4 COMMENT='페이지 접근 제한 비밀번호 관리 테이블';
+
+-- 관리자 계정 접근 토큰 관리 테이블
+DROP TABLE IF EXISTS admin_token;
+CREATE TABLE admin_token (
+    id              INT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 row ID',
+    token           VARCHAR(255)    NOT NULL   COMMENT '토큰 해시 값',
+    create_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 날짜',
+    update_date     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 날짜',
+    UNIQUE (token)
+) CHARSET=utf8mb4 COMMENT='관리자 계정 접근 토큰 관리 테이블';

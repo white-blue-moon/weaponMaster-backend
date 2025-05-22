@@ -2,8 +2,10 @@ package com.example.weaponMaster.api.account.controller;
 
 import com.example.weaponMaster.api.account.dto.ReqJoinDto;
 import com.example.weaponMaster.api.account.dto.ReqLoginDto;
+import com.example.weaponMaster.api.account.dto.RespLoginDto;
 import com.example.weaponMaster.modules.account.service.UserInfoService;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +30,7 @@ public class AccountController {
 
     // 로그인
     @PostMapping("/accounts/login")
-    public ApiResponse<Void> login(@RequestBody ReqLoginDto request) {
+    public ApiResponse<RespLoginDto> login(@RequestBody ReqLoginDto request) {
         return userInfoService.login(request);
     }
 

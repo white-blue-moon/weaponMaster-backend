@@ -138,6 +138,7 @@ public class NeopleApiService {
                 return;
             }
 
+            // TODO 잘 동작하는지 체크해 보기
             // 허용 가능할 때까지 최대 timeoutDuration 만큼 대기
             RateLimiter.waitForPermission(neopleApiRateLimiter);
 

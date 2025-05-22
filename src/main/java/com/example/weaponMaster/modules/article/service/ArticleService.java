@@ -42,18 +42,30 @@ public class ArticleService {
                 request.getUserId()
         );
 
-        if (userPermissionService.isAdminAuthorized(request.getIsAdminMode(), request.getUserId())) {
+        boolean isAdmin = userPermissionService.isAdminAuthorized(
+                request.getIsAdminMode(),
+                request.getUserId(),
+                request.getAdminToken()
+        );
+        if (isAdmin) {
             article.setIsAdminMode(true);
         }
 
-        Article userArticle = articleRepository.save(article);
-        if(userArticle.getCategoryType() == CategoryType.SERVICE_CENTER) {
-            if (userArticle.getArticleType() == ArticleType.SERVICE_CENTER.PRIVATE_CONTACT) {
-                slackService.sendMessageAdmin(AdminSlackChannelType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(userArticle));
+        if (request.getCategoryType() == CategoryType.NEWS) {
+            if (!isAdmin) {
+                throw new IllegalArgumentException(String.format("[게시물 생성 에러] 관리자 권한이 없으나 NEWS 게시물 작성을 시도하였습니다. userId: %s", request.getUserId()));
             }
         }
 
-        userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.ARTICLE, LogActType.CREATE, (short)(int)userArticle.getId());
+        // 1:1 문의 등록이면 관리자에게 문의 등록 알림 전송
+        Article savedArticle = articleRepository.save(article);
+        if(savedArticle.getCategoryType() == CategoryType.SERVICE_CENTER) {
+            if (savedArticle.getArticleType() == ArticleType.SERVICE_CENTER.PRIVATE_CONTACT) {
+                slackService.sendMessageAdmin(AdminSlackChannelType.PRIVATE_CONTACT_NOTICE, getNoticeMessage(savedArticle));
+            }
+        }
+
+        userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.ARTICLE, LogActType.CREATE, (short)(int)savedArticle.getId());
         return ApiResponse.success();
     }
 
@@ -91,10 +103,8 @@ public class ArticleService {
             throw new IllegalArgumentException(String.format("[게시물 수정 에러] Article not found. userId: %s, articleId: %d", request.getUserId(), id));
         }
 
-        if (!request.getUserId().equals(article.getUserId())) {
-            if (!userPermissionService.isAdminAuthorized(request.getIsAdminMode(), request.getUserId())) {
-                throw new IllegalArgumentException(String.format("[게시물 수정 에러] 관리자 권한이 없음에도 다른 작성자의 게시물 수정을 요청하였습니다. userId: %s, articleId: %d, author: %s", request.getUserId(), article.getId(), article.getUserId()));
-            }
+        if (!isOwnerOrAdmin(request, article.getUserId())) {
+            throw new IllegalArgumentException(String.format("[게시물 수정 에러] 관리자 권한이 없음에도 다른 작성자의 게시물 수정을 요청하였습니다. userId: %s, articleId: %d, author: %s", request.getUserId(), article.getId(), article.getUserId()));
         }
 
         article.update(request);
@@ -104,6 +114,18 @@ public class ArticleService {
         return ApiResponse.success();
     }
 
+    private boolean isOwnerOrAdmin(ReqArticlesDto request, String userId) {
+        if (request.getUserId().equals(userId)) {
+            return true;
+        }
+
+        if (userPermissionService.isAdminAuthorized(request.getIsAdminMode(), request.getUserId(), request.getAdminToken())) {
+            return true;
+        }
+
+        return false;
+    }
+
     @Transactional
     public ApiResponse<Void> deleteArticle(ReqArticlesDto request, Integer articleId) {
         Article article = articleRepository.findById(articleId).orElse(null);
@@ -111,14 +133,20 @@ public class ArticleService {
            throw new IllegalArgumentException(String.format("[게시물 삭제 에러] Article not found. userId: %s, articleId: %d", request.getUserId(), articleId));
         }
 
+        boolean isAdmin = userPermissionService.isAdminAuthorized(
+                request.getIsAdminMode(),
+                request.getUserId(),
+                request.getAdminToken()
+        );
+
         if (!request.getUserId().equals(article.getUserId())) {
-            if (!userPermissionService.isAdminAuthorized(request.getIsAdminMode(), request.getUserId())) {
+            if (!isAdmin) {
                 throw new IllegalArgumentException(String.format("[게시물 삭제 에러] 관리자 권한이 없음에도 다른 작성자의 게시물 삭제를 요청하였습니다. userId: %s, articleId: %d, author: %s", request.getUserId(), article.getId(), article.getUserId()));
             }
         }
 
         if (article.getCategoryType() == CategoryType.NEWS) {
-            if (!userPermissionService.isAdminAuthorized(request.getIsAdminMode(), request.getUserId())) {
+            if (!isAdmin) {
                 throw new IllegalArgumentException(String.format("[게시물 삭제 에러] NEWS 게시물을 관리자 권한 없이 삭제 시도하였습니다. Permission denied. userId: %s, articleId: %d", request.getUserId(), articleId));
             }
         }
@@ -140,7 +168,7 @@ public class ArticleService {
             throw new IllegalArgumentException(String.format("[게시물 상단 고정 토글 에러] Article not found. userId: %s, articleId: %d", request.getUserId(), articleId));
         }
 
-        if (!userPermissionService.isAdminAuthorized(request.getIsAdminMode(), request.getUserId())) {
+        if (!userPermissionService.isAdminAuthorized(request.getIsAdminMode(), request.getUserId(), request.getAdminToken())) {
             throw new IllegalArgumentException(String.format("[게시물 상단 고정 토글 에러] 관리자 권한이 없음에도 상단 고정 토글을 요청하였습니다. userId: %s, articleId: %d", request.getUserId(), article.getId()));
         }
 

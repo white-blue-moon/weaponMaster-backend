@@ -7,6 +7,7 @@ import com.example.weaponMaster.modules.account.constant.UserType;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
 import com.example.weaponMaster.modules.account.service.UserLogService;
+import com.example.weaponMaster.modules.account.service.UserPermissionService;
 import com.example.weaponMaster.modules.article.constant.ArticleDetailType;
 import com.example.weaponMaster.modules.article.constant.ArticleType;
 import com.example.weaponMaster.modules.article.constant.CategoryType;
@@ -32,11 +33,12 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class CommentService {
 
-    private final ArticleRepository  articleRepository;
-    private final CommentRepository  commentRepository;
-    private final UserInfoRepository userInfoRepository;
-    private final UserLogService     userLogService;
-    private final SlackService       slackService;
+    private final ArticleRepository     articleRepository;
+    private final CommentRepository     commentRepository;
+    private final UserInfoRepository    userInfoRepository;
+    private final UserPermissionService userPermissionService;
+    private final UserLogService        userLogService;
+    private final SlackService          slackService;
 
     @Transactional
     public ApiResponse<Void> createComment(ReqCommentsDto request) {
@@ -230,13 +232,8 @@ public class CommentService {
 
         // 1. 댓글 소유자가 맞는지 확인
         if (!comment.getUserId().equals(request.getUserId())) {
-            UserInfo userInfo = userInfoRepository.findByUserId(request.getUserId());
-            if (userInfo == null) {
-                throw new IllegalArgumentException("[댓글 삭제 에러] User not found, userId: " + request.getUserId());
-            }
-
             // 2. 소유자가 다를 경우 관리자 권한 있는지 확인
-            if (!request.getIsAdmin() || userInfo.getUserType() != UserType.ADMIN) {
+            if (!userPermissionService.isAdminAuthorized(request.getIsAdmin(), request.getUserId(), request.getAdminToken())) {
                 throw new IllegalArgumentException(String.format("[댓글 삭제 에러] 권한 없음 userId: %s, comment ID: %d", request.getUserId(), id));
             }
         }

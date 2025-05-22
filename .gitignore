@@ -43,3 +43,4 @@ out/
 /config/
 # 하지만 예시 파일은 추적 대상에 포함
 !config/application-example.yml
+deploy.sh
