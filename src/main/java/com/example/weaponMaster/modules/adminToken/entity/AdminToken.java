@@ -16,6 +16,9 @@ public class AdminToken {
     @Column(name = "id", updatable = false)
     private Integer id;
 
+    @Column(name = "type", nullable = false, unique = true)
+    private Integer type;
+
     @Column(name = "token", nullable = false)
     private String token;
 

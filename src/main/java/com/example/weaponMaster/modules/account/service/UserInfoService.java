@@ -8,6 +8,7 @@ import com.example.weaponMaster.modules.account.constant.LogContentsType;
 import com.example.weaponMaster.modules.account.constant.UserType;
 import com.example.weaponMaster.modules.account.entity.UserInfo;
 import com.example.weaponMaster.modules.account.repository.UserInfoRepository;
+import com.example.weaponMaster.modules.adminToken.constant.AdminTokenType;
 import com.example.weaponMaster.modules.adminToken.entity.AdminToken;
 import com.example.weaponMaster.modules.adminToken.repository.AdminTokenRepository;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
@@ -39,13 +40,15 @@ public class UserInfoService {
             return ApiResponse.error(String.format("[%s 로그인 실패] 비밀번호 불일치 userId: %s", mode, request.getUserId()));
         }
 
-        if (request.getIsAdminMode() && userInfo.getUserType() != UserType.ADMIN) {
-            return ApiResponse.error(String.format("[%s 로그인 실패] 관리자 권한 없음 userId: %s", mode, request.getUserId()));
-        }
-
         RespLoginDto resp = new RespLoginDto();
         if (request.getIsAdminMode()) {
-            AdminToken adminToken = adminTokenRepository.findFirst();
+            // 관리자 권한이 없어도 관리자모드로 로그인 시도 자체는 할 수 있으므로 throw 가 아닌 에러 메시지 정상 반환 케이스 추가
+            if (userInfo.getUserType() != UserType.ADMIN) {
+                return ApiResponse.error(String.format("[%s 로그인 실패] 관리자 권한 없음 userId: %s", mode, request.getUserId()));
+            }
+
+            // 관리자 권한 확인되면 프론트에 토큰 전달
+            AdminToken adminToken = adminTokenRepository.findByType(AdminTokenType.WEAPON_MASTER);
             if (adminToken == null) {
                 throw new RuntimeException(String.format("[%s 로그인 실패] 관리자 전용 토큰 값이 조회되지 않고 있습니다. userId: %s", mode, request.getUserId()));
             }

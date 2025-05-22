@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AdminTokenRepository extends JpaRepository<AdminToken, Integer> {
 
-    @Query(value = "SELECT * FROM admin_token LIMIT 1", nativeQuery = true)
-    AdminToken findFirst();
+    @Query(value = "SELECT * FROM admin_token WHERE type = :type", nativeQuery = true)
+    AdminToken findByType(Integer type);
 }
