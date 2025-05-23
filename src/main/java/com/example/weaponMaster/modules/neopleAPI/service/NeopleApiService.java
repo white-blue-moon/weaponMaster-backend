@@ -208,15 +208,22 @@ public class NeopleApiService {
         userNotice.setAuctionState(AuctionState.EXPIRED);
         userAuctionNoticeRepo.save(userNotice);
 
-        String itemName = userNotice.getItemInfo().path("itemName").asText();
+        String itemName   = userNotice.getItemInfo().path("itemName").asText();
+        String expireDate = userNotice.getItemInfo().path("expireDate").asText();
+        int    regCount   = userNotice.getItemInfo().path("regCount").asInt();
+        long   price      = userNotice.getItemInfo().path("currentPrice").asLong();
+
         String message = String.format(
                 "`판매 기간 만료 알림`\n" +
                         "```\n" +
                         "아이템명: %s\n" +
                         "만료시각: %s\n" +
+                        "등록금액: %s 골드%s\n" +
                         "```",
                 itemName,
-                userNotice.getItemInfo().path("expireDate").asText()
+                expireDate,
+                formatPrice(price),
+                getUnitPriceText(userNotice, regCount)
         );
 
         slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
@@ -224,27 +231,56 @@ public class NeopleApiService {
         stopMonitoring(userNotice.getId());
     }
 
+    private String getUnitPriceText(UserAuctionNotice userNotice, int regCount) {
+        String unitPriceText = "";
+        if (regCount > 1) {
+            long unitPrice = userNotice.getItemInfo().path("unitPrice").asLong();
+            unitPriceText  = String.format(" (개당 %s)", formatPrice(unitPrice));
+        }
+
+        return unitPriceText;
+    }
+
     private void handleSoldOut(UserAuctionNotice userNotice) {
         userNotice.setAuctionState(AuctionState.SOLD_OUT);
         userAuctionNoticeRepo.save(userNotice);
 
-        // TODO regCount 에 대한 최종 가격 정보 전달하기 (수수료, 보증금 모두 계산한 결과 전달하기), 아이템 개수 정보도 전달하기
-        String priceStr       = userNotice.getItemInfo().path("currentPrice").asText();
-        String formattedPrice = priceStr.replaceAll("(\\d)(?=(\\d{3})+$)", "$1,");
-        String itemName       = userNotice.getItemInfo().path("itemName").asText();
-        String message        = String.format(
+        final long   DEPOSIT        = 10_000L; // 보증금 10,000 골드 고정
+        final double SALES_FEE_RATE = 0.03;    // 수수료 3%
+
+        String itemName = userNotice.getItemInfo().path("itemName").asText();
+        int    regCount = userNotice.getItemInfo().path("regCount").asInt();
+        long   price    = userNotice.getItemInfo().path("currentPrice").asLong();
+        long   salesFee = Math.round(price * SALES_FEE_RATE);
+        long   amount   = price - salesFee + DEPOSIT;
+
+        String message = String.format(
                 "`판매 완료 알림`\n" +
                         "```\n" +
-                        "아이템명: %s\n" +
-                        "판매가격: %s G\n" +
+                        "[%s이(가) %d개 판매되었습니다.]\n" +
+                        "판매가: + %s 골드%s\n" +
+                        "보증금: + %s 골드\n" +
+                        "수수료: - %s 골드\n" +
+                        "\n" +
+                        "최종 정산 금액은 %s 골드입니다." +
                         "```",
                 itemName,
-                formattedPrice
+                regCount,
+                formatPrice(price),
+                getUnitPriceText(userNotice, regCount),
+                formatPrice(DEPOSIT),
+                formatPrice(salesFee),
+                formatPrice(amount)
         );
 
         slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
         sendAuctionStateChange(userNotice);
         stopMonitoring(userNotice.getId());
+    }
+
+    // 숫자 3자리마다 콤마 찍기
+    private String formatPrice(long price) {
+        return String.format("%,d", price);
     }
 
     private void handleMonitorError(UserAuctionNotice userNotice, Exception e) {
