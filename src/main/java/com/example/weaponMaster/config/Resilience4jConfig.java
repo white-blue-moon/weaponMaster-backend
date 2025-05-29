@@ -1,5 +1,6 @@
 package com.example.weaponMaster.config;
 
+import com.example.weaponMaster.common.util.ErrorUtils;
 import io.github.resilience4j.ratelimiter.*;
 import io.github.resilience4j.retry.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.time.Duration;
 import java.util.function.Predicate;
@@ -39,9 +41,20 @@ public class Resilience4jConfig {
                 root = ex;
             }
 
-            // 404 NotFound 인 경우 재시도 하지 않음
+            // 404 DNF004 -> 재시도 하지 않음 (판매완료/기간만료)
             if (root instanceof HttpClientErrorException.NotFound) {
-                return false;
+                String errBody = ((HttpClientErrorException.NotFound) root).getResponseBodyAsString();
+                if (ErrorUtils.isErrorCode(errBody, "DNF004")) {
+                    return false;
+                }
+            }
+
+            // 503 DNF980 -> 재시도 하지 않음 (던전앤파이터 시스템 점검)
+            if (root instanceof HttpServerErrorException.ServiceUnavailable) {
+                String errBody = ((HttpServerErrorException.ServiceUnavailable) root).getResponseBodyAsString();
+                if (ErrorUtils.isErrorCode(errBody, "DNF980")) {
+                    return false;
+                }
             }
 
             return true;

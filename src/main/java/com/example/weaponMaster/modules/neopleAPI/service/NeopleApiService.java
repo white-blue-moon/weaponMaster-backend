@@ -2,6 +2,7 @@ package com.example.weaponMaster.modules.neopleAPI.service;
 
 import com.example.weaponMaster.api.neople.dto.ReqAuctionDto;
 import com.example.weaponMaster.api.neople.dto.RespUserAuctionDto;
+import com.example.weaponMaster.common.util.ErrorUtils;
 import com.example.weaponMaster.modules.account.constant.LogActType;
 import com.example.weaponMaster.modules.account.constant.LogContentsType;
 import com.example.weaponMaster.modules.account.service.UserLogService;
@@ -31,6 +32,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
@@ -77,8 +79,17 @@ public class NeopleApiService {
         }
     }
 
-    @SneakyThrows
     public ApiResponse<RespAuctionDto[]> searchAuction(String itemName) {
+        try {
+            return handleSearchAuction(itemName);
+
+        } catch (HttpServerErrorException e) {
+            return handleSearchServerError(e);
+        }
+    }
+
+    @SneakyThrows
+    private ApiResponse<RespAuctionDto[]> handleSearchAuction(String itemName) {
         ResponseEntity<String> response = restClient.get()
                 .uri(urlUtil.getAuctionSearchUrl(itemName))
                 .retrieve()
@@ -92,14 +103,31 @@ public class NeopleApiService {
         JsonNode rootNode = objectMapper.readTree(res);
         JsonNode rowsNode = rootNode.path("rows");
 
-        RespAuctionDto[] auctionArray = new RespAuctionDto[rowsNode.size()];
+        RespAuctionDto[] searchResults = new RespAuctionDto[rowsNode.size()];
         for (int i = 0; i < rowsNode.size(); i++) {
-            JsonNode row    = rowsNode.get(i);
-            String   imgUrl = String.format(NeopleApi.ITEM_IMG_URL, row.path("itemId").asText());
-            auctionArray[i] = new RespAuctionDto(imgUrl, row);
+            JsonNode row     = rowsNode.get(i);
+            String   imgUrl  = String.format(NeopleApi.ITEM_IMG_URL, row.path("itemId").asText());
+            searchResults[i] = new RespAuctionDto(imgUrl, row);
         }
 
-        return ApiResponse.success(auctionArray);
+        return ApiResponse.success(searchResults);
+    }
+
+    private ApiResponse<RespAuctionDto[]> handleSearchServerError(HttpServerErrorException e) {
+        if (e.getStatusCode() != HttpStatus.SERVICE_UNAVAILABLE) {
+            throw e;
+        }
+
+        if (ErrorUtils.isErrorCode(e.getResponseBodyAsString(), "DNF980")) {
+            String errMsg = "[ 던전앤파이터 시스템 점검 중 ]\n" +
+                    "\n" +
+                    "현재 던전앤파이터 시스템 점검으로 인해\n" +
+                    "아이템 검색이 불가능합니다.\n" +
+                    "공식홈페이지에서 점검시간을 확인해 주세요.";
+            return ApiResponse.error(errMsg);
+        }
+
+        throw e;
     }
 
     // 경매 판매 알림 등록
@@ -149,6 +177,8 @@ public class NeopleApiService {
 
         } catch (HttpClientErrorException e) {
             handleAuctionState(userNotice, e);
+        } catch(HttpServerErrorException e) {
+            handleMonitorServerError(userNotice, e);
         } catch (Exception e) {
             handleMonitorError(userNotice, e);
         }
@@ -166,7 +196,7 @@ public class NeopleApiService {
             throw e;
         }
 
-        if (!isCodeDNF004(e.getResponseBodyAsString())) {
+        if (!ErrorUtils.isErrorCode(e.getResponseBodyAsString(), "DNF004")) {
             throw e;
         }
 
@@ -175,20 +205,9 @@ public class NeopleApiService {
             return;
         }
 
+
         handleSoldOut(userNotice);
         return;
-    }
-
-    @SneakyThrows
-    private Boolean isCodeDNF004(String errorBody) {
-        JsonNode rootNode  = objectMapper.readTree(errorBody);
-        String   errorCode = rootNode.path("error").path("code").asText();
-
-        if ("DNF004".equals(errorCode)) {
-            return true;
-        }
-
-        return false;
     }
 
     private Boolean isExpired(UserAuctionNotice userNotice) {
@@ -210,20 +229,20 @@ public class NeopleApiService {
 
         String itemName   = userNotice.getItemInfo().path("itemName").asText();
         String expireDate = userNotice.getItemInfo().path("expireDate").asText();
-        int    regCount   = userNotice.getItemInfo().path("regCount").asInt();
-        long   price      = userNotice.getItemInfo().path("currentPrice").asLong();
+        int    count      = userNotice.getItemInfo().path("count").asInt();
+        long   unitPrice  = userNotice.getItemInfo().path("unitPrice").asLong();
+        long   price      = count * unitPrice;
 
         String message = String.format(
                 "`판매 기간 만료 알림`\n" +
                         "```\n" +
-                        "아이템명: %s\n" +
+                        "아이템명: %s%s\n" +
                         "만료시각: %s\n" +
                         "등록금액: %s 골드%s\n" +
                         "```",
-                itemName,
+                itemName, getCountText(count),
                 expireDate,
-                formatPrice(price),
-                getUnitPriceText(userNotice, regCount)
+                formatPrice(price), getUnitPriceText(unitPrice, count)
         );
 
         slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
@@ -231,14 +250,22 @@ public class NeopleApiService {
         stopMonitoring(userNotice.getId());
     }
 
-    private String getUnitPriceText(UserAuctionNotice userNotice, int regCount) {
+    private String getUnitPriceText(long unitPrice, int count) {
         String unitPriceText = "";
-        if (regCount > 1) {
-            long unitPrice = userNotice.getItemInfo().path("unitPrice").asLong();
+        if (count > 1) {
             unitPriceText  = String.format(" (개당 %s)", formatPrice(unitPrice));
         }
 
         return unitPriceText;
+    }
+
+    private String getCountText(int count) {
+        String countText = "";
+        if (count > 1) {
+            countText  = String.format(" %d개", count);
+        }
+
+        return countText;
     }
 
     private void handleSoldOut(UserAuctionNotice userNotice) {
@@ -248,26 +275,25 @@ public class NeopleApiService {
         final long   DEPOSIT        = 10_000L; // 보증금 10,000 골드 고정
         final double SALES_FEE_RATE = 0.03;    // 수수료 3%
 
-        String itemName = userNotice.getItemInfo().path("itemName").asText();
-        int    regCount = userNotice.getItemInfo().path("regCount").asInt();
-        long   price    = userNotice.getItemInfo().path("currentPrice").asLong();
-        long   salesFee = Math.round(price * SALES_FEE_RATE);
-        long   amount   = price - salesFee + DEPOSIT;
+        String itemName  = userNotice.getItemInfo().path("itemName").asText();
+        int    count     = userNotice.getItemInfo().path("count").asInt();
+        long   unitPrice = userNotice.getItemInfo().path("unitPrice").asLong();
+        long   price     = count * unitPrice;
+        long   salesFee  = Math.round(price * SALES_FEE_RATE);
+        long   amount    = price - salesFee + DEPOSIT;
 
         String message = String.format(
                 "`판매 완료 알림`\n" +
                         "```\n" +
-                        "[%s이(가) %d개 판매되었습니다.]\n" +
+                        "[%s이(가)%s 판매되었습니다.]\n" +
                         "판매가: + %s 골드%s\n" +
                         "보증금: + %s 골드\n" +
                         "수수료: - %s 골드\n" +
                         "\n" +
                         "최종 정산 금액은 %s 골드입니다." +
                         "```",
-                itemName,
-                regCount,
-                formatPrice(price),
-                getUnitPriceText(userNotice, regCount),
+                itemName, getCountText(count),
+                formatPrice(price), getUnitPriceText(unitPrice, count),
                 formatPrice(DEPOSIT),
                 formatPrice(salesFee),
                 formatPrice(amount)
@@ -281,6 +307,48 @@ public class NeopleApiService {
     // 숫자 3자리마다 콤마 찍기
     private String formatPrice(long price) {
         return String.format("%,d", price);
+    }
+
+    private void handleMonitorServerError(UserAuctionNotice userNotice, HttpServerErrorException e) {
+        if (e.getStatusCode() != HttpStatus.SERVICE_UNAVAILABLE) {
+            throw e;
+        }
+
+        if (ErrorUtils.isErrorCode(e.getResponseBodyAsString(), "DNF980")) {
+            handleServerInspect(userNotice);
+            return;
+        }
+
+        throw e;
+    }
+
+    private void handleServerInspect(UserAuctionNotice userNotice) {
+        userNotice.setAuctionState(AuctionState.SERVER_INSPECT);
+        userAuctionNoticeRepo.save(userNotice);
+
+        String noticeUrl = "https://df.nexon.com/community/news/notice/list?categoryType=1";
+        String itemName  = userNotice.getItemInfo().path("itemName").asText();
+        int    count     = userNotice.getItemInfo().path("count").asInt();
+        long   unitPrice = userNotice.getItemInfo().path("unitPrice").asLong();
+        long   price     = count * unitPrice;
+
+        String message = String.format(
+                "`판매 상태 추적 실패` - <%s|점검 공지사항 확인하기>\n" +
+                        "```\n" +
+                        "[던전앤파이터 시스템 점검으로 인해 현재 판매 상태를 추적할 수 없습니다.]\n" +
+                        "[점검이 종료된 후 다시 등록해 주시기 바랍니다.]\n" +
+                        "\n" +
+                        "아이템: %s%s\n" +
+                        "판매가: %s 골드%s\n" +
+                        "```",
+                noticeUrl,
+                itemName, getCountText(count),
+                formatPrice(price), getUnitPriceText(unitPrice, count)
+        );
+
+        slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
+        sendAuctionStateChange(userNotice);
+        stopMonitoring(userNotice.getId());
     }
 
     private void handleMonitorError(UserAuctionNotice userNotice, Exception e) {
