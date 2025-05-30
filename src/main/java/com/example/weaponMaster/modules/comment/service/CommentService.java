@@ -84,14 +84,15 @@ public class CommentService {
     }
 
     private void handlePrivateContactComment(Article article, ReqCommentsDto request, Comment savedComment) {
-        // 1:1 문의 > 관리자의 최초 댓글 기재면 답변 완료 상태로 업데이트 및 유저에게 슬랙 알림 발송
-        if (request.getIsAdmin()) {
+        // 1:1 문의 > 관리자의 최초 댓글 기재면 답변 완료 상태로 업데이트, 유저에게 답변완료 슬랙 알림 발송
+        if (userPermissionService.isAdminAuthorized(request.getIsAdmin(), request.getUserId(), request.getAdminToken())) {
             if (article.getArticleDetailType() == ArticleDetailType.SERVICE_CENTER.PRIVATE_CONTACT.WAITING) {
                 article.setArticleDetailType(ArticleDetailType.SERVICE_CENTER.PRIVATE_CONTACT.ANSWERED);
                 articleRepository.save(article);
-                slackService.sendMessage(article.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, getUserNoticeMessage(article, savedComment));
-                return;
             }
+
+            slackService.sendMessage(article.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, getUserNoticeMessage(article, savedComment));
+            return;
         }
 
         // 1:1 문의 > 유저가 추가 댓글을 기재했다면 관리자 슬랙 알림 발송
