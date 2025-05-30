@@ -32,7 +32,7 @@ public class ArticleService {
     private final UserPermissionService userPermissionService;
 
     @Transactional
-    public ApiResponse<Void> createArticle(ReqArticlesDto request) {
+    public ApiResponse<Integer> createArticle(ReqArticlesDto request) {
         Article article = new Article(
                 request.getCategoryType(),
                 request.getArticleType(),
@@ -66,7 +66,7 @@ public class ArticleService {
         }
 
         userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.ARTICLE, LogActType.CREATE, (short)(int)savedArticle.getId());
-        return ApiResponse.success();
+        return ApiResponse.success(savedArticle.getId());
     }
 
     private String getNoticeMessage(Article userArticle) {
@@ -97,7 +97,7 @@ public class ArticleService {
     }
 
     @Transactional
-    public ApiResponse<Void> updateArticle(ReqArticlesDto request, Integer id) {
+    public ApiResponse<Integer> updateArticle(ReqArticlesDto request, Integer id) {
         Article article = articleRepository.findById(id).orElse(null);
         if (article == null) {
             throw new IllegalArgumentException(String.format("[게시물 수정 에러] Article not found. userId: %s, articleId: %d", request.getUserId(), id));
@@ -111,7 +111,7 @@ public class ArticleService {
         Article savedArticle = articleRepository.save(article);
 
         userLogService.saveLog(request.getUserId(), request.getIsAdminMode(), LogContentsType.ARTICLE, LogActType.UPDATE, (short)(int)savedArticle.getId());
-        return ApiResponse.success();
+        return ApiResponse.success(savedArticle.getId());
     }
 
     private boolean isOwnerOrAdmin(ReqArticlesDto request, String userId) {

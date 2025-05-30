@@ -21,7 +21,7 @@ public class ArticlesController {
 
     // 게시물 등록
     @PostMapping("/articles")
-    public ApiResponse<Void> createArticle(@RequestBody ReqArticlesDto request) {
+    public ApiResponse<Integer> createArticle(@RequestBody ReqArticlesDto request) {
         return articleService.createArticle(request);
     }
 
@@ -33,7 +33,7 @@ public class ArticlesController {
 
     // 게시물 수정
     @PutMapping("/articles/{id}")
-    public ApiResponse<Void> updateArticle(@RequestBody ReqArticlesDto request, @PathVariable("id") Integer id) {
+    public ApiResponse<Integer> updateArticle(@RequestBody ReqArticlesDto request, @PathVariable("id") Integer id) {
         return articleService.updateArticle(request, id);
     }
 
