@@ -78,17 +78,17 @@ public class ArticleService {
         if (plainText.length() > maxLength) {
             plainText = plainText.substring(0, maxLength) + "...";
         }
-
-        // 이모지코드: 📩
-        String link = String.format("%s/service/%d", MyURL.WEAPON_MASTER, userArticle.getId());
+        
+        String emoji   = "\uD83D\uDCE9"; // 이모지코드: 📩
+        String link    = String.format("%s/service/%d", MyURL.WEAPON_MASTER, userArticle.getId());
         String message = String.format(
-                "`\uD83D\uDCE9 1:1 새 문의 등록` - <%s|링크 바로가기>\n" +
+                "`%s 1:1 새 문의 등록` - <%s|링크 바로가기>\n" +
                         "```" +
                         "제목: %s\n" +
                         "이름: %s\n" +
                         "본문: %s" +
                         "```",
-                link,
+                emoji, link,
                 userArticle.getTitle(),
                 userArticle.getUserId(),
                 plainText

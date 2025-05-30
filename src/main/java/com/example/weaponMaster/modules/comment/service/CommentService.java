@@ -139,16 +139,16 @@ public class CommentService {
             plainText = plainText.substring(0, maxLength) + "...";
         }
 
-        // 이모지코드: 💬
-        String link = String.format("%s/service/%d", MyURL.WEAPON_MASTER, article.getId());
+        String emoji   = "\uD83D\uDCAC"; // 이모지코드: 💬
+        String link    = String.format("%s/service/%d", MyURL.WEAPON_MASTER, article.getId());
         String message = String.format(
                 "문의 주신 내용에 대한 답변이 완료되었습니다.\n" +
-                        "`\uD83D\uDCAC 1:1 문의 답변완료 알림` - <%s|링크 바로가기>\n" +
+                        "`%s 1:1 문의 답변완료 알림` - <%s|링크 바로가기>\n" +
                         "```" +
                         "제목: %s\n" +
                         "답변: %s" +
                         "```",
-                link,
+                emoji, link,
                 article.getTitle(),
                 plainText
         );
@@ -165,16 +165,16 @@ public class CommentService {
             plainText = plainText.substring(0, maxLength) + "...";
         }
 
-        // 이모지코드: 💬
-        String link = String.format("%s/service/%d", MyURL.WEAPON_MASTER, article.getId());
+        String emoji   = "\uD83D\uDCAC"; // 이모지코드: 💬
+        String link    = String.format("%s/service/%d", MyURL.WEAPON_MASTER, article.getId());
         String message = String.format(
-                "`\uD83D\uDCAC 1:1 문의 댓글 등록` - <%s|링크 바로가기>\n" +
+                "`%s 1:1 문의 댓글 등록` - <%s|링크 바로가기>\n" +
                         "```" +
                         "제목: %s\n" +
                         "이름: %s\n" +
                         "댓글: %s" +
                         "```",
-                link,
+                emoji, link,
                 article.getTitle(),
                 article.getUserId(),
                 plainText
