@@ -7,17 +7,17 @@ import org.springframework.stereotype.Component;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-@Component  // Spring Bean으로 등록
+@Component  // Spring Bean 으로 등록
 public class UrlUtil {
 
     private final String apiKey;
 
-    // 생성자에서 apiKey @Value 주입 (application.properties 값 참조)
+    // 생성자에서 apiKey @Value 주입 (application.yml 값 참조)
     public UrlUtil(@Value("${neople.api.key}") String apiKey) {
         this.apiKey = apiKey;
     }
 
-    // TODO 인코딩을 하지 않고 바로 넘겨야 결과 값을 받아와서 함수 사용 임시 보류
+    // 인코딩을 하지 않고 바로 넘겨야 결과 값을 받아와서 함수 사용 임시 보류
     private static String encodeURIComponent(String component)   {
         String result = null;
 
