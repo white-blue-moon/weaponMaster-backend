@@ -16,8 +16,8 @@ public class AccountController {
     private final UserInfoService userInfoService;
 
     // 아이디 중복체크
-    @GetMapping("/accounts/{userId}/exists")
-    public ApiResponse<Boolean> checkUserIdExist(@PathVariable("userId") String userId) {
+    @GetMapping("/accounts/exists")
+    public ApiResponse<Boolean> checkUserIdExist(@RequestParam("userId") String userId) {
         boolean isUserIdAvailable = userInfoService.isUserIdAvailable(userId);
         return ApiResponse.success(isUserIdAvailable);
     }
