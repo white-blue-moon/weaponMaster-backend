@@ -20,8 +20,8 @@ public class CommentsController {
     }
 
     // 댓글 리스트 조회
-    @GetMapping("/comments/{id}")
-    public ApiResponse<CommentDto[]> getCommentList(@PathVariable("id") Integer articleId) {
+    @GetMapping("/comments/{articleId}")
+    public ApiResponse<CommentDto[]> getCommentList(@PathVariable("articleId") Integer articleId) {
         return commentService.getCommentList(articleId);
     }
 
