@@ -14,21 +14,11 @@ import java.util.Map;
 public class SlackController {
 
     private final SlackService slackService;
-
-    // TODO /slack/events/subscribe 로 경로 수정하기
+    
     // 슬랙봇 Request URL 최초 1회 등록 및 확인용
     @PostMapping("/slack/events")
     public ResponseEntity<Map<String, String>> slackSubscribeEvent(@RequestBody Map<String, Object> payload) {
-        String type = (String) payload.get("type");
-
-        // 슬랙이 봇 서버 URL 이 진짜 동작하는지 확인할 때 보내는 요청
-        if ("url_verification".equals(type)) {
-            String challenge = (String) payload.get("challenge");
-            return ResponseEntity.ok(Map.of("challenge", challenge));
-        }
-
-        // 그 외 이벤트는 일단 200 OK 로 응답만
-        return ResponseEntity.ok(Map.of());
+        return slackService.slackSubscribeEvent(payload);
     }
 
     // 슬랙봇 설치 및 연동 콜백

@@ -42,6 +42,19 @@ public class SlackService {
     private final ObjectMapper               mapper;
     private final RestClient                 restClient;
 
+    public ResponseEntity<Map<String, String>> slackSubscribeEvent(Map<String, Object> payload) {
+        String type = (String) payload.get("type");
+
+        // 슬랙이 봇 서버 URL 이 진짜 동작하는지 확인할 때 보내는 요청
+        if ("url_verification".equals(type)) {
+            String challenge = (String) payload.get("challenge");
+            return ResponseEntity.ok(Map.of("challenge", challenge));
+        }
+
+        // 그 외 이벤트는 일단 200 OK 로 응답만
+        return ResponseEntity.ok(Map.of());
+    }
+
     @SneakyThrows
     public void sendMessage(String userId, Byte noticeType, String message) {
         // 1. Slack 연동 정보 확인

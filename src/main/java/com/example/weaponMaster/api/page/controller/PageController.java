@@ -25,6 +25,7 @@ public class PageController {
         return pageService.getPageMaintenance(bannerType);
     }
 
+    // 인트로 페이지 비밀번호 확인
     @PostMapping("/page/access-gate/verify")
     public ApiResponse<Void> verifyAccessGate(@RequestBody ReqAccessGateDto request) {
         return pageService.verifyAccessGate(request);

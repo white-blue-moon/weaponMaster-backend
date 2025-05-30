@@ -78,7 +78,7 @@ public class PageService {
 
     public ApiResponse<Void> verifyAccessGate(ReqAccessGateDto request) {
         if (accessGatePasswordService.isPasswordValid(request.getPassword())) {
-            // TODO 페이지 접근 해제가 몇 번 정도 이루어지는지 확인을 위해 임시 로그 추가 -> 추후 삭제 필요
+            // 페이지 접근 해제가 몇 번 정도 이루어지는지 확인을 위해 임시 로그 추가 -> 추후 삭제해도 무방
             userLogService.saveLog("시스템", false, LogContentsType.WEAPON_MASTER, LogActType.LOGIN_ACCESS_GATE);
             return ApiResponse.success();
         }
