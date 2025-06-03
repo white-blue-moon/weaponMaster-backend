@@ -6,6 +6,7 @@ import com.example.weaponMaster.common.util.ErrorUtils;
 import com.example.weaponMaster.modules.account.constant.LogActType;
 import com.example.weaponMaster.modules.account.constant.LogContentsType;
 import com.example.weaponMaster.modules.account.service.UserLogService;
+import com.example.weaponMaster.modules.common.constant.MyURL;
 import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.neopleAPI.constant.AuctionNotice;
 import com.example.weaponMaster.modules.neopleAPI.constant.AuctionState;
@@ -367,20 +368,22 @@ public class NeopleApiService {
     }
 
     private void sendUserMonitorError(UserAuctionNotice userNotice) {
+        String askUrl    = String.format("%s/service/private_contact/list", MyURL.WEAPON_MASTER);
         String itemName  = userNotice.getItemInfo().path("itemName").asText();
         int    count     = userNotice.getItemInfo().path("count").asInt();
         long   unitPrice = userNotice.getItemInfo().path("unitPrice").asLong();
         long   price     = count * unitPrice;
 
         String message = String.format(
-                "`판매 상태 추적 실패`\n" +
+                "`판매 상태 추적 실패` - <%s|문의하기>\n" +
                         "```\n" +
-                        "[에러가 발생하여 판매 상태 추적에 실패하였습니다.]\n" +
-                        "[재등록 시도에도 에러가 계속 발생한다면 문의해 주시기 바랍니다.]\n" +
+                        "[판매 상태 추적 중 에러가 발생했습니다.]\n" +
+                        "[재등록해도 동일한 문제가 반복된다면 문의해 주세요.]\n" +
                         "\n" +
                         "아이템: %s%s\n" +
                         "판매가: %s 골드%s\n" +
                         "```",
+                askUrl,
                 itemName, getCountText(count),
                 formatPrice(price), getUnitPriceText(unitPrice, count)
         );
