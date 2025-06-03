@@ -165,19 +165,22 @@ public class NeopleApiService {
                 return;
             }
 
-            // TODO 잘 동작하는지 체크해 보기
-            // 허용 가능할 때까지 최대 timeoutDuration 만큼 대기
+            // 네오플 API 요청 허용량 넘었으면 분산 대기
             RateLimiter.waitForPermission(neopleApiRateLimiter);
 
-            // 기존 정보가 조회되지 않는 404 에러로 판매 상태 변경 판단
+            // 아이템 상태 확인 -> 호출 실패 시 재시도
             Retry.decorateCheckedRunnable(neopleApiRetry, () -> {
                 checkAuctionState(userNotice);
             }).run();
 
+        // 기존 정보가 조회되지 않는 404 에러로 판매 상태 변경 판단
         } catch (HttpClientErrorException e) {
             handleAuctionState(userNotice, e);
+
+        // 던전앤파이터 시스템 점검
         } catch(HttpServerErrorException e) {
             handleMonitorServerError(userNotice, e);
+
         } catch (Exception e) {
             handleMonitorError(userNotice, e);
         }
