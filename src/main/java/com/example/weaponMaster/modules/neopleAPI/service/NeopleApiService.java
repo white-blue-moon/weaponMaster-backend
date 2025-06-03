@@ -10,6 +10,7 @@ import com.example.weaponMaster.modules.common.dto.ApiResponse;
 import com.example.weaponMaster.modules.neopleAPI.constant.AuctionNotice;
 import com.example.weaponMaster.modules.neopleAPI.constant.AuctionState;
 import com.example.weaponMaster.modules.neopleAPI.constant.NeopleApi;
+import com.example.weaponMaster.modules.neopleAPI.constant.WebSocketApi;
 import com.example.weaponMaster.modules.neopleAPI.entity.UserAuctionNotice;
 import com.example.weaponMaster.modules.neopleAPI.repository.UserAuctionNoticeRepository;
 import com.example.weaponMaster.modules.neopleAPI.util.UrlUtil;
@@ -35,6 +36,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -164,7 +166,7 @@ public class NeopleApiService {
                 stopMonitoring(userNotice.getId());
                 return;
             }
-
+            
             // 네오플 API 요청 허용량 넘었으면 분산 대기
             RateLimiter.waitForPermission(neopleApiRateLimiter);
 
@@ -358,13 +360,43 @@ public class NeopleApiService {
         userNotice.setAuctionState(AuctionState.MONITOR_ERROR);
         userAuctionNoticeRepo.save(userNotice);
 
+        sendUserMonitorError(userNotice);
+        sendAdminMonitorError(userNotice, e);
+
+        stopMonitoring(userNotice.getId());
+    }
+
+    private void sendUserMonitorError(UserAuctionNotice userNotice) {
+        String itemName  = userNotice.getItemInfo().path("itemName").asText();
+        int    count     = userNotice.getItemInfo().path("count").asInt();
+        long   unitPrice = userNotice.getItemInfo().path("unitPrice").asLong();
+        long   price     = count * unitPrice;
+
+        String message = String.format(
+                "`판매 상태 추적 실패`\n" +
+                        "```\n" +
+                        "[에러가 발생하여 판매 상태 추적에 실패하였습니다.]\n" +
+                        "[재등록 시도에도 에러가 계속 발생한다면 문의해 주시기 바랍니다.]\n" +
+                        "\n" +
+                        "아이템: %s%s\n" +
+                        "판매가: %s 골드%s\n" +
+                        "```",
+                itemName, getCountText(count),
+                formatPrice(price), getUnitPriceText(unitPrice, count)
+        );
+
+        slackService.sendMessage(userNotice.getUserId(), UserSlackNoticeType.WEAPON_MASTER_SERVICE_ALERT, message);
+        sendAuctionStateChange(userNotice);
+    }
+
+    private void sendAdminMonitorError(UserAuctionNotice userNotice, Exception e) {
         Throwable root = ExceptionUtils.getRootCause(e);
         if (root == null) {
             root = e;
         }
 
         String errMessage = String.format(
-                "`[경매 판매 알림 추적 에러]`\n" +
+                "`경매 판매 알림 추적 에러`\n" +
                         "```\n" +
                         "유저 ID: %s\n" +
                         "추적 ID: %d\n" +
@@ -385,14 +417,12 @@ public class NeopleApiService {
 
         System.err.println(errMessage);
         slackService.sendMessageAdmin(AdminSlackChannelType.BACK_END_ERROR_NOTICE, errMessage);
-        stopMonitoring(userNotice.getId());
     }
 
-    // TODO 경로 상수화 하기
     // 프론트가 구독 중인 topic 으로 메시지를 보냄 (WebSocket 통신)
     private void sendAuctionStateChange(UserAuctionNotice userNotice) {
         messagingTemplate.convertAndSend(
-                "/topic/auction-state",
+                WebSocketApi.AUCTION_STATE,
                 new RespAuctionDto(
                         userNotice.getItemImg(),
                         userNotice.getItemInfo(),
