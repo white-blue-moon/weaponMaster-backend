@@ -63,7 +63,6 @@ public class NeopleApiService {
     // 서버 재시작 후 SELLING 상태 알림들 스케줄 재등록
     @PostConstruct
     public void resumeAuctionMonitoring() {
-        // TODO AuctionState.MONITOR_ERROR 는 어떻게 처리할지 고민
         UserAuctionNotice[] sellingNotices = userAuctionNoticeRepo.findByState(AuctionState.SELLING);
 
         for (UserAuctionNotice userNotice : sellingNotices) {
@@ -74,7 +73,7 @@ public class NeopleApiService {
                 }
 
                 auctionMonitorMap.put(userNotice.getId(), future);
-                userLogService.saveLog(userNotice.getUserId(), false, LogContentsType.AUCTION_NOTICE, LogActType.CONTINUE, (short)(int)userNotice.getId());
+                userLogService.saveLog(userNotice.getUserId(), false, LogContentsType.AUCTION_NOTICE, LogActType.RESUME, (short)(int)userNotice.getId());
             }
         }
     }
@@ -262,7 +261,8 @@ public class NeopleApiService {
     private String getCountText(int count) {
         String countText = "";
         if (count > 1) {
-            countText  = String.format(" %d개", count);
+            String countComma = String.format("%,d", count); // 3자리마다 콤마 추가
+            countText         = String.format(" %s개", countComma);
         }
 
         return countText;

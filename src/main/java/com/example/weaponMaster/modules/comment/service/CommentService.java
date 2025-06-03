@@ -142,7 +142,7 @@ public class CommentService {
         String emoji   = "\uD83D\uDCAC"; // 이모지코드: 💬
         String link    = String.format("%s/service/%d", MyURL.WEAPON_MASTER, article.getId());
         String message = String.format(
-                "문의 주신 내용에 대한 답변이 완료되었습니다.\n" +
+                "문의해 주신 내용에 대한 답변이 완료되었습니다.\n" +
                         "`%s 1:1 문의 답변완료 알림` - <%s|링크 바로가기>\n" +
                         "```" +
                         "제목: %s\n" +

@@ -20,5 +20,5 @@ public class LogActType {
 
     public static final Short TOGGLE_ARTICLE_PIN = 40; // 게시물 상단 고정
 
-    public static final Short CONTINUE = 50; // 다시 재게
+    public static final Short RESUME = 50; // 다시 재게
 }
