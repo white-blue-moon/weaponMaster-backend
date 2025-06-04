@@ -338,7 +338,7 @@ public class NeopleApiService {
         long   price     = count * unitPrice;
 
         String message = String.format(
-                "`판매 상태 추적 실패` - <%s|점검 공지사항 확인하기>\n" +
+                "`판매 상태 추적 실패` - <%s|점검 시간 확인하기>\n" +
                         "```\n" +
                         "[던전앤파이터 시스템 점검으로 인해 현재 판매 상태를 추적할 수 없습니다.]\n" +
                         "[점검이 종료된 후 다시 등록해 주시기 바랍니다.]\n" +

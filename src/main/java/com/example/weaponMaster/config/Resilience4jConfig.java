@@ -71,6 +71,15 @@ public class Resilience4jConfig {
                 .build();
 
         Retry retry = Retry.of("neopleApiRetry", config);
+
+        // TODO 실제 retry 를 진행하는지 확인하기 위해 임시 로그 추가
+        retry.getEventPublisher()
+                .onRetry(event -> {
+                    log.warn("[Retry] Attempt {} due to {}",
+                            event.getNumberOfRetryAttempts(),
+                            event.getLastThrowable() != null ? event.getLastThrowable().toString() : "unknown error");
+                });
+
         return retry;
     }
 
