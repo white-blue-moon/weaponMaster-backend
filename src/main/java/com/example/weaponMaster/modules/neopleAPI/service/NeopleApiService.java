@@ -23,16 +23,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.retry.Retry;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
@@ -63,7 +65,8 @@ public class NeopleApiService {
     private final Retry       neopleApiRetry;
 
     // 서버 재시작 후 SELLING 상태 알림들 스케줄 재등록
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
+    @Transactional
     public void resumeAuctionMonitoring() {
         UserAuctionNotice[] sellingNotices = userAuctionNoticeRepo.findByState(AuctionState.SELLING);
 
@@ -132,6 +135,7 @@ public class NeopleApiService {
     }
 
     // 경매 판매 알림 등록
+    @Transactional
     public ApiResponse<Void> registerAuctionNotice(ReqAuctionDto request) {
         // 1. 현재 SELLING 추적 중인 알람 개수 확인
         UserAuctionNotice[] userNotices = userAuctionNoticeRepo.findByUserIdAndState(request.getUserId(), AuctionState.SELLING);
@@ -454,6 +458,7 @@ public class NeopleApiService {
     }
 
     // 경매 판매 알림 해제
+    @Transactional
     public ApiResponse<Void> removeAuctionNotice(ReqAuctionDto request) {
         String            auctionNo  = request.getItemInfo().path("auctionNo").asText();
         UserAuctionNotice userNotice = userAuctionNoticeRepo.findByUserIdAndNo(request.getUserId(), auctionNo);
