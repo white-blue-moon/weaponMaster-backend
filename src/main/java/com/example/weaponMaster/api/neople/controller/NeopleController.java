@@ -15,8 +15,8 @@ public class NeopleController {
     private final NeopleApiService neopleApiService;
 
     // 경매장 등록 아이템 검색
-    @GetMapping("/neople/auction/{itemName}")
-    public ApiResponse<RespAuctionDto[]> searchAuction(@PathVariable("itemName") String itemName) {
+    @GetMapping("/neople/auction")
+    public ApiResponse<RespAuctionDto[]> searchAuction(@RequestParam String itemName) {
         return neopleApiService.searchAuction(itemName);
     }
 
