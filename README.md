@@ -81,7 +81,7 @@ db는 실제 경로인 src/db에 위치합니다.
 ./gradlew clean bootJar
 
 # 실행
-java -jar build/libs/weapon-backend-0.0.1-SNAPSHOT.jar
+java -jar build/libs/weaponMaster-0.0.1-SNAPSHOT.jar
 
 # 또는 개발 서버 실행
 ./gradlew bootRun
