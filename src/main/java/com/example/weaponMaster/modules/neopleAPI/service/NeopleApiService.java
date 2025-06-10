@@ -87,6 +87,7 @@ public class NeopleApiService {
         try {
             return handleSearchAuction(itemName);
 
+        // 던전앤파이터 시스템 점검
         } catch (HttpServerErrorException e) {
             return handleSearchServerError(e);
         }

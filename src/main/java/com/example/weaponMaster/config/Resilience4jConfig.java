@@ -4,8 +4,6 @@ import com.example.weaponMaster.common.util.ErrorUtils;
 import io.github.resilience4j.ratelimiter.*;
 import io.github.resilience4j.retry.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.HttpClientErrorException;
@@ -16,8 +14,6 @@ import java.util.function.Predicate;
 
 @Configuration
 public class Resilience4jConfig {
-
-    private static final Logger log = LoggerFactory.getLogger(Resilience4jConfig.class);
 
     // 네오플 API 요청 허용량: 1초 최대 허용량(1,000건), 1분 최대 허용량(60,000건), 1시간 최대 허용량(3,600,000건)
     // 초당 1000건 이하로 분산 호출되도록 제어하며, 초과 시 최대 3초 대기 후 요청
