@@ -9,6 +9,4 @@ public class ReqJoinDto {
 
     private final String userId;
     private final String userPw;
-    private final String dfServerId;
-    private final String dfCharacterName;
 }

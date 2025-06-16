@@ -14,6 +14,10 @@ import java.time.LocalDateTime;
 public class UserInfo {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false)
+    private Integer id;
+
     @Column(name = "user_id", nullable = false)
     private String userId;
 
@@ -23,23 +27,15 @@ public class UserInfo {
     @Column(name = "user_type", nullable = false)
     private int userType;
 
-    @Column(name = "df_server_id", nullable = true, columnDefinition = "VARCHAR(255) DEFAULT ''")
-    private String dfServerId;
-
-    @Column(name = "df_character_name", nullable = true, columnDefinition = "VARCHAR(255) DEFAULT ''")
-    private String dfCharacterName;
-
     @Column(name = "last_login_date", insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime lastLoginDate;
 
     @Column(name = "join_date", insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime joinDate;
 
-    public UserInfo(String userId, String userPw, String dfServerId, String dfCharacterName) {
+    public UserInfo(String userId, String userPw) {
         this.userId = userId;
         this.userPw = userPw;
-        this.dfServerId = dfServerId;
-        this.dfCharacterName = dfCharacterName;
     }
 }
 

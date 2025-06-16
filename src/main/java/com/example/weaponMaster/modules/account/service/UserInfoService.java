@@ -77,12 +77,7 @@ public class UserInfoService {
             throw new IllegalArgumentException("[회원가입 오류] 이미 존재하는 아이디로 가입 API 를 호출하였습니다. userId already exist: " + request.getUserId());
         }
 
-        UserInfo userInfo = new UserInfo(
-                request.getUserId(),
-                request.getUserPw(),
-                request.getDfServerId(),
-                request.getDfCharacterName()
-        );
+        UserInfo userInfo = new UserInfo(request.getUserId(), request.getUserPw());
 
         userInfoRepository.save(userInfo);
         userLogService.saveLog(request.getUserId(), LogContentsType.WEAPON_MASTER, LogActType.JOIN);
