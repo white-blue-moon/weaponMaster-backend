@@ -260,21 +260,25 @@ INSERT INTO ref_character_banner_detail (version, character_type, character_deta
 -----------[ 세팅 환경에 맞게 추가해야 하는 부분 ]--------------
 -- 홈페이지 설정 값 리스트 테스트 정보 추가
 DELETE FROM site_setting WHERE settings_comment = "설정 테스트";
-INSERT INTO site_setting (active_state, settings, settings_comment) VALUES(1, '{"publisher_logo_ver": 1, "home_main_focus_ver": 2, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1, "inspection_main_focus_ver": 1, "character_banner_ver": 1}', '설정 테스트');
+INSERT INTO site_setting (active_state, settings, settings_comment) VALUES
+(1, '{"publisher_logo_ver": 1, "home_main_focus_ver": 2, "home_news_focus_first_ver": 1, "home_news_focus_second_ver": 1, "inspection_main_focus_ver": 1, "character_banner_ver": 1}', '설정 테스트');
 
 -- 슬랙봇 정보 추가
 DELETE FROM slack_bot WHERE `type` = 1;
-INSERT INTO slack_bot (type_comment, `type`, client_id, client_secret, redirect_uri) VALUES('(기본) 웨펀마스터-알림봇', 1, '클라이언트.ID', '클라이언트secret', '백엔드_도메인/slack/oauth/callback');
+INSERT INTO slack_bot (type_comment, `type`, client_id, client_secret, redirect_uri) VALUES
+('(기본) 웨펀마스터-알림봇', 1, '클라이언트.ID', '클라이언트secret', '백엔드_도메인/slack/oauth/callback');
 
 -- 관리자 슬랙 알림 정보 추가
 DELETE FROM admin_slack_notice WHERE slack_bot_type = 1;
-INSERT INTO admin_slack_notice (channel_comment, channel_type, slack_bot_type, slack_bot_token, slack_channel_id) VALUES('웨펀마스터 1:1 문의글 등록 알림', 1, 1, '토큰', '채널ID');
-INSERT INTO admin_slack_notice (channel_comment, channel_type, slack_bot_type, slack_bot_token, slack_channel_id) VALUES('웨펀마스터 백엔드 에러 알림', 100, 1, '토큰', '채널ID');
+INSERT INTO admin_slack_notice (channel_comment, channel_type, slack_bot_type, slack_bot_token, slack_channel_id) VALUES
+('웨펀마스터 1:1 문의글 등록 알림', 1, 1, '토큰', '채널ID'),
+('웨펀마스터 백엔드 에러 알림', 100, 1, '토큰', '채널ID');
 
 -- 페이지 접근 제한 비밀번호 정보 추가
 DELETE FROM access_gate_password WHERE `type` IN (1, 2);
-INSERT INTO access_gate_password (`type`, password) VALUES(1, '6자리_비밀번호');
-INSERT INTO access_gate_password (`type`, password) VALUES(2, '6자리_비밀번호');
+INSERT INTO access_gate_password (`type`, password) VALUES
+(1, '6자리_비밀번호'),
+(2, '6자리_비밀번호');
 
 
 -----------[ DB 데이터로 게시물 내용을 추가해야 하는 부분 ]--------------
