@@ -109,12 +109,36 @@ INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES
 -- 점검 > 메인 포커스 배너 (버전 1)
 DELETE FROM ref_focus_banner_info WHERE version = 1 AND banner_type = 1001;
 INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
-(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/3e0a78be-a19f-d2d3-5dbf-540aa173cab5.jpg', 1, ' '),
-(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/eb467836-7628-ea9b-f49c-db53254e8bf4.jpg', 2, ' '),
-(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/9641f064-a335-a7cd-df77-db9abc6ee8d1.png', 3, ' '),
-(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/a3390e26-c053-759e-e460-486467f9f3e5.jpg', 4, ' '),
-(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/0a3b7ce4-cb9c-1144-461d-634afa4f27c7.jpg', 5, ' '),
-(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/9a10acd4-d732-4002-2bec-c0a09bbfff45.jpg', 6, ' ');
+(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/3e0a78be-a19f-d2d3-5dbf-540aa173cab5.jpg', 1, '겨울 PC방'),
+(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/eb467836-7628-ea9b-f49c-db53254e8bf4.jpg', 2, '1월 이달의 아이템'),
+(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/9641f064-a335-a7cd-df77-db9abc6ee8d1.png', 3, '마일리지샵 2025 시즌 1'),
+(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/a3390e26-c053-759e-e460-486467f9f3e5.jpg', 4, '중천 방어 이벤트'),
+(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/0a3b7ce4-cb9c-1144-461d-634afa4f27c7.jpg', 5, '던파ON 눈사람 아바타'),
+(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/9a10acd4-d732-4002-2bec-c0a09bbfff45.jpg', 6, '겨울 폰트 크리쳐 오라');
+
+-- 점검 > 메인 포커스 배너 (버전 2)
+DELETE FROM ref_focus_banner_info WHERE version = 2 AND banner_type = 1001;
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(2, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202506/e66bdc30-9c1c-ce72-f563-fbd29e204fe2.jpg', 1, '넥슨 캐시 20,000'),
+(2, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202506/6c6d5ea6-1c6f-f183-e77f-088004e8cb7c.jpg', 2, '디그밍 시원한 썸머'),
+(2, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202506/5d83dbb5-82d5-772c-333c-5972820318b0.png', 3, '여름맞이 안전 증폭 지원'),
+(2, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202506/610f8c12-e33c-3c95-55f2-197fe178c495.jpg', 4, '던파ON 포인트 부스트'),
+(2, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202506/5c1982c1-4695-ce50-30b0-68a4e997268a.jpg', 5, '진 각성의 서(패러메딕, 키메라)');
+
+-- 점검 > 메인 포커스 배너 (버전 3)
+DELETE FROM ref_focus_banner_info WHERE version = 3 AND banner_type = 1001;
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(3, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202506/588ebc7c-89b4-5ab9-5f81-d687f3f9b869.jpg', 1, '스킬 개화'),
+(3, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202506/29c42126-379a-d15c-5037-575de53589db.jpg', 2, '2025 아라드 패스 아바타'),
+(3, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202505/473d91cd-49be-260d-8a67-8bc621157f67.jpg', 3, '마일리지샵 2025 시즌 5'),
+(3, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202505/4b93f2b1-6cbc-ca55-797c-5cbedcf2dbb7.jpg', 4, '플래티넘 엠블렘');
+
+-- 점검 > 메인 포커스 배너 (버전 4)
+DELETE FROM ref_focus_banner_info WHERE version = 4 AND banner_type = 1001;
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(4, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202506/2cf75d6a-e9ef-8964-a1a5-db57ee12c0e2.jpg', 1, '패러메딕&키메라 미니 콘테스트'),
+(4, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202505/62434d95-212a-ba86-5899-e07543f0a538.jpg', 2, '2025 던파로 ON SPECIAL GIFT'),
+(4, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202505/7d4eeb52-8d22-0a11-09ad-be886d93bdcc.jpg', 3, '스노우 메이지 롯데타워');
 
 
 -- 홈 > 캐릭터 배너 (버전 1)
