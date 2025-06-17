@@ -1,34 +1,60 @@
 -- 명시적으로 .sql 파일 문자셋 설정 (한글 깨짐 방지)
 SET NAMES 'utf8';
 
--- 메인 포커스 배너 1 버전 정보 추가
+-- 홈 > 메인포커스 배너 (버전 1)
 DELETE FROM ref_focus_banner_info WHERE version = 1 AND banner_type = 1;
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/0a3de54d-8ab7-0919-3ef8-266c04a409e4.jpg', 1, '빙결사');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202412/23e9140b-102e-f4c2-9bfb-f48f7dc1813a.jpg', 2, '페이트 콜라보');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202412/bebf85e9-c22d-e4b1-938e-3e862ebb1ad3.jpg', 3, '아트 공모전');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/ce8502c3-776d-0d74-3f57-0b919abcf14b.jpg', 4, '중천');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/8d466130-c079-f15b-2c1a-2233b298cfde.jpg', 5, '던파 ON 리뉴얼');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/05243a37-826d-0ef2-e2b5-9b6d8fe4de1a.jpg', 6, '겨울 방학 생활');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/cc55693a-3e3c-3310-c5fb-d160747652cd.jpg', 7, '스노우 메이지 추억 앨범');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/13a64cd4-684e-77f8-4799-f8fcd2330326.jpg', 8, '스노우 메이지 스펙업');
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/0a3de54d-8ab7-0919-3ef8-266c04a409e4.jpg', 1, '빙결사 PC방'),
+(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/ce8502c3-776d-0d74-3f57-0b919abcf14b.jpg', 2, '중천 : 신비로운 세계의 여정'),
+(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/8d466130-c079-f15b-2c1a-2233b298cfde.jpg', 3, '던파 ON 리뉴얼'),
+(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/05243a37-826d-0ef2-e2b5-9b6d8fe4de1a.jpg', 4, '겨울 방학 생활'),
+(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/cc55693a-3e3c-3310-c5fb-d160747652cd.jpg', 5, '스노우 메이지 추억 앨범'),
+(1, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/13a64cd4-684e-77f8-4799-f8fcd2330326.jpg', 6, '스노우 메이지 스펙업');
 
--- 메인 포커스 배너 2 버전 정보 추가
+-- 홈 > 메인포커스 배너 (버전 2)
 DELETE FROM ref_focus_banner_info WHERE version = 2 AND banner_type = 1;
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(2, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/22f7c302-82c5-971a-89cc-184e1b7f18ef.jpg', 1, '중천 경례');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(2, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/59a585f4-e3f4-a0f5-eebd-f0efb11797b5.jpg', 2, '던파 ON 포인트 교환소 업데이트');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(2, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/316900f6-e7fa-c9e4-0f52-456b6d2f7eaa.jpg', 3, '강남 스노우메이지');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(2, 1, 'https://bbscdn.df.nexon.com/data6/commu/202412/f1fdd3c6-d432-7132-d394-19237df3f815.jpg', 4, '2부 팬아트 콘테스트');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(2, 1, 'https://bbscdn.df.nexon.com/data6/commu/202412/b9372af9-2d9a-0681-4b11-60abe1f859eb.jpg', 5, '왕실 기사단 패키지');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(2, 1, 'https://bbscdn.df.nexon.com/data6/commu/202412/3a222bc2-c132-122a-6fad-152eed8f9c17.jpg', 6, '2025 복주머니');
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(2, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/22f7c302-82c5-971a-89cc-184e1b7f18ef.jpg', 1, '중천 : 새로운 시작을 알리는 인사'),
+(2, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/59a585f4-e3f4-a0f5-eebd-f0efb11797b5.jpg', 2, '던파 ON 포인트 교환소 업데이트'),
+(2, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/316900f6-e7fa-c9e4-0f52-456b6d2f7eaa.jpg', 3, '강남 스노우메이지'),
+(2, 1, 'https://bbscdn.df.nexon.com/data6/commu/202412/b9372af9-2d9a-0681-4b11-60abe1f859eb.jpg', 4, '왕실 기사단 패키지'),
+(2, 1, 'https://bbscdn.df.nexon.com/data6/commu/202412/3a222bc2-c132-122a-6fad-152eed8f9c17.jpg', 5, '2025 복주머니');
 
--- 메인 포커스 배너 3 버전 정보 추가
+-- 홈 > 메인포커스 배너 (버전 3)
 DELETE FROM ref_focus_banner_info WHERE version = 3 AND banner_type = 1;
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(3, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/a58974c1-8e62-afe6-aa58-75021f19aeba.jpg', 1, '시즌10 중천 NEW WAVE');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(3, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/8118041f-e82f-615a-e696-ddde1f0e1e9f.jpg', 2, '레어 아바타 GIFT');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(3, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/e9a1c861-0d69-0807-23e5-57196e259e88.jpg', 3, '중천 탐사 모듈');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(3, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/d38cb663-b69e-6b73-19f8-d339da1a6911.jpg', 4, '종말의 흔적 탐색');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(3, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/bbd770e5-a1e3-2854-af0e-bb9e8f7fa267.jpg', 5, '넥플과 중천 여행');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(3, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/c9147b7e-e00b-3f6c-86cb-51c32f874e8a.jpg', 6, '새내기와 겨울나기');
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(3, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/a58974c1-8e62-afe6-aa58-75021f19aeba.jpg', 1, '시즌10 중천 NEW WAVE'),
+(3, 1, 'https://bbscdn.df.nexon.com/data6/commu/202411/8118041f-e82f-615a-e696-ddde1f0e1e9f.jpg', 2, '레어 아바타 GIFT'),
+(3, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/e9a1c861-0d69-0807-23e5-57196e259e88.jpg', 3, '중천 탐사 모듈'),
+(3, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/d38cb663-b69e-6b73-19f8-d339da1a6911.jpg', 4, '종말의 흔적 탐색'),
+(3, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/bbd770e5-a1e3-2854-af0e-bb9e8f7fa267.jpg', 5, '넥플과 중천 여행'),
+(3, 1, 'https://bbscdn.df.nexon.com/data6/commu/202501/c9147b7e-e00b-3f6c-86cb-51c32f874e8a.jpg', 6, '새내기와 겨울나기');
+
+-- 홈 > 메인포커스 배너 (버전 4)
+DELETE FROM ref_focus_banner_info WHERE version = 4 AND banner_type = 1;
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(4, 1, 'https://bbscdn.df.nexon.com/data6/commu/202506/17b2d441-d5da-1694-5b36-f79678304376.jpg', 1, '쏟아지는 햇살과 함께하는 PC방'),
+(4, 1, 'https://bbscdn.df.nexon.com/data6/commu/202506/f8a6cea0-add0-e696-0f83-0868533e201a.jpg', 2, '디그밍의 여름을 부탁해!'),
+(4, 1, 'https://bbscdn.df.nexon.com/data6/commu/202505/b97fddd8-189e-a14a-432f-47af833ef0d7.jpg', 3, '스노우 메이지 롯데타워'),
+(4, 1, 'https://bbscdn.df.nexon.com/data6/commu/202506/1239a5e6-ce08-40bd-b2d0-4caa8cc19a10.jpg', 4, '뉴 전직! 핫 썸머!');
+
+-- 홈 > 메인포커스 배너 (버전 5)
+DELETE FROM ref_focus_banner_info WHERE version = 5 AND banner_type = 1;
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(5, 1, 'https://bbscdn.df.nexon.com/data6/commu/202506/b2585588-da7d-a2a0-4262-ef81390e0727.jpg', 1, '시즌 10 Act 3. 스킬 개화 : 피어나는 칼날'),
+(5, 1, 'https://bbscdn.df.nexon.com/data6/commu/202506/2ed3d3d6-1bb1-a0c3-6a53-eeb4077e4a36.jpg', 2, '여름맞이 안전 증폭 지원'),
+(5, 1, 'https://bbscdn.df.nexon.com/data6/commu/202506/433e1fd2-dc3c-8132-be94-34a504243dd6.jpg', 3, '던파ON 포인트 부스트 이벤트'),
+(5, 1, 'https://bbscdn.df.nexon.com/data6/commu/202506/1125a3da-e2c4-2b61-47a6-9a2b05a30837.jpg', 4, '진 패러메딕의 서 & 진 키메라의 서 아바타 콤보 상자'),
+(5, 1, 'https://bbscdn.df.nexon.com/data6/commu/202506/e3e56931-1879-802c-d4e8-823ec0c07c58.jpg', 5, '카메린의 황금 성장 캡슐 패키지');
+
+-- 홈 > 메인포커스 배너 (버전 6)
+DELETE FROM ref_focus_banner_info WHERE version = 6 AND banner_type = 1;
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(6, 1, 'https://bbscdn.df.nexon.com/data6/commu/202506/1e4551a3-1ef3-dd9d-5944-4b5a5cd64787.jpg', 1, '패러메딕/키메라 미니콘테스트'),
+(6, 1, 'https://bbscdn.df.nexon.com/data6/commu/202412/f1fdd3c6-d432-7132-d394-19237df3f815.jpg', 2, '2부 팬아트 콘테스트'),
+(6, 1, 'https://bbscdn.df.nexon.com/data6/commu/202412/bebf85e9-c22d-e4b1-938e-3e862ebb1ad3.jpg', 3, '아트 공모전 : 창의력 가득한 작품들'),
+(6, 1, 'https://bbscdn.df.nexon.com/data6/commu/202505/a7b9aac7-a5a1-d257-713d-9fbc24e0bb36.png', 4, '2025 던파로 ON SPECIAL GIFT');
+
 
 -- 뉴스 포커스 배너 첫번째 1 버전 정보 추가
 DELETE FROM ref_focus_banner_info WHERE version = 1 AND banner_type = 2;
