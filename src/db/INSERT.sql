@@ -56,41 +56,72 @@ INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img
 (6, 1, 'https://bbscdn.df.nexon.com/data6/commu/202505/a7b9aac7-a5a1-d257-713d-9fbc24e0bb36.png', 4, '2025 던파로 ON SPECIAL GIFT');
 
 
--- 뉴스 포커스 배너 첫번째 1 버전 정보 추가
+-- 홈 > 뉴스 포커스 배너 1st (버전 1)
 DELETE FROM ref_focus_banner_info WHERE version = 1 AND banner_type = 2;
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 2, 'https://bbscdn.df.nexon.com/data6/commu/202411/094bad7a-b6d9-5c78-f677-e013907b33d6.jpg', 1, '스노우 메이지 크리쳐');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 2, 'https://bbscdn.df.nexon.com/data6/commu/202411/37727be4-df26-1db9-b31c-6e36a1d1e761.jpg', 2, '이달의 아이템');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 2, 'https://bbscdn.df.nexon.com/data6/commu/202410/66deb79c-4cb3-d46d-aaa7-29360f5e1831.jpg', 3, '아라드 패스 시즌5');
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(1, 2, 'https://bbscdn.df.nexon.com/data6/commu/202411/094bad7a-b6d9-5c78-f677-e013907b33d6.jpg', 1, '스노우 메이지 크리쳐'),
+(1, 2, 'https://bbscdn.df.nexon.com/data6/commu/202411/37727be4-df26-1db9-b31c-6e36a1d1e761.jpg', 2, '이달의 아이템'),
+(1, 2, 'https://bbscdn.df.nexon.com/data6/commu/202410/66deb79c-4cb3-d46d-aaa7-29360f5e1831.jpg', 3, '아라드 패스 시즌5');
 
--- 뉴스 포커스 배너 두번째 1 버전 정보 추가
+-- 홈 > 뉴스 포커스 배너 1st (버전 2)
+DELETE FROM ref_focus_banner_info WHERE version = 2 AND banner_type = 2;
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(2, 2, 'https://bbscdn.df.nexon.com/data6/commu/202506/f8a028fe-d057-ab4a-e380-6c3439016f35.jpg', 1, '해군 제독 아바타 콤보 상자'),
+(2, 2, 'https://bbscdn.df.nexon.com/data6/commu/202506/2a5e5e4d-5b79-c176-2fab-b7e64ef7a405.png', 2, '차원 여행 아바타 콤보 상자'),
+(2, 2, 'https://bbscdn.df.nexon.com/data6/commu/202505/972845d8-14e7-2565-aeb7-2d96fc4084b5.jpg', 3, '6월 이달의 아이템');
+
+-- 홈 > 뉴스 포커스 배너 1st (버전 3)
+DELETE FROM ref_focus_banner_info WHERE version = 3 AND banner_type = 2;
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(3, 2, 'https://bbscdn.df.nexon.com/data6/commu/202505/03e04d20-3d4d-47d7-851b-bae19b8b4727.jpg', 1, '마일리지샵 2025 시즌5'),
+(3, 2, 'https://bbscdn.df.nexon.com/data6/commu/202505/dddeb800-87e7-e1d5-e5b4-131b82c9ca0c.jpg', 2, '아라드 패스 2025 시즌3');
+
+-- 홈 > 뉴스 포커스 배너 2nd (버전 1)
 DELETE FROM ref_focus_banner_info WHERE version = 1 AND banner_type = 3;
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 3, 'https://bbscdn.df.nexon.com/data6/commu/202411/9323fca1-bdf3-793d-2be0-3ad61ef8f07f.jpg', 1, '던페 쿠폰 보상');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 3, 'https://bbscdn.df.nexon.com/data6/commu/202411/4297ef52-57ee-be59-2a83-e926ea732041.jpg', 2, '중천 발표 요약');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 3, 'https://bbscdn.df.nexon.com/data6/commu/202411/693e417e-9076-d8e8-8c77-264cc97a7404.jpg', 3, '중천 쿠폰');
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(1, 3, 'https://bbscdn.df.nexon.com/data6/commu/202411/9323fca1-bdf3-793d-2be0-3ad61ef8f07f.jpg', 1, '던페 쿠폰 보상'),
+(1, 3, 'https://bbscdn.df.nexon.com/data6/commu/202411/4297ef52-57ee-be59-2a83-e926ea732041.jpg', 2, '중천 발표 요약'),
+(1, 3, 'https://bbscdn.df.nexon.com/data6/commu/202411/693e417e-9076-d8e8-8c77-264cc97a7404.jpg', 3, '중천 쿠폰');
 
--- 퍼블리셔 로고 1 ~ 5 버전 정보 추가
-DELETE FROM ref_publisher_logo WHERE version >= 1 AND version <= 5;
-INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(1, 'https://rs.nxfs.nexon.com/gnb/images/logo_nexon.png', 'NEXON');
-INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(2, 'https://rs.nxfs.nexon.com/bannerusr/24/3/fvfQ21143034203.gif', 'Logo');
-INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(3, 'https://rs.nxfs.nexon.com/bannerusr/24/12/cb8Q30153846079.png', '추모');
-INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(4, 'https://rs.nxfs.nexon.com/bannerusr/24/12/LoDB30160754039.png', '1230 애도');
-INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES(5, 'https://rs.nxfs.nexon.com/bannerusr/24/2/5k9s02153134458.png', '설날(2025)');
+-- 홈 > 뉴스 포커스 배너 2nd (버전 2)
+DELETE FROM ref_focus_banner_info WHERE version = 2 AND banner_type = 3;
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(2, 3, 'https://bbscdn.df.nexon.com/data6/commu/202506/6a759fe8-c4cc-abe6-6e34-85ccc28b82c7.jpg', 1, '굿즈 제휴 할인'),
+(2, 3, 'https://bbscdn.df.nexon.com/data6/commu/202506/7650be64-121c-3eb7-0b97-db5886cef2ba.jpg', 2, '신규 전직 공략 이벤트'),
+(2, 3, 'https://bbscdn.df.nexon.com/data6/commu/202506/f928fe9f-abb1-69a3-c107-55b2123256c1.jpg', 3, '레바 중천 Comics 4화');
 
--- 점검페이지 메인 포커스 배너 1 버전 정보 추가
+-- 홈 > 뉴스 포커스 배너 2nd (버전 3)
+DELETE FROM ref_focus_banner_info WHERE version = 3 AND banner_type = 3;
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(3, 3, 'https://bbscdn.df.nexon.com/data6/commu/202505/92f5caf6-535c-3349-61fc-d9fa7643d47e.jpg', 1, '스노우 메이지 롯데타워'),
+(3, 3, 'https://bbscdn.df.nexon.com/data6/commu/202502/390d3199-1f9c-93c5-de5f-680a002cd553.jpg', 2, '달빛 탁자'),
+(3, 3, 'https://bbscdn.df.nexon.com/data6/commu/202505/13db9cdc-11c4-a588-d6b4-94bf289ce8ae.jpg', 3, '스노우 메이지 쿠폰');
+
+
+-- 퍼블리셔 로고 1 ~ 3 버전 정보 추가
+DELETE FROM ref_publisher_logo WHERE version >= 1 AND version <= 3;
+INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES
+(1, 'https://cdn.jsdelivr.net/gh/white-blue-moon/portfolio-assets/weapon-master/assets/publisher-logo/logo_blue_moon.png', 'BLUE MOON'),
+(2, 'https://cdn.jsdelivr.net/gh/white-blue-moon/portfolio-assets/weapon-master/assets/publisher-logo/logo_blue_moon_spring2025.png', '2025 봄'),
+(3, 'https://cdn.jsdelivr.net/gh/white-blue-moon/portfolio-assets/weapon-master/assets/publisher-logo/logo_blue_moon_children_day_2025.png', '2025 어린이날');
+
+
+-- 점검 > 메인 포커스 배너 (버전 1)
 DELETE FROM ref_focus_banner_info WHERE version = 1 AND banner_type = 1001;
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/3e0a78be-a19f-d2d3-5dbf-540aa173cab5.jpg', 1, ' ');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/eb467836-7628-ea9b-f49c-db53254e8bf4.jpg', 2, ' ');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/9641f064-a335-a7cd-df77-db9abc6ee8d1.png', 3, ' ');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/a3390e26-c053-759e-e460-486467f9f3e5.jpg', 4, ' ');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/0a3b7ce4-cb9c-1144-461d-634afa4f27c7.jpg', 5, ' ');
-INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/9a10acd4-d732-4002-2bec-c0a09bbfff45.jpg', 6, ' ');
+INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img_comment) VALUES
+(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/3e0a78be-a19f-d2d3-5dbf-540aa173cab5.jpg', 1, ' '),
+(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/eb467836-7628-ea9b-f49c-db53254e8bf4.jpg', 2, ' '),
+(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/9641f064-a335-a7cd-df77-db9abc6ee8d1.png', 3, ' '),
+(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/a3390e26-c053-759e-e460-486467f9f3e5.jpg', 4, ' '),
+(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/0a3b7ce4-cb9c-1144-461d-634afa4f27c7.jpg', 5, ' '),
+(1, 1001, 'https://bbscdn.df.nexon.com/data6/commu/202412/9a10acd4-d732-4002-2bec-c0a09bbfff45.jpg', 6, ' ');
 
--- 캐릭터 배너 1 버전 추가
+
+-- 홈 > 캐릭터 배너 (버전 1)
 DELETE FROM ref_character_banner WHERE version = 1;
 INSERT INTO ref_character_banner (version, character_type, character_desc, name_img_url, thumb_img_url, banner_order) VALUES (1, 4, '격투가(여)', 'https://bbscdn.df.nexon.com/pg/characters/img/main/mc_txt04.png', 'https://bbscdn.df.nexon.com/pg/characters/img/thum/thum_char_04.png', 1);
 INSERT INTO ref_character_banner (version, character_type, character_desc, name_img_url, thumb_img_url, banner_order) VALUES (1, 1, '귀검사(남)', 'https://bbscdn.df.nexon.com/pg/characters/img/main/mc_txt01.png', 'https://bbscdn.df.nexon.com/pg/characters/img/thum/thum_char_01.png', 2);
 
--- 캐릭터 배너 상세 정보 1 버전 추가
 DELETE FROM ref_character_banner_detail WHERE version = 1 AND character_type = 4;
 INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 4, 1, '넨마스터(여)', '넨의 힘을 활용하기 위한 수련을 한 격투가', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg14_3.jpg', '/pg/characters/cim14');
 INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 4, 2, '스트라이커(여)', '육체를 극한까지 단련한 정통파 격투가', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg15_3.jpg', '/pg/characters/cim15');
@@ -103,6 +134,7 @@ INSERT INTO ref_character_banner_detail (version, character_type, character_deta
 INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 1, 3, '버서커', '강력한 힘을 위해 부작용을 감수하며 카잔증후군을 받아들인 귀검사', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg03_3.jpg', '/pg/characters/cim03');
 INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 1, 4, '아수라', '파동의 힘을 느끼기 위해 스스로 시력을 포기한 귀검사', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg04_3.jpg', '/pg/characters/cim04');
 INSERT INTO ref_character_banner_detail (version, character_type, character_detail_type, character_name, character_intro, img_url, homepage_link_url) VALUES (1, 1, 5, '검귀', '원귀의 혼과 융합하여 귀신과 인간의 경계에 선 귀검사', 'https://bbscdn.df.nexon.com/pg/characters/img/bg/bg05_3.jpg', '/pg/characters/cim05');
+
 
 -----------[ 세팅 환경에 맞게 추가해야 하는 부분 ]--------------
 -- 홈페이지 설정 값 리스트 테스트 정보 추가
@@ -122,3 +154,7 @@ INSERT INTO admin_slack_notice (channel_comment, channel_type, slack_bot_type, s
 DELETE FROM access_gate_password WHERE `type` IN (1, 2);
 INSERT INTO access_gate_password (`type`, password) VALUES(1, '6자리_비밀번호');
 INSERT INTO access_gate_password (`type`, password) VALUES(2, '6자리_비밀번호');
+
+
+-----------[ DB 데이터로 게시물 내용을 추가해야 하는 부분 ]--------------
+
