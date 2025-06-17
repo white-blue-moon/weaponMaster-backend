@@ -278,4 +278,22 @@ INSERT INTO access_gate_password (`type`, password) VALUES(2, '6자리_비밀번
 
 
 -----------[ DB 데이터로 게시물 내용을 추가해야 하는 부분 ]--------------
+-- 목적 및 소개 게시물 추가
+DELETE FROM user_article WHERE category_type = 4 AND article_type = 1;
+INSERT INTO user_article (user_id, category_type, article_type, article_detail_type, title, contents, comment_count, view_count, is_pinned, is_admin_mode) VALUES
+('admin', 4, 1, 0, '목적 및 소개', '<p style="color: gray; font-size: 0.9em;"> ※ 이곳에 필요한 내용을 작성해 주세요.</p>', 1);
 
+-- 전체 가이드 게시물 추가
+DELETE FROM user_article WHERE category_type = 5 AND article_type = 1;
+INSERT INTO user_article (user_id, category_type, article_type, article_detail_type, title, contents, is_admin_mode) VALUES
+('admin', 5, 1, 0, '전체 가이드', '<p style="color: gray; font-size: 0.9em;"> ※ 이곳에 필요한 내용을 작성해 주세요.</p>', 1);
+
+-- 경매 가이드 게시물 추가
+DELETE FROM user_article WHERE category_type = 5 AND article_type = 2;
+INSERT INTO user_article (user_id, category_type, article_type, article_detail_type, title, contents, comment_count, view_count, is_pinned, is_admin_mode) VALUES
+('admin', 5, 2, 0, '경매 가이드', '<p style="color: gray; font-size: 0.9em;"> ※ 이곳에 필요한 내용을 작성해 주세요.</p>', 1);
+
+-- Slack 가이드 게시물 추가
+DELETE FROM user_article WHERE category_type = 5 AND article_type = 3;
+INSERT INTO user_article (user_id, category_type, article_type, article_detail_type, title, contents, comment_count, view_count, is_pinned, is_admin_mode) VALUES
+('admin', 5, 3, 0, 'Slack 가이드', '<p style="color: gray; font-size: 0.9em;"> ※ 이곳에 필요한 내용을 작성해 주세요.</p>', 1);
