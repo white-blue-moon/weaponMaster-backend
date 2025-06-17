@@ -98,12 +98,13 @@ INSERT INTO ref_focus_banner_info (version, banner_type, img_url, img_order, img
 (3, 3, 'https://bbscdn.df.nexon.com/data6/commu/202505/13db9cdc-11c4-a588-d6b4-94bf289ce8ae.jpg', 3, '스노우 메이지 쿠폰');
 
 
--- 퍼블리셔 로고 1 ~ 3 버전 정보 추가
-DELETE FROM ref_publisher_logo WHERE version >= 1 AND version <= 3;
+-- 퍼블리셔 로고 1 ~ 4 버전 정보 추가
+DELETE FROM ref_publisher_logo WHERE version >= 1 AND version <= 4;
 INSERT INTO ref_publisher_logo (version, img_url, alt) VALUES
 (1, 'https://cdn.jsdelivr.net/gh/white-blue-moon/portfolio-assets/weapon-master/assets/publisher-logo/logo_blue_moon.png', 'BLUE MOON'),
 (2, 'https://cdn.jsdelivr.net/gh/white-blue-moon/portfolio-assets/weapon-master/assets/publisher-logo/logo_blue_moon_spring2025.png', '2025 봄'),
-(3, 'https://cdn.jsdelivr.net/gh/white-blue-moon/portfolio-assets/weapon-master/assets/publisher-logo/logo_blue_moon_children_day_2025.png', '2025 어린이날');
+(3, 'https://cdn.jsdelivr.net/gh/white-blue-moon/portfolio-assets/weapon-master/assets/publisher-logo/logo_blue_moon_children_day_2025.png', '2025 어린이날'),
+(4, 'https://cdn.jsdelivr.net/gh/white-blue-moon/portfolio-assets/weapon-master/assets/publisher-logo/logo_blue_moon_summer2025.png', '2025 여름');
 
 
 -- 점검 > 메인 포커스 배너 (버전 1)
