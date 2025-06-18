@@ -289,7 +289,7 @@ public class NeopleApiService {
         int    count     = userNotice.getItemInfo().path("count").asInt();
         long   unitPrice = userNotice.getItemInfo().path("unitPrice").asLong();
         long   price     = count * unitPrice;
-        long   salesFee  = Math.round(price * SALES_FEE_RATE);
+        long   salesFee  = (long) Math.floor(price * SALES_FEE_RATE);
         long   amount    = price - salesFee + DEPOSIT;
 
         String message = String.format(
