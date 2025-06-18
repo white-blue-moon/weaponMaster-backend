@@ -17,19 +17,6 @@ public class UrlUtil {
         this.apiKey = apiKey;
     }
 
-    // 인코딩을 하지 않고 바로 넘겨야 결과 값을 받아와서 함수 사용 임시 보류
-    private static String encodeURIComponent(String component)   {
-        String result = null;
-
-        try {
-            result = URLEncoder.encode(component, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            result = component;
-        }
-
-        return result;
-    }
-
     // 경매 아이템 이름 검색 API URL
     public String getAuctionSearchUrl(String itemName) {
         String  defaultWordType      = "front"; // 동일 단어(match), 앞 단어 검색(front), 전문 검색(full)
