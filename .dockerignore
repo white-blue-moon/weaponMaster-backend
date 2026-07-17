@@ -1,0 +1,9 @@
+.git
+.gradle
+.idea
+.vscode
+.DS_Store
+build
+config
+deploy.sh
+README.md
